@@ -1,0 +1,96 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: restore
+      POSTGRES_USER: restore
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-restore_dev_secret}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U restore"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    profiles: ["with-redis"]
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://restore:${POSTGRES_PASSWORD:-restore_dev_secret}@postgres:5432/restore
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
+      HMAC_SECRET: ${HMAC_SECRET:-dev_hmac_secret_change_in_production}
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-local}
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-restore-evidence}
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - evidence_storage:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.worker
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://restore:${POSTGRES_PASSWORD:-restore_dev_secret}@postgres:5432/restore
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
+      HMAC_SECRET: ${HMAC_SECRET:-dev_hmac_secret_change_in_production}
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-local}
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-restore-evidence}
+      WORKER_POLL_INTERVAL_MS: 5000
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - evidence_storage:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE_URL: http://localhost:3001/api/v1
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  evidence_storage:
