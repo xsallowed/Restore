@@ -4,7 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { useAuth } from './store/auth';
 import { ThemeProvider } from './lib/themeContext';
 import { LoginPage } from './pages/LoginPage';
-import { EventsLandingPage } from './pages/EventsLandingPage';
+import { HomePage } from './pages/HomePage';
 import { OrchestratorDashboard } from './pages/silver/OrchestratorDashboard';
 import { ExecutionInterface } from './pages/bronze/ExecutionInterface';
 import { EventCommandView } from './pages/silver/EventCommandView';
@@ -54,7 +54,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route element={<RequireAuth><AppShell /></RequireAuth>}>
-            <Route path="/"                  element={<EventsLandingPage />} />
+            <Route path="/"                  element={<HomePage />} />
             <Route path="/gold"              element={<GoldDashboard />} />
             <Route path="/dashboard"         element={<OrchestratorDashboard />} />
             <Route path="/events"            element={<EventListPage />} />

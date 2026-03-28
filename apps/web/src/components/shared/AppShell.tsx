@@ -1,6 +1,8 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useAuth } from '../../store/auth';
 import { useTheme } from '../../lib/themeContext';
+import { useRecentSections } from '../../hooks/useRecentSections';
 import {
   LayoutDashboard, AlertTriangle, Database, Users,
   BookOpen, ClipboardList, LogOut, Shield, Play,
@@ -39,6 +41,17 @@ export function AppShell() {
   const { user, clearAuth } = useAuth();
   const { theme: currentTheme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { addRecentSection } = useRecentSections();
+
+  // Track recently visited sections
+  useEffect(() => {
+    const navItem = NAV.find(n => n.to === location.pathname);
+    if (navItem) {
+      addRecentSection(navItem.to, navItem.label, navItem.icon.name || '');
+    }
+  }, [location.pathname, addRecentSection]);
+
   const tier = user?.restore_tier ?? 'BRONZE';
   const tierStyle = TIER_STYLES[tier as keyof typeof TIER_STYLES] ?? TIER_STYLES.BRONZE;
   const visibleNav = NAV.filter(n => n.tiers.includes(tier));
