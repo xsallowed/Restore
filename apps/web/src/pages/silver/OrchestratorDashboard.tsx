@@ -11,7 +11,11 @@ import { IncidentDashboard } from '../../components/recovery/IncidentDashboard';
 import { EventCard } from '../../components/recovery/EventCard';
 import { EventDetailsModal } from '../../components/recovery/EventDetailsModal';
 import { NewEventDialog } from '../../components/recovery/NewEventDialog';
-import { useState, useEffect } from 'react';
+import { DashboardGrid } from '../../components/dashboard/DashboardGrid';
+import { IncidentOverviewWidget } from '../../components/dashboard/widgets/IncidentOverviewWidget';
+import { ProgressWidget } from '../../components/dashboard/widgets/ProgressWidget';
+import { KPIWidget } from '../../components/dashboard/widgets/KPIWidget';
+import { useState, useEffect, useMemo } from 'react';
 import { themeClasses } from '../../lib/themeClasses';
 
 const STATUS_CONFIG: Record<string, { color: string; dot: string; label: string }> = {
@@ -111,66 +115,119 @@ export function OrchestratorDashboard() {
         </div>
       )}
 
-      {/* Show Incident Dashboard when event is activated */}
+      {/* Show Widget-based Dashboard when event is activated */}
       {activeEventId && activeEvents.find(e => e.id === activeEventId) && soeData && (
-        <>
-          <IncidentDashboard
-            metrics={{
-              eventTitle: activeEvents.find(e => e.id === activeEventId)?.title || 'Unknown',
-              eventType: activeEvents.find(e => e.id === activeEventId)?.event_type || '',
-              severity: activeEvents.find(e => e.id === activeEventId)?.severity || 'P1',
-              status: 'Active',
-              opened_at: activeEvents.find(e => e.id === activeEventId)?.opened_at || new Date().toISOString(),
-              total_estimated_minutes: soeData.total_estimated_minutes || 180,
-              ml_ttfr_minutes: soeData.ml_ttfr_minutes,
-              ml_ttfr_confidence_low: soeData.ml_ttfr_confidence_low,
-              ml_ttfr_confidence_high: soeData.ml_ttfr_confidence_high,
-              recovery_confidence_score: soeData.recovery_confidence_score,
-              steps_total: soeSteps.length,
-              steps_completed: soeSteps.filter((s: any) => s.status === 'COMPLETED').length,
-              steps_in_progress: soeSteps.filter((s: any) => s.status === 'IN_PROGRESS').length,
-              affected_services: activeEvents.find(e => e.id === activeEventId)?.affected_service_ids?.length || 0,
-            }}
-          />
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className={clsx(themeClasses.text.primary, 'text-2xl font-bold')}>
+              Dashboard - {activeEvents.find(e => e.id === activeEventId)?.title}
+            </h2>
+            <button
+              onClick={() => setActiveEventId(null)}
+              className={clsx(themeClasses.button.secondary, 'px-4 py-2 rounded-lg font-medium text-sm')}
+            >
+              Back to Events
+            </button>
+          </div>
 
-          <GanttChart
-            steps={soeSteps}
-            totalMinutes={soeData.total_estimated_minutes || 180}
+          <DashboardGrid
+            eventId={activeEventId}
+            widgets={[
+              {
+                id: 'incident-overview',
+                title: 'Incident Overview',
+                minW: 6,
+                minH: 4,
+                component: (
+                  <IncidentOverviewWidget
+                    eventTitle={activeEvents.find(e => e.id === activeEventId)?.title || 'Unknown'}
+                    eventType={activeEvents.find(e => e.id === activeEventId)?.event_type || ''}
+                    severity={activeEvents.find(e => e.id === activeEventId)?.severity || 'P1'}
+                    opened_at={activeEvents.find(e => e.id === activeEventId)?.opened_at || new Date().toISOString()}
+                  />
+                ),
+              },
+              {
+                id: 'progress-metrics',
+                title: 'Recovery Progress',
+                minW: 6,
+                minH: 5,
+                component: (
+                  <ProgressWidget
+                    stepsCompleted={soeSteps.filter((s: any) => s.status === 'COMPLETED').length}
+                    stepsTotal={soeSteps.length}
+                    stepsInProgress={soeSteps.filter((s: any) => s.status === 'IN_PROGRESS').length}
+                    estimatedMinutes={soeData.total_estimated_minutes || 180}
+                    elapsedMinutes={Math.floor((Date.now() - new Date(activeEvents.find(e => e.id === activeEventId)?.opened_at || '').getTime()) / (1000 * 60))}
+                  />
+                ),
+              },
+              {
+                id: 'kpi-metrics',
+                title: 'Key Performance Indicators',
+                minW: 4,
+                minH: 6,
+                component: (
+                  <KPIWidget
+                    ttfrMinutes={soeData.ml_ttfr_minutes}
+                    ttfrConfidenceLow={soeData.ml_ttfr_confidence_low}
+                    ttfrConfidenceHigh={soeData.ml_ttfr_confidence_high}
+                    recoveryConfidenceScore={soeData.recovery_confidence_score}
+                    stepsCompleted={soeSteps.filter((s: any) => s.status === 'COMPLETED').length}
+                    stepsTotal={soeSteps.length}
+                    stepsInProgress={soeSteps.filter((s: any) => s.status === 'IN_PROGRESS').length}
+                    affectedServices={activeEvents.find(e => e.id === activeEventId)?.affected_service_ids?.length || 0}
+                  />
+                ),
+              },
+              {
+                id: 'recovery-timeline',
+                title: 'Recovery Timeline',
+                minW: 8,
+                minH: 6,
+                component: (
+                  <GanttChart
+                    steps={soeSteps}
+                    totalMinutes={soeData.total_estimated_minutes || 180}
+                  />
+                ),
+              },
+              {
+                id: 'recovery-tasks',
+                title: 'Recovery Tasks',
+                minW: 12,
+                minH: 8,
+                component: (
+                  <TasksTable
+                    tasks={soeSteps.map((step: any) => ({
+                      id: step.id,
+                      sequence: step.sequence,
+                      name: step.name,
+                      description: step.description,
+                      assigned_to: step.assigned_to,
+                      assignee_name: step.assignee_name,
+                      status: step.status,
+                      started_at: step.started_at,
+                      completed_at: step.completed_at,
+                      dependencies: step.dependencies || [],
+                      is_on_critical_path: step.is_on_critical_path,
+                    }))}
+                    onAddTask={(newTask) => {
+                      const task = {
+                        id: 'task-' + Date.now(),
+                        ...newTask,
+                      };
+                      setTasks([...tasks, task]);
+                    }}
+                    onDeleteTask={(taskId) => {
+                      setTasks(tasks.filter(t => t.id !== taskId));
+                    }}
+                  />
+                ),
+              },
+            ]}
           />
-
-          <TasksTable
-            tasks={soeSteps.map((step: any) => ({
-              id: step.id,
-              sequence: step.sequence,
-              name: step.name,
-              description: step.description,
-              assigned_to: step.assigned_to,
-              assignee_name: step.assignee_name,
-              status: step.status,
-              started_at: step.started_at,
-              completed_at: step.completed_at,
-              dependencies: step.dependencies || [],
-              is_on_critical_path: step.is_on_critical_path,
-            }))}
-            onAddTask={(newTask) => {
-              const task = {
-                id: 'task-' + Date.now(),
-                ...newTask,
-              };
-              setTasks([...tasks, task]);
-            }}
-            onDeleteTask={(taskId) => {
-              setTasks(tasks.filter(t => t.id !== taskId));
-            }}
-          />
-
-          <button
-            onClick={() => setActiveEventId(null)}
-            className={clsx(themeClasses.button.secondary, 'w-full px-4 py-2 rounded-lg font-medium')}
-          >
-            Back to Events List
-          </button>
-        </>
+        </div>
       )}
 
       {/* Events Grid - Show when no event is active */}
