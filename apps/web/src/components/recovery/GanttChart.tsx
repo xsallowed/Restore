@@ -35,12 +35,31 @@ const STATUS_TEXT = {
 };
 
 export function GanttChart({ steps, totalMinutes }: GanttChartProps) {
-  const chartWidth = Math.max(totalMinutes * 4, 800); // 4px per minute
+  const chartWidth = Math.max(totalMinutes * 5, 900); // 5px per minute for better visibility
   const pixelsPerMinute = chartWidth / totalMinutes;
+  const completedSteps = steps.filter(s => s.status === 'COMPLETED').length;
+  const completionPercent = Math.round((completedSteps / steps.length) * 100);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Recovery Timeline</h3>
+    <div className="bg-gradient-to-br from-gray-50 to-white border-2 border-gray-200 rounded-2xl p-8 shadow-sm">
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">Recovery Timeline</h3>
+            <p className="text-sm text-gray-500 mt-1">Real-time visualization of recovery steps</p>
+          </div>
+          <div className="text-right">
+            <div className="text-3xl font-bold text-blue-600">{completionPercent}%</div>
+            <p className="text-xs text-gray-500">Complete</p>
+          </div>
+        </div>
+        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500"
+            style={{ width: `${completionPercent}%` }}
+          />
+        </div>
+      </div>
       
       <div className="overflow-x-auto">
         <div className="inline-block min-w-full">

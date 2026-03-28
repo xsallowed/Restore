@@ -2,11 +2,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { servicesApi, eventsApi } from '../../lib/api';
 import { useSSE } from '../../lib/api';
-import { AlertTriangle, CheckCircle, Clock, Zap, TrendingDown, Activity } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Zap, TrendingDown, Activity, Plus } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import clsx from 'clsx';
 import { GanttChart } from '../../components/recovery/GanttChart';
 import { TasksTable } from '../../components/recovery/TasksTable';
+import { IncidentDashboard } from '../../components/recovery/IncidentDashboard';
+import { EventCard } from '../../components/recovery/EventCard';
+import { EventDetailsModal } from '../../components/recovery/EventDetailsModal';
+import { NewEventDialog } from '../../components/recovery/NewEventDialog';
 import { useState } from 'react';
 
 const STATUS_CONFIG: Record<string, { color: string; dot: string; label: string }> = {
@@ -30,6 +34,10 @@ export function OrchestratorDashboard() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [tasks, setTasks] = useState<any[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [showEventDetailsModal, setShowEventDetailsModal] = useState(false);
+  const [showNewEventDialog, setShowNewEventDialog] = useState(false);
+  const [activeEventId, setActiveEventId] = useState<string | null>(null);
 
   const { data: servicesData } = useQuery({
     queryKey: ['business-services'],
@@ -64,15 +72,15 @@ export function OrchestratorDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Orchestration Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Real-time recovery intelligence — Silver tier</p>
+          <h1 className="text-3xl font-bold text-gray-900">Incident Recovery Center</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Manage and orchestrate cyber incident responses</p>
         </div>
         <button
-          onClick={() => navigate('/events/new')}
-          className="flex items-center gap-2 bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors"
+          onClick={() => setShowNewEventDialog(true)}
+          className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:shadow-lg transition-all"
         >
-          <Zap size={15} />
-          Open Recovery Event
+          <Plus size={18} />
+          Create Incident
         </button>
       </div>
 
@@ -94,44 +102,35 @@ export function OrchestratorDashboard() {
         ))}
       </div>
 
-      {/* Active incident banner */}
-      {activeEvents.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Active Events</h2>
-          {activeEvents.map(event => (
-            <div
-              key={event.id as string}
-              onClick={() => navigate(`/events/${event.id}`)}
-              className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:bg-red-100 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <AlertTriangle size={18} className="text-red-500 shrink-0" />
-                <div>
-                  <span className={clsx('text-xs font-bold px-2 py-0.5 rounded mr-2', SEVERITY_COLOR[event.severity as string])}>
-                    {event.severity as string}
-                  </span>
-                  <span className="font-medium text-gray-900">{event.title as string}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <Clock size={13} />
-                {formatDistanceToNow(new Date(event.opened_at as string), { addSuffix: true })}
-                <span className="text-brand-600 font-medium ml-2">View →</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Show Incident Dashboard when event is activated */}
+      {activeEventId && activeEvents.find(e => e.id === activeEventId) && soeData && (
+        <>
+          <IncidentDashboard
+            metrics={{
+              eventTitle: activeEvents.find(e => e.id === activeEventId)?.title || 'Unknown',
+              eventType: activeEvents.find(e => e.id === activeEventId)?.event_type || '',
+              severity: activeEvents.find(e => e.id === activeEventId)?.severity || 'P1',
+              status: 'Active',
+              opened_at: activeEvents.find(e => e.id === activeEventId)?.opened_at || new Date().toISOString(),
+              total_estimated_minutes: soeData.total_estimated_minutes || 180,
+              ml_ttfr_minutes: soeData.ml_ttfr_minutes,
+              ml_ttfr_confidence_low: soeData.ml_ttfr_confidence_low,
+              ml_ttfr_confidence_high: soeData.ml_ttfr_confidence_high,
+              recovery_confidence_score: soeData.recovery_confidence_score,
+              steps_total: soeSteps.length,
+              steps_completed: soeSteps.filter((s: any) => s.status === 'COMPLETED').length,
+              steps_in_progress: soeSteps.filter((s: any) => s.status === 'IN_PROGRESS').length,
+              affected_services: activeEvents.find(e => e.id === activeEventId)?.affected_service_ids?.length || 0,
+            }}
+          />
 
-      {/* Recovery Timeline & Tasks - shown when event is active */}
-      {activeEvents.length > 0 && soeData && (
-        <div className="space-y-6">
           <GanttChart
             steps={soeSteps}
             totalMinutes={soeData.total_estimated_minutes || 180}
           />
+
           <TasksTable
-            tasks={soeSteps.map((step: any, idx: number) => ({
+            tasks={soeSteps.map((step: any) => ({
               id: step.id,
               sequence: step.sequence,
               name: step.name,
@@ -155,40 +154,114 @@ export function OrchestratorDashboard() {
               setTasks(tasks.filter(t => t.id !== taskId));
             }}
           />
-        </div>
+
+          <button
+            onClick={() => setActiveEventId(null)}
+            className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-xl transition-colors"
+          >
+            Back to Events List
+          </button>
+        </>
       )}
 
-      {/* Business Service Health Panel */}
-      <div>
-        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Business Service Health</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {services.map(service => {
-            const cfg = STATUS_CONFIG[service.status as string] ?? STATUS_CONFIG.OPERATIONAL;
-            return (
-              <div
-                key={service.id as string}
-                className={clsx('rounded-xl border p-4 flex items-start justify-between', cfg.color)}
+      {/* Events Grid - Show when no event is active */}
+      {!activeEventId && (
+        <div>
+          <h2 className="text-lg font-bold text-gray-900 mb-4">
+            {activeEvents.length > 0 ? 'Active Incidents' : 'No Active Incidents'}
+          </h2>
+          {activeEvents.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {activeEvents.map(event => (
+                <EventCard
+                  key={event.id as string}
+                  id={event.id as string}
+                  title={event.title as string}
+                  event_type={event.event_type as string}
+                  severity={event.severity as any}
+                  status={event.status as any}
+                  opened_at={event.opened_at as string}
+                  commander_name={event.commander_name as string}
+                  onClick={() => {
+                    setSelectedEvent(event);
+                    setShowEventDetailsModal(true);
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-12 text-center">
+              <CheckCircle size={48} className="text-green-600 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-green-900 mb-2">All Systems Operational</h3>
+              <p className="text-green-800 mb-6">No active incidents. Create one to test the recovery platform.</p>
+              <button
+                onClick={() => setShowNewEventDialog(true)}
+                className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold transition-all"
               >
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={clsx('w-2 h-2 rounded-full shrink-0', cfg.dot)} />
-                    <span className="font-medium text-sm">{service.name as string}</span>
-                  </div>
-                  <p className="text-xs opacity-70">{service.business_unit as string}</p>
-                  <p className="text-xs opacity-70 mt-0.5">RTO: {service.rto_minutes as number} min</p>
-                </div>
-                <span className="text-xs font-semibold shrink-0 ml-2">{cfg.label}</span>
-              </div>
-            );
-          })}
-
-          {services.length === 0 && (
-            <div className="col-span-3 bg-gray-50 border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
-              No business services configured — add assets and services in the Asset Registry.
+                <Plus size={18} />
+                Create Test Incident
+              </button>
             </div>
           )}
         </div>
-      </div>
+      )}
+
+      {/* Business Service Health Panel - Always show */}
+      {!activeEventId && (
+        <div>
+          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Business Service Health</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {services.map(service => {
+              const cfg = STATUS_CONFIG[service.status as string] ?? STATUS_CONFIG.OPERATIONAL;
+              return (
+                <div
+                  key={service.id as string}
+                  className={clsx('rounded-xl border p-4 flex items-start justify-between', cfg.color)}
+                >
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={clsx('w-2 h-2 rounded-full shrink-0', cfg.dot)} />
+                      <span className="font-medium text-sm">{service.name as string}</span>
+                    </div>
+                    <p className="text-xs opacity-70">{service.business_unit as string}</p>
+                    <p className="text-xs opacity-70 mt-0.5">RTO: {service.rto_minutes as number} min</p>
+                  </div>
+                  <span className="text-xs font-semibold shrink-0 ml-2">{cfg.label}</span>
+                </div>
+              );
+            })}
+
+            {services.length === 0 && (
+              <div className="col-span-3 bg-gray-50 border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
+                No business services configured — add assets and services in the Asset Registry.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modals */}
+      {selectedEvent && (
+        <EventDetailsModal
+          event={selectedEvent}
+          isOpen={showEventDetailsModal}
+          onClose={() => setShowEventDetailsModal(false)}
+          onActivate={() => {
+            setActiveEventId(selectedEvent.id);
+            setShowEventDetailsModal(false);
+          }}
+        />
+      )}
+
+      <NewEventDialog
+        isOpen={showNewEventDialog}
+        onClose={() => setShowNewEventDialog(false)}
+        onCreate={(newEvent) => {
+          // In a real app, this would create the event
+          console.log('Creating event:', newEvent);
+          setShowNewEventDialog(false);
+        }}
+      />
     </div>
   );
 }
