@@ -9,8 +9,8 @@ export const themeClasses = {
     primary: 'bg-white dark:bg-gray-950',
     secondary: 'bg-gray-50 dark:bg-gray-900',
     tertiary: 'bg-gray-100 dark:bg-gray-800',
-    elevated: 'bg-white dark:bg-gray-850',
-    card: 'bg-white dark:bg-gray-850',
+    elevated: 'bg-white dark:bg-gray-900',
+    card: 'bg-white dark:bg-gray-900',
     input: 'bg-white dark:bg-gray-800',
   },
 
@@ -31,7 +31,7 @@ export const themeClasses = {
   },
 
   // Cards & Containers
-  card: 'bg-white dark:bg-gray-850 border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-lg',
+  card: 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-lg',
   cardHover: 'hover:shadow-md dark:hover:border-gray-600',
   
   // Buttons
