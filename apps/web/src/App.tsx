@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { useAuth } from './store/auth';
+import { ThemeProvider } from './lib/themeContext';
 import { LoginPage } from './pages/LoginPage';
 import { OrchestratorDashboard } from './pages/silver/OrchestratorDashboard';
 import { ExecutionInterface } from './pages/bronze/ExecutionInterface';
@@ -53,8 +54,9 @@ function EventPage() {
 
 export default function App() {
   return (
-    <QueryClientProvider client={qc}>
-      <BrowserRouter>
+    <ThemeProvider>
+      <QueryClientProvider client={qc}>
+        <BrowserRouter>
         <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -76,5 +78,6 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
+    </ThemeProvider>
   );
 }

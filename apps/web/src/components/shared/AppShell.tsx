@@ -1,18 +1,21 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../store/auth';
+import { useTheme } from '../../lib/themeContext';
 import {
   LayoutDashboard, AlertTriangle, Database, Users,
   BookOpen, ClipboardList, LogOut, Shield, Play,
-  BarChart3, BarChart2, Plug, ChevronRight, Network
+  BarChart3, BarChart2, Plug, ChevronRight, Network,
+  Sun, Moon
 } from 'lucide-react';
 import clsx from 'clsx';
+import { theme } from '../../lib/themeStyles';
 
 const TIER_STYLES = {
-  BRONZE: { bg: 'bg-bronze-600', text: 'text-white', label: 'Bronze', ring: 'ring-bronze-600' },
-  SILVER: { bg: 'bg-silver-600', text: 'text-white', label: 'Silver', ring: 'ring-silver-600' },
-  GOLD:   { bg: 'bg-gold-600',   text: 'text-white', label: 'Gold',   ring: 'ring-gold-600'   },
-  AUTHOR: { bg: 'bg-purple-600', text: 'text-white', label: 'Author', ring: 'ring-purple-600' },
-  ADMIN:  { bg: 'bg-gray-800',   text: 'text-white', label: 'Admin',  ring: 'ring-gray-800'   },
+  BRONZE: { bg: 'bg-amber-600 dark:bg-amber-700', text: 'text-white', label: 'Bronze' },
+  SILVER: { bg: 'bg-blue-600 dark:bg-blue-700', text: 'text-white', label: 'Silver' },
+  GOLD:   { bg: 'bg-gold dark:bg-gold', text: 'text-gray-900', label: 'Gold' },
+  AUTHOR: { bg: 'bg-purple-600 dark:bg-purple-700', text: 'text-white', label: 'Author' },
+  ADMIN:  { bg: 'bg-gray-700 dark:bg-gray-600', text: 'text-white', label: 'Admin' },
 };
 
 interface NavItem {
@@ -34,34 +37,64 @@ const NAV: NavItem[] = [
 
 export function AppShell() {
   const { user, clearAuth } = useAuth();
+  const { theme: currentTheme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const tier = user?.restore_tier ?? 'BRONZE';
-  const style = TIER_STYLES[tier as keyof typeof TIER_STYLES] ?? TIER_STYLES.BRONZE;
+  const tierStyle = TIER_STYLES[tier as keyof typeof TIER_STYLES] ?? TIER_STYLES.BRONZE;
   const visibleNav = NAV.filter(n => n.tiers.includes(tier));
 
   return (
-    <div className="flex h-screen overflow-hidden bg-dark-950">
+    <div className={clsx(
+      'flex h-screen overflow-hidden transition-colors',
+      currentTheme === 'dark' ? 'bg-gray-950 dark' : 'bg-gray-50'
+    )}>
       {/* Sidebar */}
-      <aside className="w-56 flex flex-col bg-dark-900 border-r border-brand-600 border-opacity-20 text-white shrink-0">
+      <aside className={clsx(
+        'w-56 flex flex-col shrink-0 border-r transition-colors',
+        currentTheme === 'dark'
+          ? 'bg-gray-900 border-gray-800'
+          : 'bg-white border-gray-200'
+      )}>
         {/* Logo */}
-        <div className="px-4 py-5 border-b border-white/10">
+        <div className={clsx(
+          'px-4 py-5 border-b transition-colors',
+          currentTheme === 'dark'
+            ? 'border-gray-800'
+            : 'border-gray-200'
+        )}>
           <div className="flex items-center gap-2">
             <Shield size={20} className="text-purple-600" />
-            <span className="text-lg font-bold tracking-tight">Restore</span>
+            <span className={clsx('text-lg font-bold tracking-tight', theme.text.primary)}>
+              Restore
+            </span>
           </div>
-          <p className="text-xs text-blue-200 mt-0.5 truncate">Resilience Orchestration</p>
+          <p className={clsx('text-xs mt-0.5 truncate', currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500')}>
+            Resilience Orchestration
+          </p>
         </div>
 
         {/* User + Tier badge */}
-        <div className="px-4 py-3 border-b border-white/10">
+        <div className={clsx(
+          'px-4 py-3 border-b transition-colors',
+          currentTheme === 'dark'
+            ? 'border-gray-800'
+            : 'border-gray-200'
+        )}>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-dark-900 bg-opacity-50/20 flex items-center justify-center text-xs font-bold shrink-0">
+            <div className={clsx(
+              'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0',
+              currentTheme === 'dark'
+                ? 'bg-gray-800 text-gray-200'
+                : 'bg-gray-200 text-gray-800'
+            )}>
               {user?.displayName?.charAt(0).toUpperCase() ?? '?'}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-medium truncate">{user?.displayName}</p>
-              <span className={clsx('inline-block text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider', style.bg, style.text)}>
-                {style.label}
+              <p className={clsx('text-sm font-medium truncate', theme.text.primary)}>
+                {user?.displayName}
+              </p>
+              <span className={clsx('inline-block text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider', tierStyle.bg, tierStyle.text)}>
+                {tierStyle.label}
               </span>
             </div>
           </div>
@@ -74,34 +107,73 @@ export function AppShell() {
               key={item.to}
               to={item.to}
               className={({ isActive }) => clsx(
-                'flex items-center gap-3 px-4 py-2.5 text-sm transition-colors',
+                'flex items-center gap-3 px-4 py-2.5 text-sm transition-colors group relative',
                 isActive
-                  ? 'bg-dark-900 bg-opacity-50/15 text-white font-medium'
-                  : 'text-blue-100 hover:bg-dark-900 bg-opacity-50/10 hover:text-white'
+                  ? currentTheme === 'dark'
+                    ? 'bg-gray-800 text-white font-medium'
+                    : 'bg-gray-100 text-gray-900 font-medium'
+                  : currentTheme === 'dark'
+                    ? 'text-gray-400 hover:text-white hover:bg-gray-800'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               )}
             >
-              <item.icon size={16} />
-              <span>{item.label}</span>
-              {({ isActive }: { isActive: boolean }) => isActive && <ChevronRight size={12} className="ml-auto" />}
+              {({ isActive }) => (
+                <>
+                  <item.icon size={16} className={isActive ? 'text-purple-600' : ''} />
+                  <span>{item.label}</span>
+                  {isActive && <ChevronRight size={12} className="ml-auto" />}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
 
-        {/* Logout */}
-        <button
-          onClick={() => { clearAuth(); navigate('/login'); }}
-          className="flex items-center gap-3 px-4 py-3 text-sm text-blue-200 hover:text-white hover:bg-dark-900 bg-opacity-50/10 border-t border-white/10 transition-colors"
-        >
-          <LogOut size={16} />
-          Sign out
-        </button>
+        {/* Theme Toggle & Logout */}
+        <div className={clsx(
+          'border-t transition-colors space-y-1 p-2',
+          currentTheme === 'dark'
+            ? 'border-gray-800'
+            : 'border-gray-200'
+        )}>
+          <button
+            onClick={toggleTheme}
+            className={clsx(
+              'w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg transition-colors',
+              currentTheme === 'dark'
+                ? 'text-gray-400 hover:text-white hover:bg-gray-800'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            )}
+            title={`Switch to ${currentTheme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {currentTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            <span>{currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+          </button>
+
+          <button
+            onClick={() => { clearAuth(); navigate('/login'); }}
+            className={clsx(
+              'w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg transition-colors',
+              currentTheme === 'dark'
+                ? 'text-gray-400 hover:text-white hover:bg-gray-800'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            )}
+          >
+            <LogOut size={16} />
+            Sign out
+          </button>
+        </div>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className={clsx(
+        'flex-1 overflow-y-auto transition-colors',
+        currentTheme === 'dark'
+          ? 'bg-gray-950'
+          : 'bg-gray-50'
+      )}>
         {/* Rehearsal banner */}
         {window.location.search.includes('rehearsal=true') && (
-          <div className="bg-red-600 text-gold text-center text-sm font-bold py-2 px-4 flex items-center justify-center gap-2">
+          <div className="bg-red-600 text-white text-center text-sm font-bold py-2 px-4 flex items-center justify-center gap-2">
             <Play size={14} />
             REHEARSAL MODE — No live systems will be affected
           </div>
