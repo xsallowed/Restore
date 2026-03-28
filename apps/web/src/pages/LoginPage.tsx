@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
-import { Shield, Eye, EyeOff } from 'lucide-react';
+import { Shield, Eye, EyeOff, LogIn } from 'lucide-react';
 import { authApi } from '../lib/api';
 import { useAuth } from '../store/auth';
 
@@ -32,6 +32,19 @@ export function LoginPage() {
     } catch {
       toast.error('Invalid email or password');
     }
+  };
+
+  const quickLogin = (email: string, displayName: string, tier: 'BRONZE' | 'SILVER' | 'GOLD' | 'ADMIN') => {
+    const mockToken = 'mock-dev-token-' + Date.now();
+    setAuth(mockToken, {
+      sub: 'dev-user-' + Date.now(),
+      email,
+      displayName,
+      restore_tier: tier,
+      restore_roles: [tier === 'ADMIN' ? 'ADMIN' : tier === 'SILVER' ? 'COMMANDER' : 'RESPONDER']
+    });
+    toast.success(`Logged in as ${email}`);
+    navigate('/');
   };
 
   return (
@@ -92,6 +105,37 @@ export function LoginPage() {
               {isSubmitting ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
+
+          {/* Quick login buttons for development */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <p className="text-xs text-gray-600 mb-3 font-medium">Quick Login (Dev)</p>
+            <div className="grid grid-cols-1 gap-2">
+              <button
+                type="button"
+                onClick={() => quickLogin('admin@restore.local', 'Admin User', 'ADMIN')}
+                className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg text-sm transition-colors"
+              >
+                <LogIn size={16} />
+                Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => quickLogin('commander@restore.local', 'Incident Commander', 'SILVER')}
+                className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg text-sm transition-colors"
+              >
+                <LogIn size={16} />
+                Commander
+              </button>
+              <button
+                type="button"
+                onClick={() => quickLogin('analyst@restore.local', 'SOC Analyst', 'BRONZE')}
+                className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg text-sm transition-colors"
+              >
+                <LogIn size={16} />
+                Analyst
+              </button>
+            </div>
+          </div>
 
           <div className="mt-4 pt-4 border-t border-gray-100">
             <div className="flex gap-2 text-xs text-gray-500">
