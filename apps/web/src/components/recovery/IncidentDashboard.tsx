@@ -59,7 +59,7 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
               <span className="text-xs font-semibold text-purple-300 uppercase tracking-wider">Active Incident</span>
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">{metrics.eventTitle}</h1>
-            <p className="text-dark-200">{metrics.eventType}</p>
+            <p className="text-gray-300">{metrics.eventType}</p>
           </div>
           <div className="text-right">
             <p className="text-xs font-semibold text-purple-300 uppercase tracking-wider mb-2">Severity Level</p>

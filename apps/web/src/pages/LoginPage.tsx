@@ -101,7 +101,7 @@ export function LoginPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-medium text-dark-200 mb-2">Email address</label>
+              <label className="block text-sm font-medium text-gray-100 mb-2">Email address</label>
               <input
                 {...register('email')}
                 type="email"
@@ -114,7 +114,7 @@ export function LoginPage() {
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-dark-200 mb-2">Password</label>
+              <label className="block text-sm font-medium text-gray-100 mb-2">Password</label>
               <div className="relative">
                 <input
                   {...register('password')}
@@ -126,7 +126,7 @@ export function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPw(p => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 hover:text-dark-200 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors"
                   tabIndex={-1}
                 >
                   {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -147,7 +147,7 @@ export function LoginPage() {
 
           {/* Quick Login Section */}
           <div className="mt-8 pt-8 border-t border-dark-700">
-            <p className="text-xs font-semibold text-dark-300 uppercase tracking-wider mb-4">Quick Login (Development)</p>
+            <p className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-4">Quick Login (Development)</p>
             <div className="space-y-2">
               <button
                 type="button"
@@ -178,7 +178,7 @@ export function LoginPage() {
 
           {/* Tier Legend */}
           <div className="mt-6 pt-6 border-t border-dark-700">
-            <p className="text-xs text-dark-400 mb-3 font-medium">Account tiers</p>
+            <p className="text-xs text-gray-400 mb-3 font-medium">Account tiers</p>
             <div className="flex flex-wrap gap-2">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-500/20 border border-amber-500/50 text-amber-300 rounded-full text-xs font-semibold">
                 <span className="w-1.5 h-1.5 bg-amber-400 rounded-full"></span>
@@ -197,7 +197,7 @@ export function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-dark-400 text-xs">
+        <p className="text-center text-gray-400 text-xs">
           RESTORE-SDD-001 v1.1 Lean MVP
         </p>
       </div>

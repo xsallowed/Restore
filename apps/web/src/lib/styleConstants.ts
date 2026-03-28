@@ -21,8 +21,8 @@ export const Typography = {
   cardHeading: 'text-base font-semibold text-white',
   
   // Body text - Main content
-  bodyText: 'text-base text-dark-200',
-  bodyTextSmall: 'text-sm text-dark-300',
+  bodyText: 'text-base text-gray-300',
+  bodyTextSmall: 'text-sm text-gray-400',
   
   // Badge/tag text
   badge: 'text-xs font-semibold uppercase tracking-wider',

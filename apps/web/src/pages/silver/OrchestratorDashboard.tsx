@@ -100,7 +100,7 @@ export function OrchestratorDashboard() {
             <stat.icon size={20} className={stat.color} />
             <div>
               <p className="text-2xl font-bold text-white">{stat.value}</p>
-              <p className="text-xs text-dark-200">{stat.label}</p>
+              <p className="text-xs text-gray-300">{stat.label}</p>
             </div>
           </div>
         ))}

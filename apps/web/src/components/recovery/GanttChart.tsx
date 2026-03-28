@@ -51,7 +51,7 @@ export function GanttChart({ steps, totalMinutes }: GanttChartProps) {
           </div>
           <div className="text-right">
             <div className="text-3xl font-bold bg-gradient-purple-orange bg-clip-text text-transparent">{completionPercent}%</div>
-            <p className="text-xs text-dark-200 mt-0.5">Complete</p>
+            <p className="text-xs text-gray-300 mt-0.5">Complete</p>
           </div>
         </div>
         <div className="w-full h-2 bg-dark-800 rounded-full overflow-hidden">
@@ -68,7 +68,7 @@ export function GanttChart({ steps, totalMinutes }: GanttChartProps) {
           <div className="flex mb-4">
             <div className="w-40 shrink-0" />
             <div className="relative" style={{ width: chartWidth }}>
-              <div className="flex text-xs text-dark-300 font-medium">
+              <div className="flex text-xs text-gray-400 font-medium">
                 {Array.from({ length: Math.ceil(totalMinutes / 30) + 1 }).map((_, i) => (
                   <div
                     key={i}
@@ -126,7 +126,7 @@ export function GanttChart({ steps, totalMinutes }: GanttChartProps) {
             ].map((item, idx) => (
               <div key={idx} className="flex items-center gap-2">
                 <div className={clsx('w-3 h-3 rounded-sm', item.color)} />
-                <span className="text-dark-200">{item.label}</span>
+                <span className="text-gray-300">{item.label}</span>
               </div>
             ))}
           </div>

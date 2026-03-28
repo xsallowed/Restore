@@ -67,27 +67,27 @@ export function EventCard({
             </span>
           </div>
           <h3 className="text-base font-semibold text-white mb-1.5">{title}</h3>
-          <p className="text-sm text-dark-200">{event_type}</p>
+          <p className="text-sm text-gray-300">{event_type}</p>
         </div>
       </div>
 
       {/* Details */}
       <div className="space-y-2.5 mb-5">
         <div className="flex items-center gap-2.5 text-sm">
-          <Clock size={14} className="text-dark-200 shrink-0" />
-          <span className="text-dark-200">{timeSinceOpen}</span>
+          <Clock size={14} className="text-gray-400 shrink-0" />
+          <span className="text-gray-300">{timeSinceOpen}</span>
         </div>
 
         {commander_name && (
           <div className="flex items-center gap-2.5 text-sm">
-            <Users size={14} className="text-dark-200 shrink-0" />
-            <span className="text-dark-200">{commander_name}</span>
+            <Users size={14} className="text-gray-400 shrink-0" />
+            <span className="text-gray-300">{commander_name}</span>
           </div>
         )}
 
         {affected_service_ids && affected_service_ids.length > 0 && (
           <div className="flex items-center gap-2.5 text-sm">
-            <Target size={14} className="text-dark-200 shrink-0" />
+            <Target size={14} className="text-gray-400 shrink-0" />
             <span className="text-dark-200">{affected_service_ids.length} services affected</span>
           </div>
         )}

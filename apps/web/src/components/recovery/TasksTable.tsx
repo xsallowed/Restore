@@ -27,7 +27,7 @@ const STATUS_BADGE = {
   NOT_STARTED: { bg: 'bg-dark-700', text: 'text-dark-200', label: 'Not Started' },
   IN_PROGRESS: { bg: 'bg-purple-600', text: 'text-purple-100', label: 'In Progress' },
   COMPLETED: { bg: 'bg-gold', text: 'text-gray-900', label: 'Completed' },
-  SKIPPED: { bg: 'bg-dark-600', text: 'text-dark-200', label: 'Skipped' },
+  SKIPPED: { bg: 'bg-dark-600', text: 'text-gray-200', label: 'Skipped' },
   BLOCKED: { bg: 'bg-red-600', text: 'text-red-100', label: 'Blocked' },
 };
 
@@ -174,10 +174,10 @@ export function TasksTable({ tasks, onAddTask, onDeleteTask }: TasksTableProps) 
                         {status.label}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-dark-400">
+                    <td className="px-4 py-3 text-xs text-gray-400">
                       {task.started_at ? format(new Date(task.started_at), 'MMM dd, HH:mm') : '-'}
                     </td>
-                    <td className="px-4 py-3 text-xs text-dark-400">
+                    <td className="px-4 py-3 text-xs text-gray-400">
                       {task.completed_at ? format(new Date(task.completed_at), 'MMM dd, HH:mm') : '-'}
                     </td>
                     <td className="px-4 py-3 text-xs">
