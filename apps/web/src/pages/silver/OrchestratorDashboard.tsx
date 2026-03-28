@@ -14,19 +14,19 @@ import { NewEventDialog } from '../../components/recovery/NewEventDialog';
 import { useState } from 'react';
 
 const STATUS_CONFIG: Record<string, { color: string; dot: string; label: string }> = {
-  OPERATIONAL:        { color: 'bg-green-50 text-green-800 border-green-200',   dot: 'bg-green-500', label: 'Operational' },
-  DEGRADED:           { color: 'bg-yellow-50 text-yellow-800 border-yellow-200', dot: 'bg-yellow-500', label: 'Degraded' },
-  PARTIALLY_IMPACTED: { color: 'bg-orange-50 text-orange-800 border-orange-200', dot: 'bg-orange-500', label: 'Partial Impact' },
-  DOWN:               { color: 'bg-red-50 text-red-800 border-red-200',          dot: 'bg-red-500',    label: 'Down' },
-  RECOVERING:         { color: 'bg-blue-50 text-blue-800 border-blue-200',       dot: 'bg-blue-500',   label: 'Recovering' },
-  RESTORED:           { color: 'bg-green-50 text-green-700 border-green-200',    dot: 'bg-green-400',  label: 'Restored' },
+  OPERATIONAL:        { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-accent-gold border-opacity-30',   dot: 'bg-accent-gold', label: 'Operational' },
+  DEGRADED:           { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-accent-orange border-opacity-30', dot: 'bg-accent-orange', label: 'Degraded' },
+  PARTIALLY_IMPACTED: { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-accent-orange border-opacity-30', dot: 'bg-accent-orange', label: 'Partial Impact' },
+  DOWN:               { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-red-500 border-opacity-30',      dot: 'bg-red-500',    label: 'Down' },
+  RECOVERING:         { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-brand-600 border-opacity-30',       dot: 'bg-brand-500',   label: 'Recovering' },
+  RESTORED:           { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-accent-gold border-opacity-30',    dot: 'bg-accent-gold',  label: 'Restored' },
 };
 
 const SEVERITY_COLOR: Record<string, string> = {
-  P1: 'bg-red-100 text-red-800',
-  P2: 'bg-orange-100 text-orange-800',
-  P3: 'bg-yellow-100 text-yellow-800',
-  P4: 'bg-gray-100 text-gray-700',
+  P1: 'bg-red-500 bg-opacity-20 text-red-200',
+  P2: 'bg-accent-orange bg-opacity-20 text-accent-orange',
+  P3: 'bg-accent-gold bg-opacity-20 text-dark-950',
+  P4: 'bg-brand-600 bg-opacity-20 text-brand-200',
 };
 
 export function OrchestratorDashboard() {
@@ -72,12 +72,12 @@ export function OrchestratorDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Incident Recovery Center</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Manage and orchestrate cyber incident responses</p>
+          <h1 className="text-3xl font-bold text-white">Incident Recovery Center</h1>
+          <p className="text-sm text-dark-200 mt-0.5">Manage and orchestrate cyber incident responses</p>
         </div>
         <button
           onClick={() => setShowNewEventDialog(true)}
-          className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:shadow-lg transition-all"
+          className="flex items-center gap-2 bg-gradient-purple-orange text-white px-6 py-3 rounded-lg text-sm font-semibold hover:shadow-glow transition-all"
         >
           <Plus size={18} />
           Create Incident
@@ -87,16 +87,16 @@ export function OrchestratorDashboard() {
       {/* Summary stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Active Events', value: activeEvents.length, icon: AlertTriangle, color: activeEvents.length > 0 ? 'text-red-500' : 'text-gray-400' },
-          { label: 'Services Down', value: downCount, icon: TrendingDown, color: downCount > 0 ? 'text-red-500' : 'text-gray-400' },
-          { label: 'Degraded', value: degradedCount, icon: Activity, color: degradedCount > 0 ? 'text-orange-500' : 'text-gray-400' },
-          { label: 'Operational', value: healthyCount, icon: CheckCircle, color: 'text-green-500' },
+          { label: 'Active Events', value: activeEvents.length, icon: AlertTriangle, color: activeEvents.length > 0 ? 'text-red-400' : 'text-dark-400' },
+          { label: 'Services Down', value: downCount, icon: TrendingDown, color: downCount > 0 ? 'text-red-400' : 'text-dark-400' },
+          { label: 'Degraded', value: degradedCount, icon: Activity, color: degradedCount > 0 ? 'text-accent-orange' : 'text-dark-400' },
+          { label: 'Operational', value: healthyCount, icon: CheckCircle, color: 'text-accent-gold' },
         ].map(stat => (
-          <div key={stat.label} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3">
+          <div key={stat.label} className="bg-dark-900 bg-opacity-50 backdrop-blur rounded-lg border border-brand-600 border-opacity-20 p-4 flex items-center gap-3">
             <stat.icon size={20} className={stat.color} />
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              <p className="text-xs text-gray-500">{stat.label}</p>
+              <p className="text-2xl font-bold text-white">{stat.value}</p>
+              <p className="text-xs text-dark-200">{stat.label}</p>
             </div>
           </div>
         ))}
@@ -157,7 +157,7 @@ export function OrchestratorDashboard() {
 
           <button
             onClick={() => setActiveEventId(null)}
-            className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-xl transition-colors"
+            className="w-full py-3 bg-dark-900 border border-brand-600 hover:border-accent-orange text-brand-400 hover:text-accent-orange font-semibold rounded-lg transition-all"
           >
             Back to Events List
           </button>
@@ -167,7 +167,7 @@ export function OrchestratorDashboard() {
       {/* Events Grid - Show when no event is active */}
       {!activeEventId && (
         <div>
-          <h2 className="text-lg font-bold text-gray-900 mb-4">
+          <h2 className="text-lg font-bold text-white mb-4">
             {activeEvents.length > 0 ? 'Active Incidents' : 'No Active Incidents'}
           </h2>
           {activeEvents.length > 0 ? (
@@ -190,13 +190,13 @@ export function OrchestratorDashboard() {
               ))}
             </div>
           ) : (
-            <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-12 text-center">
-              <CheckCircle size={48} className="text-green-600 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-green-900 mb-2">All Systems Operational</h3>
-              <p className="text-green-800 mb-6">No active incidents. Create one to test the recovery platform.</p>
+            <div className="bg-dark-900 bg-opacity-50 backdrop-blur border-2 border-accent-gold border-opacity-30 rounded-xl p-12 text-center">
+              <CheckCircle size={48} className="text-accent-gold mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">All Systems Operational</h3>
+              <p className="text-dark-200 mb-6">No active incidents. Create one to test the recovery platform.</p>
               <button
                 onClick={() => setShowNewEventDialog(true)}
-                className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold transition-all"
+                className="inline-flex items-center gap-2 bg-gradient-purple-orange text-white px-6 py-3 rounded-lg font-semibold transition-all hover:shadow-glow"
               >
                 <Plus size={18} />
                 Create Test Incident
@@ -209,30 +209,30 @@ export function OrchestratorDashboard() {
       {/* Business Service Health Panel - Always show */}
       {!activeEventId && (
         <div>
-          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Business Service Health</h2>
+          <h2 className="text-sm font-semibold text-brand-300 uppercase tracking-wide mb-3">Business Service Health</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {services.map(service => {
               const cfg = STATUS_CONFIG[service.status as string] ?? STATUS_CONFIG.OPERATIONAL;
               return (
                 <div
                   key={service.id as string}
-                  className={clsx('rounded-xl border p-4 flex items-start justify-between', cfg.color)}
+                  className={clsx('rounded-lg border p-4 flex items-start justify-between backdrop-blur', cfg.color)}
                 >
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span className={clsx('w-2 h-2 rounded-full shrink-0', cfg.dot)} />
-                      <span className="font-medium text-sm">{service.name as string}</span>
+                      <span className="font-medium text-sm text-white">{service.name as string}</span>
                     </div>
-                    <p className="text-xs opacity-70">{service.business_unit as string}</p>
-                    <p className="text-xs opacity-70 mt-0.5">RTO: {service.rto_minutes as number} min</p>
+                    <p className="text-xs text-dark-300">{service.business_unit as string}</p>
+                    <p className="text-xs text-dark-300 mt-0.5">RTO: {service.rto_minutes as number} min</p>
                   </div>
-                  <span className="text-xs font-semibold shrink-0 ml-2">{cfg.label}</span>
+                  <span className="text-xs font-semibold shrink-0 ml-2 text-dark-200">{cfg.label}</span>
                 </div>
               );
             })}
 
             {services.length === 0 && (
-              <div className="col-span-3 bg-gray-50 border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
+              <div className="col-span-3 bg-dark-900 bg-opacity-50 border border-brand-600 border-opacity-20 rounded-lg p-8 text-center text-dark-200 text-sm">
                 No business services configured — add assets and services in the Asset Registry.
               </div>
             )}
