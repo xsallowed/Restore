@@ -196,7 +196,7 @@ function DependencyGraphCanvas({ assets, dependencies, selectedId, onSelect }: {
       )}
       {assets.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center text-gray-400">
+          <div className="text-center text-white">
             <Network size={32} className="mx-auto mb-2 opacity-30" />
             <p className="text-sm">No assets to display</p>
             <p className="text-xs mt-1">Add assets to see the dependency graph</p>
@@ -208,10 +208,10 @@ function DependencyGraphCanvas({ assets, dependencies, selectedId, onSelect }: {
         {Object.entries(STATUS_DOT).slice(0, 5).map(([s, c]) => (
           <div key={s} className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full inline-block shrink-0" style={{ background: c }} />
-            <span className="text-gray-500">{s}</span>
+            <span className="text-gray-300">{s}</span>
           </div>
         ))}
-        <div className="border-t border-gray-700 pt-1 text-gray-400">Click node to select</div>
+        <div className="border-t border-gray-700 pt-1 text-white">Click node to select</div>
       </div>
     </div>
   );
@@ -245,7 +245,7 @@ function DependencyTable({ assets, dependencies, selectedId, onSelect }: {
     HOSTS: 'bg-purple-100 text-purple-800',
     REQUIRES: 'bg-blue-100 text-blue-800',
     CONSUMES: 'bg-green-100 text-green-800',
-    REPLICATES_TO: 'bg-amber-100 text-amber-800',
+    REPLICATES_TO: 'bg-amber-100 text-gold',
     LOAD_BALANCES: 'bg-dark-700 text-gray-300',
   };
 
@@ -253,7 +253,7 @@ function DependencyTable({ assets, dependencies, selectedId, onSelect }: {
     <div className="flex-1 overflow-hidden flex flex-col">
       <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700 shrink-0">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-500">{filtered.length} dependencies {selectedId ? '(filtered)' : ''}</span>
+          <span className="text-xs font-medium text-gray-300">{filtered.length} dependencies {selectedId ? '(filtered)' : ''}</span>
           {selectedId && <button onClick={() => onSelect('')} className="text-xs text-brand-600 hover:underline">Clear filter</button>}
         </div>
         <button onClick={() => setAddRow(r => !r)} className="flex items-center gap-1 text-xs bg-brand-600 text-white px-2.5 py-1.5 rounded-lg hover:bg-brand-700">
@@ -277,14 +277,14 @@ function DependencyTable({ assets, dependencies, selectedId, onSelect }: {
           <button onClick={() => addDep.mutate()} disabled={!src || !tgt || addDep.isPending} className="text-xs bg-brand-600 text-white px-3 py-1.5 rounded-lg hover:bg-brand-700 disabled:opacity-50">
             {addDep.isPending ? 'Adding…' : 'Add'}
           </button>
-          <button onClick={() => setAddRow(false)} className="text-xs text-gray-400 hover:text-gray-600">Cancel</button>
+          <button onClick={() => setAddRow(false)} className="text-xs text-white hover:text-gray-600">Cancel</button>
         </div>
       )}
 
       <div className="overflow-y-auto flex-1">
         <table className="w-full text-xs">
           <thead className="sticky top-0 bg-dark-800 border-b border-gray-700">
-            <tr>{['Source','Relationship','Target','Source Tier','Target Tier'].map(h => <th key={h} className="px-4 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">{h}</th>)}</tr>
+            <tr>{['Source','Relationship','Target','Source Tier','Target Tier'].map(h => <th key={h} className="px-4 py-2.5 text-left font-semibold text-gray-300 uppercase tracking-wide">{h}</th>)}</tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
             {filtered.map((d, i) => {
@@ -298,7 +298,7 @@ function DependencyTable({ assets, dependencies, selectedId, onSelect }: {
                       <span className="w-2 h-2 rounded-full shrink-0" style={{ background: STATUS_DOT[src?.status ?? 'UNKNOWN'] }} />
                       <span className="font-medium text-white">{src?.name ?? d.source.slice(0, 8)}</span>
                     </div>
-                    <p className="text-gray-400 ml-3.5">{src?.asset_type}</p>
+                    <p className="text-white ml-3.5">{src?.asset_type}</p>
                   </td>
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-1">
@@ -311,15 +311,15 @@ function DependencyTable({ assets, dependencies, selectedId, onSelect }: {
                       <span className="w-2 h-2 rounded-full shrink-0" style={{ background: STATUS_DOT[tgt?.status ?? 'UNKNOWN'] }} />
                       <span className="font-medium text-white">{tgt?.name ?? d.target.slice(0, 8)}</span>
                     </div>
-                    <p className="text-gray-400 ml-3.5">{tgt?.asset_type}</p>
+                    <p className="text-white ml-3.5">{tgt?.asset_type}</p>
                   </td>
-                  <td className="px-4 py-2.5 text-center"><span className="font-bold text-gray-500" style={{ color: TIER_COLOR[src?.criticality_tier ?? 4] }}>T{src?.criticality_tier}</span></td>
-                  <td className="px-4 py-2.5 text-center"><span className="font-bold text-gray-500" style={{ color: TIER_COLOR[tgt?.criticality_tier ?? 4] }}>T{tgt?.criticality_tier}</span></td>
+                  <td className="px-4 py-2.5 text-center"><span className="font-bold text-gray-300" style={{ color: TIER_COLOR[src?.criticality_tier ?? 4] }}>T{src?.criticality_tier}</span></td>
+                  <td className="px-4 py-2.5 text-center"><span className="font-bold text-gray-300" style={{ color: TIER_COLOR[tgt?.criticality_tier ?? 4] }}>T{tgt?.criticality_tier}</span></td>
                 </tr>
               );
             })}
             {filtered.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+              <tr><td colSpan={5} className="px-4 py-8 text-center text-white">
                 {dependencies.length === 0 ? 'No dependencies defined yet — add one above' : 'No dependencies for selected asset'}
               </td></tr>
             )}
@@ -373,34 +373,34 @@ function RunbookAssociationPanel({ asset, service, runbooks, onClose }: {
           <BookOpen size={15} className="text-purple-500" />
           <div>
             <p className="text-sm font-semibold text-white">Runbook association</p>
-            <p className="text-xs text-gray-400">{name} · {runbooks.length} available</p>
+            <p className="text-xs text-white">{name} · {runbooks.length} available</p>
           </div>
         </div>
-        <button onClick={onClose}><X size={15} className="text-gray-400 hover:text-gray-600" /></button>
+        <button onClick={onClose}><X size={15} className="text-white hover:text-gray-600" /></button>
       </div>
 
       <div className="px-4 py-3 bg-dark-800 border-b border-gray-700 space-y-2 shrink-0">
         <div className="flex gap-2">
           <div className="flex-1">
-            <label className="text-xs text-gray-500 mb-1 block">Event type to associate</label>
+            <label className="text-xs text-gray-300 mb-1 block">Event type to associate</label>
             <select value={eventType} onChange={e => setEventType(e.target.value)} className="w-full text-xs border border-gray-600 rounded-lg px-2 py-1.5 bg-dark-900 bg-opacity-50 focus:outline-none">
               {EVENT_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}
             </select>
           </div>
         </div>
-        <p className="text-xs text-gray-400">Select runbooks to associate with this {asset ? 'component' : 'service'} for {eventType.replace(/_/g, ' ')} recovery. These will be used by the SOE generator when this component is affected.</p>
+        <p className="text-xs text-white">Select runbooks to associate with this {asset ? 'component' : 'service'} for {eventType.replace(/_/g, ' ')} recovery. These will be used by the SOE generator when this component is affected.</p>
       </div>
 
       <div className="px-4 py-2 border-b border-gray-700 shrink-0">
         <div className="flex items-center gap-2 bg-dark-800 rounded-lg px-2.5 py-1.5">
-          <Search size={13} className="text-gray-400" />
+          <Search size={13} className="text-white" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search runbooks…" className="text-xs bg-transparent focus:outline-none flex-1" />
         </div>
       </div>
 
       <div className="overflow-y-auto flex-1 divide-y divide-gray-50">
         {filtered.length === 0 ? (
-          <div className="py-10 text-center text-gray-400 text-xs">
+          <div className="py-10 text-center text-white text-xs">
             {runbooks.length === 0 ? 'No runbooks ingested yet' : 'No matches'}
           </div>
         ) : filtered.map(r => {
@@ -410,18 +410,18 @@ function RunbookAssociationPanel({ asset, service, runbooks, onClose }: {
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5">
-                    {isLinked && <CheckCircle2 size={12} className="text-green-500 shrink-0" />}
+                    {isLinked && <CheckCircle2 size={12} className="text-gold shrink-0" />}
                     <p className="text-xs font-medium text-white truncate">{r.title}</p>
                   </div>
-                  <p className="text-[10px] text-gray-400 font-mono truncate">{r.source_ref}</p>
+                  <p className="text-[10px] text-white font-mono truncate">{r.source_ref}</p>
                   <div className="flex gap-1 mt-1 flex-wrap">
                     {(r.event_tags || []).map(t => (
-                      <span key={t} className={clsx('text-[10px] px-1.5 py-0.5 rounded', t === eventType ? 'bg-blue-100 text-blue-800 font-medium' : 'bg-dark-700 text-gray-500')}>{t}</span>
+                      <span key={t} className={clsx('text-[10px] px-1.5 py-0.5 rounded', t === eventType ? 'bg-blue-100 text-blue-800 font-medium' : 'bg-dark-700 text-gray-300')}>{t}</span>
                     ))}
                   </div>
                 </div>
                 <div className="flex gap-1 shrink-0">
-                  <button onClick={() => setPreview(r)} className="p-1.5 hover:bg-dark-700 rounded text-gray-400"><Eye size={12} /></button>
+                  <button onClick={() => setPreview(r)} className="p-1.5 hover:bg-dark-700 rounded text-white"><Eye size={12} /></button>
                   <button
                     onClick={() => tagMutation.mutate(r.id)}
                     disabled={isLinked || tagMutation.isPending}
@@ -441,7 +441,7 @@ function RunbookAssociationPanel({ asset, service, runbooks, onClose }: {
           <div className="bg-dark-900 bg-opacity-50 rounded-2xl shadow-2xl w-full max-w-xl mx-4 max-h-[75vh] flex flex-col" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700 shrink-0">
               <p className="font-semibold text-white text-sm">{preview.title}</p>
-              <button onClick={() => setPreview(null)}><X size={15} className="text-gray-400" /></button>
+              <button onClick={() => setPreview(null)}><X size={15} className="text-white" /></button>
             </div>
             <div className="px-5 py-4 overflow-y-auto flex-1">
               <pre className="text-xs text-gray-600 whitespace-pre-wrap font-mono leading-relaxed">{preview.content_text?.slice(0, 3000)}{(preview.content_text?.length ?? 0) > 3000 ? '\n…[truncated]' : ''}</pre>
@@ -484,14 +484,14 @@ function ServiceDetailPanel({ service, assets, runbooks, allAssets }: { service:
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{ background: TIER_COLOR[service.impact_tier] + '20', color: TIER_COLOR[service.impact_tier] }}>T{service.impact_tier}</span>
                 <span className="w-2 h-2 rounded-full" style={{ background: STATUS_DOT[service.status] }} />
-                <span className="text-xs text-gray-500">{service.status}</span>
+                <span className="text-xs text-gray-300">{service.status}</span>
               </div>
               <h3 className="font-bold text-white">{service.name}</h3>
-              <p className="text-xs text-gray-500 mt-0.5">{service.business_unit}</p>
+              <p className="text-xs text-gray-300 mt-0.5">{service.business_unit}</p>
             </div>
             <div className="text-right">
               <p className="text-lg font-bold text-brand-700">{service.rto_minutes >= 60 ? `${Math.round(service.rto_minutes/60*10)/10}h` : `${service.rto_minutes}m`}</p>
-              <p className="text-[10px] text-gray-400">RTO target</p>
+              <p className="text-[10px] text-white">RTO target</p>
             </div>
           </div>
           <button
@@ -513,17 +513,17 @@ function ServiceDetailPanel({ service, assets, runbooks, allAssets }: { service:
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ background: STATUS_DOT[a.status] }} />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-white truncate">{a.name}</p>
-                  <p className="text-[10px] text-gray-400">{a.asset_type} · T{a.criticality_tier}</p>
+                  <p className="text-[10px] text-white">{a.asset_type} · T{a.criticality_tier}</p>
                 </div>
                 <button onClick={() => unlinkMutation.mutate(a.id)} className="opacity-0 group-hover:opacity-100 p-1 text-gray-300 hover:text-red-400 transition-all"><X size={11} /></button>
               </div>
             ))}
-            {assets.length === 0 && <p className="text-xs text-gray-400 py-2 text-center">No assets linked yet</p>}
+            {assets.length === 0 && <p className="text-xs text-white py-2 text-center">No assets linked yet</p>}
           </div>
 
           {unlinkedAssets.length > 0 && (
             <div className="mt-2">
-              <p className="text-[10px] text-gray-400 mb-1">Add asset:</p>
+              <p className="text-[10px] text-white mb-1">Add asset:</p>
               <div className="flex flex-wrap gap-1">
                 {unlinkedAssets.slice(0, 8).map(a => (
                   <button key={a.id} onClick={() => linkMutation.mutate(a.id)} className="text-[10px] bg-dark-700 text-gray-600 hover:bg-brand-100 hover:text-brand-700 px-2 py-1 rounded-full transition-colors">
@@ -545,8 +545,8 @@ function ServiceDetailPanel({ service, assets, runbooks, allAssets }: { service:
           </div>
           {serviceRunbooks.length === 0 ? (
             <div className="bg-dark-800 border border-amber-200 rounded-lg px-3 py-2.5">
-              <p className="text-xs text-amber-700 font-medium">No runbooks linked</p>
-              <p className="text-[10px] text-amber-600 mt-0.5">Associate runbooks to enable AI-powered SOE generation for this service</p>
+              <p className="text-xs text-gold font-medium">No runbooks linked</p>
+              <p className="text-[10px] text-gold mt-0.5">Associate runbooks to enable AI-powered SOE generation for this service</p>
             </div>
           ) : serviceRunbooks.slice(0, 4).map(r => (
             <div key={r.id} className="flex items-center gap-2 bg-dark-900 bg-opacity-50 border border-gray-700 rounded-lg px-3 py-2 mb-1.5">
@@ -588,14 +588,14 @@ function AssetDetailPanel({ asset, dependencies, assets, runbooks }: { asset: As
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs">
             {[['Type', asset.asset_type], ['Env', asset.environment], ['Tier', `T${asset.criticality_tier}`], ['Owner', asset.owner || '—'], ['Status', asset.status]].map(([k, v]) => (
-              <div key={k as string}><span className="text-gray-400">{k}</span><p className="font-medium text-gray-100 mt-0.5">{v}</p></div>
+              <div key={k as string}><span className="text-white">{k}</span><p className="font-medium text-gray-100 mt-0.5">{v}</p></div>
             ))}
           </div>
         </div>
 
         {upstreamDeps.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Depends on ({upstreamDeps.length})</p>
+            <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide mb-2">Depends on ({upstreamDeps.length})</p>
             <div className="space-y-1">
               {upstreamDeps.map((d, i) => {
                 const src = assetMap.get(d.source);
@@ -612,7 +612,7 @@ function AssetDetailPanel({ asset, dependencies, assets, runbooks }: { asset: As
 
         {downstreamDeps.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Depended on by ({downstreamDeps.length})</p>
+            <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide mb-2">Depended on by ({downstreamDeps.length})</p>
             <div className="space-y-1">
               {downstreamDeps.map((d, i) => {
                 const tgt = assetMap.get(d.target);
@@ -629,12 +629,12 @@ function AssetDetailPanel({ asset, dependencies, assets, runbooks }: { asset: As
 
         <div>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Recovery runbooks</p>
+            <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Recovery runbooks</p>
             <button onClick={() => setShowRunbooks(true)} className="text-xs text-brand-600 flex items-center gap-1"><Link size={11} /> Associate</button>
           </div>
           {runbooks.length === 0 ? (
             <div className="bg-dark-800 border border-amber-200 rounded-lg px-3 py-2">
-              <p className="text-xs text-amber-700">No runbooks linked to this component</p>
+              <p className="text-xs text-gold">No runbooks linked to this component</p>
             </div>
           ) : runbooks.slice(0, 3).map(r => (
             <div key={r.id} className="flex items-center gap-2 bg-dark-900 bg-opacity-50 border border-gray-700 rounded-lg px-3 py-2 mb-1.5">
@@ -700,16 +700,16 @@ export function DependencyMappingPage() {
       <div className="px-6 py-4 border-b border-gray-600 bg-dark-900 bg-opacity-50 flex items-center justify-between shrink-0">
         <div>
           <h1 className="text-xl font-bold text-white">Application Dependency Mapping</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-sm text-gray-300 mt-0.5">
             {assets.length} components · {dependencies.length} dependencies · {services.length} business services · {runbooks.length} runbooks
           </p>
         </div>
         <div className="flex gap-2">
           <div className="flex items-center gap-1 bg-dark-700 rounded-lg p-1">
-            <button onClick={() => setView('graph')} className={clsx('flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md transition-colors', view === 'graph' ? 'bg-dark-900 bg-opacity-50 shadow-sm text-white font-medium' : 'text-gray-500 hover:text-gray-300')}>
+            <button onClick={() => setView('graph')} className={clsx('flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md transition-colors', view === 'graph' ? 'bg-dark-900 bg-opacity-50 shadow-sm text-white font-medium' : 'text-gray-300 hover:text-gray-300')}>
               <Network size={13} /> Graph
             </button>
-            <button onClick={() => setView('table')} className={clsx('flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md transition-colors', view === 'table' ? 'bg-dark-900 bg-opacity-50 shadow-sm text-white font-medium' : 'text-gray-500 hover:text-gray-300')}>
+            <button onClick={() => setView('table')} className={clsx('flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md transition-colors', view === 'table' ? 'bg-dark-900 bg-opacity-50 shadow-sm text-white font-medium' : 'text-gray-300 hover:text-gray-300')}>
               <Table size={13} /> Table
             </button>
           </div>
@@ -729,7 +729,7 @@ export function DependencyMappingPage() {
         {/* Left sidebar — Business Services */}
         <div className="w-56 border-r border-gray-600 bg-dark-800 flex flex-col shrink-0">
           <div className="px-3 py-2.5 border-b border-gray-600">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Business Services</p>
+            <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Business Services</p>
           </div>
           <div className="flex-1 overflow-y-auto py-1">
             {services.map(s => (
@@ -742,13 +742,13 @@ export function DependencyMappingPage() {
                   <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: STATUS_DOT[s.status] }} />
                   <span className="text-xs font-medium text-white truncate">{s.name}</span>
                 </div>
-                <p className="text-[10px] text-gray-400 ml-3">{s.business_unit} · T{s.impact_tier}</p>
-                <p className="text-[10px] text-gray-400 ml-3">RTO: {s.rto_minutes >= 60 ? `${Math.round(s.rto_minutes/60*10)/10}h` : `${s.rto_minutes}m`}</p>
+                <p className="text-[10px] text-white ml-3">{s.business_unit} · T{s.impact_tier}</p>
+                <p className="text-[10px] text-white ml-3">RTO: {s.rto_minutes >= 60 ? `${Math.round(s.rto_minutes/60*10)/10}h` : `${s.rto_minutes}m`}</p>
               </button>
             ))}
             {services.length === 0 && (
               <div className="px-3 py-4 text-center">
-                <p className="text-xs text-gray-400 mb-2">No services defined</p>
+                <p className="text-xs text-white mb-2">No services defined</p>
                 <button onClick={() => navigate('/services')} className="text-xs text-brand-600 hover:underline">Add service →</button>
               </div>
             )}
@@ -766,17 +766,17 @@ export function DependencyMappingPage() {
           {view === 'graph' && (
             <div className="px-4 py-2 border-b border-gray-700 bg-dark-900 bg-opacity-50 flex items-center gap-3 shrink-0">
               <div className="flex items-center gap-2 bg-dark-800 rounded-lg px-3 py-1.5 flex-1 max-w-xs">
-                <Search size={13} className="text-gray-400" />
+                <Search size={13} className="text-white" />
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter components…" className="text-xs bg-transparent focus:outline-none flex-1" />
               </div>
               {selectedAsset && (
-                <div className="flex items-center gap-2 text-xs text-gray-500">
+                <div className="flex items-center gap-2 text-xs text-gray-300">
                   <span className="w-2 h-2 rounded-full" style={{ background: STATUS_DOT[selectedAsset.status] }} />
                   <span className="font-medium text-gray-300">{selectedAsset.name}</span>
-                  <button onClick={() => handleAssetSelect(null)} className="text-gray-300 hover:text-gray-500"><X size={12} /></button>
+                  <button onClick={() => handleAssetSelect(null)} className="text-gray-300 hover:text-gray-300"><X size={12} /></button>
                 </div>
               )}
-              <div className="ml-auto flex items-center gap-3 text-xs text-gray-400">
+              <div className="ml-auto flex items-center gap-3 text-xs text-white">
                 {[1,2,3,4].map(t => <span key={t} className="flex items-center gap-1"><span className="w-2 h-2 rounded-full inline-block" style={{ background: TIER_COLOR[t] }} />T{t}</span>)}
               </div>
             </div>

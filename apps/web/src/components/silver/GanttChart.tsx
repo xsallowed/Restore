@@ -49,7 +49,7 @@ export function GanttChart({ eventId }: { eventId: string }) {
 
   if (isLoading) {
     return (
-      <div className="h-40 flex items-center justify-center text-sm text-gray-400">
+      <div className="h-40 flex items-center justify-center text-sm text-white">
         Loading Gantt chart…
       </div>
     );
@@ -57,7 +57,7 @@ export function GanttChart({ eventId }: { eventId: string }) {
 
   if (!steps.length) {
     return (
-      <div className="h-40 flex items-center justify-center text-sm text-gray-400">
+      <div className="h-40 flex items-center justify-center text-sm text-white">
         SOE not yet generated
       </div>
     );
@@ -87,19 +87,19 @@ export function GanttChart({ eventId }: { eventId: string }) {
       <div className="flex items-stretch border-b border-gray-700">
         <div className="flex-1 px-4 py-3 flex items-center gap-6 flex-wrap">
           <div>
-            <p className="text-xs text-gray-400 uppercase tracking-wide">TTFR Estimate</p>
+            <p className="text-xs text-white uppercase tracking-wide">TTFR Estimate</p>
             <p className="text-lg font-bold text-white">
               {ttfrData?.ttfrMinutes ? `${Math.round(ttfrData.ttfrMinutes / 60 * 10) / 10}h` : '–'}
             </p>
             {ttfrData?.confidenceLow && (
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-white">
                 {Math.round(ttfrData.confidenceLow / 60 * 10) / 10}h – {Math.round(ttfrData.confidenceHigh / 60 * 10) / 10}h range
               </p>
             )}
           </div>
 
           <div>
-            <p className="text-xs text-gray-400 uppercase tracking-wide">Confidence</p>
+            <p className="text-xs text-white uppercase tracking-wide">Confidence</p>
             <div className="flex items-center gap-2">
               <div className="w-20 h-2 bg-gray-600 rounded-full overflow-hidden">
                 <div
@@ -118,13 +118,13 @@ export function GanttChart({ eventId }: { eventId: string }) {
           </div>
 
           <div>
-            <p className="text-xs text-gray-400 uppercase tracking-wide">Progress</p>
+            <p className="text-xs text-white uppercase tracking-wide">Progress</p>
             <p className="text-lg font-bold text-white">{ttfrData?.completionPercentage ?? 0}%</p>
           </div>
         </div>
 
         {/* Legend */}
-        <div className="px-4 py-3 flex items-center gap-4 text-xs text-gray-500 border-l border-gray-700">
+        <div className="px-4 py-3 flex items-center gap-4 text-xs text-gray-300 border-l border-gray-700">
           {[
             { color: '#22c55e', label: 'Complete' },
             { color: '#3b82f6', label: 'In Progress' },
@@ -204,7 +204,7 @@ export function GanttChart({ eventId }: { eventId: string }) {
           return (
             <div key={lane} className="text-xs bg-dark-800 border border-gray-600 rounded px-2 py-1">
               <span className="font-medium">{lane}</span>
-              <span className="text-gray-400 ml-1">{laneCompleted}/{laneSteps.length}</span>
+              <span className="text-white ml-1">{laneCompleted}/{laneSteps.length}</span>
             </div>
           );
         })}

@@ -46,7 +46,7 @@ export function AppShell() {
         {/* Logo */}
         <div className="px-4 py-5 border-b border-white/10">
           <div className="flex items-center gap-2">
-            <Shield size={20} className="text-blue-300" />
+            <Shield size={20} className="text-purple-600" />
             <span className="text-lg font-bold tracking-tight">Restore</span>
           </div>
           <p className="text-xs text-blue-200 mt-0.5 truncate">Resilience Orchestration</p>
@@ -101,7 +101,7 @@ export function AppShell() {
       <main className="flex-1 overflow-y-auto">
         {/* Rehearsal banner */}
         {window.location.search.includes('rehearsal=true') && (
-          <div className="bg-red-600 text-amber-900 text-center text-sm font-bold py-2 px-4 flex items-center justify-center gap-2">
+          <div className="bg-red-600 text-gold text-center text-sm font-bold py-2 px-4 flex items-center justify-center gap-2">
             <Play size={14} />
             REHEARSAL MODE — No live systems will be affected
           </div>

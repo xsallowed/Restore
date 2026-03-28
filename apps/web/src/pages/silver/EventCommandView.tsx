@@ -122,14 +122,14 @@ export function EventCommandView() {
                 'bg-dark-700 text-gray-300': event?.severity === 'P4',
               })}>{event?.severity as string}</span>
               <span className="text-xs bg-dark-700 text-gray-600 px-2 py-0.5 rounded">{event?.event_type as string}</span>
-              {event?.is_rehearsal && <span className="text-xs font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded">REHEARSAL</span>}
+              {event?.is_rehearsal && <span className="text-xs font-bold bg-amber-100 text-gold px-2 py-0.5 rounded">REHEARSAL</span>}
               <span className={clsx('text-xs font-medium px-2 py-0.5 rounded', {
                 'bg-blue-100 text-blue-700': event?.status === 'IN_PROGRESS',
                 'bg-green-100 text-green-700': event?.status === 'RESOLVED',
               })}>{String(event?.status ?? '').replace('_', ' ')}</span>
             </div>
             <h1 className="text-xl font-bold text-white">{event?.title as string}</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <p className="text-sm text-gray-300 mt-0.5">
               IC: {event?.commander_name as string} ·{' '}
               Opened {event?.opened_at ? formatDistanceToNow(new Date(event.opened_at as string), { addSuffix: true }) : ''}
             </p>
@@ -156,7 +156,7 @@ export function EventCommandView() {
 
         {/* Progress bar */}
         <div className="mt-3 space-y-1">
-          <div className="flex items-center justify-between text-xs text-gray-500">
+          <div className="flex items-center justify-between text-xs text-gray-300">
             <span>{summary.completed}/{summary.total} steps</span>
             <span className="font-medium">{pct}% complete</span>
           </div>
@@ -170,16 +170,16 @@ export function EventCommandView() {
       <div className="grid grid-cols-5 gap-3">
         {[
           { label: 'Completed', value: summary.completed, color: 'text-green-600', bg: 'bg-dark-800', icon: CheckCircle2 },
-          { label: 'In Progress', value: summary.inProg,   color: 'text-blue-600',  bg: 'bg-dark-800',  icon: Clock },
+          { label: 'In Progress', value: summary.inProg,   color: 'text-purple-600',  bg: 'bg-dark-800',  icon: Clock },
           { label: 'Blocked',    value: summary.blocked,  color: 'text-red-600',   bg: 'bg-dark-800',   icon: AlertTriangle },
-          { label: 'Escalations', value: openEscalations, color: openEscalations > 0 ? 'text-orange-600' : 'text-gray-500', bg: openEscalations > 0 ? 'bg-orange-50' : 'bg-dark-800', icon: Zap },
-          { label: 'ML Flags',   value: summary.missing,  color: summary.missing > 0 ? 'text-purple-600' : 'text-gray-500', bg: summary.missing > 0 ? 'bg-purple-50' : 'bg-dark-800', icon: Shield },
+          { label: 'Escalations', value: openEscalations, color: openEscalations > 0 ? 'text-orange-600' : 'text-gray-300', bg: openEscalations > 0 ? 'bg-orange-50' : 'bg-dark-800', icon: Zap },
+          { label: 'ML Flags',   value: summary.missing,  color: summary.missing > 0 ? 'text-purple-600' : 'text-gray-300', bg: summary.missing > 0 ? 'bg-purple-50' : 'bg-dark-800', icon: Shield },
         ].map(stat => (
           <div key={stat.label} className={clsx('rounded-xl p-3 flex items-center gap-2', stat.bg)}>
             <stat.icon size={16} className={stat.color} />
             <div>
               <p className={clsx('text-xl font-bold', stat.color)}>{stat.value}</p>
-              <p className="text-xs text-gray-500">{stat.label}</p>
+              <p className="text-xs text-gray-300">{stat.label}</p>
             </div>
           </div>
         ))}
@@ -193,7 +193,7 @@ export function EventCommandView() {
             onClick={() => setView(v)}
             className={clsx('px-4 py-1.5 rounded-md text-sm font-medium transition-colors capitalize', {
               'bg-dark-900 bg-opacity-50 text-white shadow-sm': view === v,
-              'text-gray-500 hover:text-gray-300': view !== v,
+              'text-gray-300 hover:text-gray-300': view !== v,
             })}
           >
             {v === 'escalations' ? `Escalations${openEscalations > 0 ? ` (${openEscalations})` : ''}` : v.charAt(0).toUpperCase() + v.slice(1)}
@@ -213,7 +213,7 @@ export function EventCommandView() {
         <div className="space-y-2">
           {escalations.length === 0 ? (
             <div className="bg-dark-800 border border-green-200 rounded-xl p-8 text-center">
-              <CheckCircle2 size={28} className="text-green-500 mx-auto mb-2" />
+              <CheckCircle2 size={28} className="text-gold mx-auto mb-2" />
               <p className="text-green-800 font-medium text-sm">No escalations raised</p>
             </div>
           ) : escalations.map(esc => (
@@ -239,7 +239,7 @@ export function EventCommandView() {
                     })}>{esc.status as string}</span>
                   </div>
                   <p className="text-sm font-medium text-white">{esc.description as string}</p>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-white mt-1">
                     Raised by {esc.raised_by_name as string} · {formatDistanceToNow(new Date(esc.created_at as string), { addSuffix: true })}
                   </p>
                 </div>
@@ -263,7 +263,7 @@ export function EventCommandView() {
           {/* Phase filter sidebar */}
           <div className="col-span-1">
             <div className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl overflow-hidden sticky top-4">
-              <div className="px-3 py-2.5 border-b border-gray-700 text-xs font-semibold text-gray-500 uppercase tracking-wide">Phases</div>
+              <div className="px-3 py-2.5 border-b border-gray-700 text-xs font-semibold text-gray-300 uppercase tracking-wide">Phases</div>
               <div>
                 <button
                   onClick={() => setSelectedPhase(null)}
@@ -273,7 +273,7 @@ export function EventCommandView() {
                   })}
                 >
                   All phases
-                  <span className="text-xs text-gray-400">{steps.length}</span>
+                  <span className="text-xs text-white">{steps.length}</span>
                 </button>
                 {phases.map(phase => {
                   const phaseSteps = steps.filter(s => s.phase_name === phase.name);
@@ -292,7 +292,7 @@ export function EventCommandView() {
                         <span className="truncate">{phase.name}</span>
                         <div className="flex items-center gap-1 shrink-0 ml-2">
                           {phaseBlocked > 0 && <span className="w-1.5 h-1.5 rounded-full bg-red-600" />}
-                          <span className="text-xs text-gray-400">{phaseComplete}/{phaseSteps.length}</span>
+                          <span className="text-xs text-white">{phaseComplete}/{phaseSteps.length}</span>
                         </div>
                       </div>
                       <div className="mt-1 h-1 bg-dark-700 rounded-full overflow-hidden">
@@ -305,14 +305,14 @@ export function EventCommandView() {
 
               {/* Swim lane summary */}
               <div className="px-3 py-2.5 border-t border-gray-700">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Teams</p>
+                <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide mb-2">Teams</p>
                 {lanes.map(lane => {
                   const laneSteps = steps.filter(s => (s.swim_lane || 'General') === lane);
                   const done = laneSteps.filter(s => s.status === 'COMPLETED').length;
                   return (
                     <div key={lane} className="flex items-center justify-between py-1 text-xs text-gray-600">
                       <span className="truncate">{lane}</span>
-                      <span className="text-gray-400 ml-2">{done}/{laneSteps.length}</span>
+                      <span className="text-white ml-2">{done}/{laneSteps.length}</span>
                     </div>
                   );
                 })}
@@ -331,34 +331,34 @@ export function EventCommandView() {
                     className="flex items-center gap-3 px-4 py-3 cursor-pointer"
                     onClick={() => setExpandedStep(isExpanded ? null : step.id)}
                   >
-                    <span className="w-6 h-6 rounded-full bg-dark-700 text-gray-500 text-xs font-bold flex items-center justify-center shrink-0">
+                    <span className="w-6 h-6 rounded-full bg-dark-700 text-gray-300 text-xs font-bold flex items-center justify-center shrink-0">
                       {step.sequence}
                     </span>
 
                     {step.step_type === 'AUTOMATED'
                       ? <Bot size={14} className="text-purple-500 shrink-0" />
-                      : <User size={14} className="text-gray-400 shrink-0" />
+                      : <User size={14} className="text-white shrink-0" />
                     }
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         {step.is_on_critical_path && <span className="text-red-500 text-xs font-bold">★CP</span>}
                         <p className="font-medium text-sm text-white truncate">{step.name}</p>
-                        {step.ml_missing_step_flag && <Shield size={12} className="text-orange-500 shrink-0" title="Possible missing step" />}
+                        {step.ml_missing_step_flag && <Shield size={12} className="text-gold shrink-0" title="Possible missing step" />}
                         {step.requires_approval && !step.approved_by && <Lock size={12} className="text-purple-500 shrink-0" title="Awaiting approval" />}
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-gray-400">{step.swim_lane || 'General'}</span>
+                        <span className="text-xs text-white">{step.swim_lane || 'General'}</span>
                         {step.assignee_name && (
-                          <span className="text-xs text-gray-400 flex items-center gap-1">
+                          <span className="text-xs text-white flex items-center gap-1">
                             <Users size={10} />{step.assignee_name}
                           </span>
                         )}
-                        <span className="text-xs text-gray-400 flex items-center gap-1">
+                        <span className="text-xs text-white flex items-center gap-1">
                           <Clock size={10} />{step.ml_predicted_duration_minutes || step.estimated_duration_minutes || '?'} min
                         </span>
                         {step.confidence_score !== undefined && step.confidence_score < 0.6 && (
-                          <span className="text-xs text-amber-600">Low confidence</span>
+                          <span className="text-xs text-gold">Low confidence</span>
                         )}
                       </div>
                     </div>
@@ -404,7 +404,7 @@ export function EventCommandView() {
                         </div>
                       )}
 
-                      {isExpanded ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronRight size={14} className="text-gray-400" />}
+                      {isExpanded ? <ChevronDown size={14} className="text-white" /> : <ChevronRight size={14} className="text-white" />}
                     </div>
                   </div>
 
@@ -414,7 +414,7 @@ export function EventCommandView() {
                       <p className="text-sm text-gray-600">{step.description}</p>
 
                       {step.runbook_citation && (
-                        <p className="text-xs text-gray-400 italic flex items-center gap-1">
+                        <p className="text-xs text-white italic flex items-center gap-1">
                           <FileText size={11} /> Source: {step.runbook_citation}
                         </p>
                       )}
@@ -433,7 +433,7 @@ export function EventCommandView() {
                       )}
 
                       {step.dependencies?.length > 0 && (
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-white">
                           Depends on {step.dependencies.length} step(s)
                         </p>
                       )}
@@ -462,7 +462,7 @@ export function EventCommandView() {
             })}
 
             {filteredSteps.length === 0 && (
-              <div className="bg-dark-800 border border-gray-600 rounded-xl p-8 text-center text-gray-400 text-sm">
+              <div className="bg-dark-800 border border-gray-600 rounded-xl p-8 text-center text-white text-sm">
                 No steps in this phase yet
               </div>
             )}

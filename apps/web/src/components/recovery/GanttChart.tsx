@@ -47,7 +47,7 @@ export function GanttChart({ steps, totalMinutes }: GanttChartProps) {
         <div className="flex items-start justify-between mb-5">
           <div>
             <h3 className="text-lg font-semibold text-white">Recovery Timeline</h3>
-            <p className="text-sm text-dark-200 mt-1">Step-by-step visualization</p>
+            <p className="text-sm text-gray-300 mt-1">Step-by-step visualization</p>
           </div>
           <div className="text-right">
             <div className="text-3xl font-bold bg-gradient-purple-orange bg-clip-text text-transparent">{completionPercent}%</div>
@@ -68,7 +68,7 @@ export function GanttChart({ steps, totalMinutes }: GanttChartProps) {
           <div className="flex mb-4">
             <div className="w-40 shrink-0" />
             <div className="relative" style={{ width: chartWidth }}>
-              <div className="flex text-xs text-gray-400 font-medium">
+              <div className="flex text-xs text-white font-medium">
                 {Array.from({ length: Math.ceil(totalMinutes / 30) + 1 }).map((_, i) => (
                   <div
                     key={i}
@@ -93,7 +93,7 @@ export function GanttChart({ steps, totalMinutes }: GanttChartProps) {
               <div key={step.id} className="flex mb-2.5 items-center group">
                 <div className="w-40 shrink-0 text-sm truncate pr-3">
                   <div className="font-medium text-white">{step.name}</div>
-                  <div className="text-xs text-dark-300">{STATUS_TEXT[step.status]}</div>
+                  <div className="text-xs text-gray-300">{STATUS_TEXT[step.status]}</div>
                 </div>
 
                 <div className="relative flex-1" style={{ height: 36 }}>

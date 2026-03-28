@@ -51,14 +51,14 @@ export function EscalationModal({ eventId, stepId, stepName, onClose, onEscalate
             <AlertTriangle size={16} className="text-red-500" />
             <h2 className="font-semibold text-white">Raise Escalation</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={16} /></button>
+          <button onClick={onClose} className="text-white hover:text-gray-600"><X size={16} /></button>
         </div>
 
         <div className="px-5 py-4 space-y-4">
           {/* Step context */}
           {stepName && (
             <div className="bg-dark-800 rounded-lg px-3 py-2.5 text-sm text-gray-300">
-              <span className="text-gray-400 text-xs">Step: </span>{stepName}
+              <span className="text-white text-xs">Step: </span>{stepName}
             </div>
           )}
 

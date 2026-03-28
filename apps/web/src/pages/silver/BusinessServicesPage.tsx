@@ -34,7 +34,7 @@ function ServiceForm({ service, onClose, onSaved }: { service?: Service; onClose
       <div className="bg-dark-900 bg-opacity-50 rounded-2xl shadow-2xl w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700">
           <h2 className="font-semibold text-white">{service ? 'Edit business service' : 'Add business service'}</h2>
-          <button onClick={onClose}><X size={16} className="text-gray-400" /></button>
+          <button onClick={onClose}><X size={16} className="text-white" /></button>
         </div>
         <div className="px-5 py-4 grid grid-cols-2 gap-4">
           <div className="col-span-2">
@@ -88,17 +88,17 @@ function AssetLinkModal({ service, onClose }: { service: Service; onClose: () =>
       <div className="bg-dark-900 bg-opacity-50 rounded-2xl shadow-2xl w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700">
           <div className="flex items-center gap-2"><Link size={16} className="text-brand-500" /><h2 className="font-semibold text-white text-sm">Assets — {service.name}</h2></div>
-          <button onClick={onClose}><X size={16} className="text-gray-400" /></button>
+          <button onClick={onClose}><X size={16} className="text-white" /></button>
         </div>
         <div className="px-5 py-3 max-h-80 overflow-y-auto divide-y divide-gray-50">
-          {allAssets.length === 0 && <p className="text-sm text-gray-400 py-4 text-center">No assets registered yet. Add assets first.</p>}
+          {allAssets.length === 0 && <p className="text-sm text-white py-4 text-center">No assets registered yet. Add assets first.</p>}
           {allAssets.map(asset => {
             const linked = linkedIds.includes(asset.id);
             return (
               <div key={asset.id} className="flex items-center justify-between py-2.5">
                 <div>
                   <p className="text-sm font-medium text-white">{asset.name}</p>
-                  <p className="text-xs text-gray-400">{asset.asset_type} · T{asset.criticality_tier}</p>
+                  <p className="text-xs text-white">{asset.asset_type} · T{asset.criticality_tier}</p>
                 </div>
                 <button
                   onClick={() => toggle.mutate({ assetId: asset.id, link: !linked })}
@@ -111,7 +111,7 @@ function AssetLinkModal({ service, onClose }: { service: Service; onClose: () =>
           })}
         </div>
         <div className="px-5 pb-4 pt-3 border-t border-gray-700">
-          <p className="text-xs text-gray-400">{linkedIds.length} asset{linkedIds.length !== 1 ? 's' : ''} linked to this service</p>
+          <p className="text-xs text-white">{linkedIds.length} asset{linkedIds.length !== 1 ? 's' : ''} linked to this service</p>
         </div>
       </div>
     </div>
@@ -139,7 +139,7 @@ export function BusinessServicesPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">Business Services</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{services.length} services · map assets to recovery scope · FR0.1.3</p>
+          <p className="text-sm text-gray-300 mt-0.5">{services.length} services · map assets to recovery scope · FR0.1.3</p>
         </div>
         <button onClick={() => setShowAdd(true)} className="flex items-center gap-1.5 text-sm bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700">
           <Plus size={14} /> Add service
@@ -147,7 +147,7 @@ export function BusinessServicesPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center h-40 text-gray-400 text-sm">Loading…</div>
+        <div className="flex items-center justify-center h-40 text-white text-sm">Loading…</div>
       ) : (
         <div className="space-y-2">
           {services.map(service => {
@@ -163,15 +163,15 @@ export function BusinessServicesPage() {
                       <h3 className="font-semibold text-white">{service.name}</h3>
                       <span className={clsx('text-xs px-2 py-0.5 rounded-full font-medium', cfg.bg)}>{cfg.label}</span>
                     </div>
-                    <p className="text-xs text-gray-500">{service.business_unit} · RTO: {rtoHours} · {service.asset_count ?? 0} assets</p>
+                    <p className="text-xs text-gray-300">{service.business_unit} · RTO: {rtoHours} · {service.asset_count ?? 0} assets</p>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
                     <button onClick={() => setLinkService(service)} className="flex items-center gap-1 text-xs border border-gray-600 px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-gray-600">
                       <Link size={12} /> Assets
                     </button>
-                    <button onClick={() => setEditService(service)} className="p-1.5 hover:bg-dark-700 rounded text-gray-400 hover:text-gray-300"><Edit2 size={14} /></button>
-                    <button onClick={() => { if (window.confirm(`Delete ${service.name}?`)) deleteMutation.mutate(service.id); }} className="p-1.5 hover:bg-dark-800 rounded text-gray-400 hover:text-red-500"><Trash2 size={14} /></button>
-                    <button onClick={() => setExpanded(isExpanded ? null : service.id)} className="p-1.5 text-gray-400">
+                    <button onClick={() => setEditService(service)} className="p-1.5 hover:bg-dark-700 rounded text-white hover:text-gray-300"><Edit2 size={14} /></button>
+                    <button onClick={() => { if (window.confirm(`Delete ${service.name}?`)) deleteMutation.mutate(service.id); }} className="p-1.5 hover:bg-dark-800 rounded text-white hover:text-red-500"><Trash2 size={14} /></button>
+                    <button onClick={() => setExpanded(isExpanded ? null : service.id)} className="p-1.5 text-white">
                       {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                     </button>
                   </div>
@@ -179,10 +179,10 @@ export function BusinessServicesPage() {
                 {isExpanded && (
                   <div className="px-5 pb-4 pt-1 border-t border-gray-700 bg-dark-800/50">
                     <div className="grid grid-cols-4 gap-3 text-xs">
-                      <div><span className="text-gray-400">Impact tier</span><p className="font-medium mt-0.5">Tier {service.impact_tier}</p></div>
-                      <div><span className="text-gray-400">RTO target</span><p className="font-medium mt-0.5">{rtoHours}</p></div>
-                      <div><span className="text-gray-400">Business unit</span><p className="font-medium mt-0.5">{service.business_unit}</p></div>
-                      <div><span className="text-gray-400">Status</span><p className="font-medium mt-0.5">{cfg.label}</p></div>
+                      <div><span className="text-white">Impact tier</span><p className="font-medium mt-0.5">Tier {service.impact_tier}</p></div>
+                      <div><span className="text-white">RTO target</span><p className="font-medium mt-0.5">{rtoHours}</p></div>
+                      <div><span className="text-white">Business unit</span><p className="font-medium mt-0.5">{service.business_unit}</p></div>
+                      <div><span className="text-white">Status</span><p className="font-medium mt-0.5">{cfg.label}</p></div>
                     </div>
                   </div>
                 )}
@@ -191,8 +191,8 @@ export function BusinessServicesPage() {
           })}
           {services.length === 0 && (
             <div className="bg-dark-800 border border-gray-600 rounded-xl p-10 text-center">
-              <p className="text-gray-400 text-sm mb-3">No business services defined yet</p>
-              <p className="text-gray-400 text-xs mb-4">Define your business services first, then link the technology assets that support each service</p>
+              <p className="text-white text-sm mb-3">No business services defined yet</p>
+              <p className="text-white text-xs mb-4">Define your business services first, then link the technology assets that support each service</p>
               <button onClick={() => setShowAdd(true)} className="text-sm bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 inline-flex items-center gap-2"><Plus size={14} /> Add first service</button>
             </div>
           )}

@@ -79,12 +79,12 @@ export function EventDetailsModal({
             <div className="bg-dark-800 border border-red-200 rounded-xl p-4">
               <p className="text-xs text-gray-600 mb-1">Severity</p>
               <p className="font-bold text-red-700">{event.severity}</p>
-              <p className="text-xs text-gray-500 mt-1">{SEVERITY_LABEL[event.severity]}</p>
+              <p className="text-xs text-gray-300 mt-1">{SEVERITY_LABEL[event.severity]}</p>
             </div>
             <div className="bg-dark-800 border border-blue-200 rounded-xl p-4">
               <p className="text-xs text-gray-600 mb-1">Status</p>
               <p className="font-bold text-blue-700">{event.status}</p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-300 mt-1">
                 {event.status === 'OPEN' ? 'Awaiting activation' : 'Active'}
               </p>
             </div>
@@ -95,12 +95,12 @@ export function EventDetailsModal({
                   (Date.now() - new Date(event.opened_at).getTime()) / (1000 * 60)
                 )}m
               </p>
-              <p className="text-xs text-gray-500 mt-1">{formatDistanceToNow(new Date(event.opened_at))}</p>
+              <p className="text-xs text-gray-300 mt-1">{formatDistanceToNow(new Date(event.opened_at))}</p>
             </div>
             <div className="bg-dark-800 border border-green-200 rounded-xl p-4">
               <p className="text-xs text-gray-600 mb-1">Commander</p>
               <p className="font-bold text-green-700">{event.commander_name || '-'}</p>
-              <p className="text-xs text-gray-500 mt-1">Incident Lead</p>
+              <p className="text-xs text-gray-300 mt-1">Incident Lead</p>
             </div>
           </div>
 
@@ -114,7 +114,7 @@ export function EventDetailsModal({
             )}
             {!event.notes && (
               <div className="bg-dark-800 border border-gray-600 rounded-lg p-4 text-center">
-                <p className="text-sm text-gray-500">No additional notes</p>
+                <p className="text-sm text-gray-300">No additional notes</p>
               </div>
             )}
           </div>

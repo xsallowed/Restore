@@ -33,7 +33,7 @@ export function StepAssignModal({ step, eventId, onClose, onAssigned }: {
   });
 
   const TIER_BADGE: Record<string, string> = {
-    BRONZE: 'bg-amber-100 text-amber-800',
+    BRONZE: 'bg-amber-100 text-gold',
     SILVER: 'bg-blue-100 text-blue-800',
     GOLD: 'bg-green-100 text-green-800',
     AUTHOR: 'bg-purple-100 text-purple-800',
@@ -55,7 +55,7 @@ export function StepAssignModal({ step, eventId, onClose, onAssigned }: {
             <Users size={16} className="text-purple-500" />
             <h2 className="font-semibold text-white text-sm">Assign step</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="text-white hover:text-gray-600">
             <X size={16} />
           </button>
         </div>
@@ -64,14 +64,14 @@ export function StepAssignModal({ step, eventId, onClose, onAssigned }: {
         <div className="px-5 py-3 bg-dark-800 border-b border-gray-700">
           <p className="text-sm font-medium text-white truncate">{step.name}</p>
           {step.assignee_name && (
-            <p className="text-xs text-gray-400 mt-0.5">Currently: {step.assignee_name}</p>
+            <p className="text-xs text-white mt-0.5">Currently: {step.assignee_name}</p>
           )}
         </div>
 
         {/* Search */}
         <div className="px-5 py-3 border-b border-gray-700">
           <div className="flex items-center gap-2 bg-dark-800 rounded-lg px-3 py-2">
-            <Search size={14} className="text-gray-400" />
+            <Search size={14} className="text-white" />
             <input
               autoFocus
               value={search}
@@ -85,7 +85,7 @@ export function StepAssignModal({ step, eventId, onClose, onAssigned }: {
         {/* User list */}
         <div className="max-h-64 overflow-y-auto divide-y divide-gray-50">
           {filtered.length === 0 ? (
-            <div className="px-5 py-6 text-center text-gray-400 text-sm">No users found</div>
+            <div className="px-5 py-6 text-center text-white text-sm">No users found</div>
           ) : filtered.map(user => (
             <button
               key={user.id}
@@ -98,7 +98,7 @@ export function StepAssignModal({ step, eventId, onClose, onAssigned }: {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">{user.display_name}</p>
-                <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                <p className="text-xs text-white truncate">{user.email}</p>
               </div>
               <span className={clsx('text-xs px-1.5 py-0.5 rounded shrink-0', TIER_BADGE[user.tier] ?? 'bg-dark-700 text-gray-600')}>
                 {user.tier}
@@ -111,7 +111,7 @@ export function StepAssignModal({ step, eventId, onClose, onAssigned }: {
         <div className="px-5 py-3 border-t border-gray-700">
           <button
             onClick={() => assignMutation.mutate('')}
-            className="w-full text-xs text-gray-500 hover:text-gray-300 py-1"
+            className="w-full text-xs text-gray-300 hover:text-gray-300 py-1"
           >
             Remove assignment
           </button>

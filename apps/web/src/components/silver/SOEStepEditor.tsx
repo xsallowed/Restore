@@ -117,13 +117,13 @@ export function SOEStepEditor({ eventId, onClose }: StepEditorModalProps) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700 shrink-0">
           <div>
             <h2 className="font-semibold text-white">Edit SOE steps</h2>
-            <p className="text-xs text-gray-400 mt-0.5">{steps.length} steps · Changes are logged as deviations (FR2.6)</p>
+            <p className="text-xs text-white mt-0.5">{steps.length} steps · Changes are logged as deviations (FR2.6)</p>
           </div>
-          <button onClick={onClose}><X size={16} className="text-gray-400" /></button>
+          <button onClick={onClose}><X size={16} className="text-white" /></button>
         </div>
 
         {isLoading ? (
-          <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">Loading SOE…</div>
+          <div className="flex-1 flex items-center justify-center text-white text-sm">Loading SOE…</div>
         ) : (
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
             {steps.map((step, idx) => (
@@ -136,22 +136,22 @@ export function SOEStepEditor({ eventId, onClose }: StepEditorModalProps) {
                   />
                 ) : (
                   <div className={clsx('flex items-center gap-3 bg-dark-900 bg-opacity-50 border rounded-xl px-4 py-3', step.is_on_critical_path ? 'border-red-200 bg-dark-800/30' : 'border-gray-600')}>
-                    <span className="text-xs text-gray-400 font-mono w-5 shrink-0">{step.sequence}</span>
-                    {step.step_type === 'AUTOMATED' ? <Bot size={14} className="text-purple-500 shrink-0" /> : <User size={14} className="text-gray-400 shrink-0" />}
+                    <span className="text-xs text-white font-mono w-5 shrink-0">{step.sequence}</span>
+                    {step.step_type === 'AUTOMATED' ? <Bot size={14} className="text-purple-500 shrink-0" /> : <User size={14} className="text-white shrink-0" />}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         {step.is_on_critical_path && <span className="text-red-500 text-xs">★</span>}
                         <span className="text-sm font-medium text-white truncate">{step.name}</span>
-                        <span className="text-xs text-gray-400">{step.swim_lane}</span>
+                        <span className="text-xs text-white">{step.swim_lane}</span>
                       </div>
-                      <p className="text-xs text-gray-400 mt-0.5 truncate">{step.description?.slice(0, 80)}</p>
+                      <p className="text-xs text-white mt-0.5 truncate">{step.description?.slice(0, 80)}</p>
                     </div>
-                    <span className="text-xs text-gray-400 shrink-0">{step.estimated_duration_minutes}m</span>
+                    <span className="text-xs text-white shrink-0">{step.estimated_duration_minutes}m</span>
                     <div className="flex gap-1 shrink-0">
-                      <button onClick={() => moveStep.mutate({ id: step.id, direction: 'up' })} disabled={idx === 0} className="p-1 hover:bg-dark-700 rounded text-gray-400 disabled:opacity-30"><ArrowUp size={13} /></button>
-                      <button onClick={() => moveStep.mutate({ id: step.id, direction: 'down' })} disabled={idx === steps.length - 1} className="p-1 hover:bg-dark-700 rounded text-gray-400 disabled:opacity-30"><ArrowDown size={13} /></button>
-                      <button onClick={() => setEditingId(step.id)} className="p-1 hover:bg-dark-700 rounded text-gray-400 hover:text-gray-300"><Edit2 size={13} /></button>
-                      <button onClick={() => { if (window.confirm(`Remove step "${step.name}"?`)) deleteStep.mutate(step.id); }} className="p-1 hover:bg-dark-800 rounded text-gray-400 hover:text-red-500"><Trash2 size={13} /></button>
+                      <button onClick={() => moveStep.mutate({ id: step.id, direction: 'up' })} disabled={idx === 0} className="p-1 hover:bg-dark-700 rounded text-white disabled:opacity-30"><ArrowUp size={13} /></button>
+                      <button onClick={() => moveStep.mutate({ id: step.id, direction: 'down' })} disabled={idx === steps.length - 1} className="p-1 hover:bg-dark-700 rounded text-white disabled:opacity-30"><ArrowDown size={13} /></button>
+                      <button onClick={() => setEditingId(step.id)} className="p-1 hover:bg-dark-700 rounded text-white hover:text-gray-300"><Edit2 size={13} /></button>
+                      <button onClick={() => { if (window.confirm(`Remove step "${step.name}"?`)) deleteStep.mutate(step.id); }} className="p-1 hover:bg-dark-800 rounded text-white hover:text-red-500"><Trash2 size={13} /></button>
                     </div>
                   </div>
                 )}
@@ -165,7 +165,7 @@ export function SOEStepEditor({ eventId, onClose }: StepEditorModalProps) {
                 onCancel={() => setAddingNew(false)}
               />
             ) : (
-              <button onClick={() => setAddingNew(true)} className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 border-2 border-dashed border-gray-600 rounded-xl py-3 hover:border-brand-400 hover:text-brand-600 transition-colors">
+              <button onClick={() => setAddingNew(true)} className="w-full flex items-center justify-center gap-2 text-sm text-white border-2 border-dashed border-gray-600 rounded-xl py-3 hover:border-brand-400 hover:text-brand-600 transition-colors">
                 <Plus size={15} /> Add step
               </button>
             )}

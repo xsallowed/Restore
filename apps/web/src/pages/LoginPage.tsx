@@ -91,7 +91,7 @@ export function LoginPage() {
           <p className={Badges.purpleOutline + ' justify-center mx-auto'}>
             AI-Powered Crisis Management
           </p>
-          <p className="text-dark-300 text-sm mt-4">Build organisational resilience through intelligent response coordination and recovery strategies</p>
+          <p className="text-gray-300 text-sm mt-4">Build organisational resilience through intelligent response coordination and recovery strategies</p>
         </div>
 
         {/* Login Card */}
@@ -126,7 +126,7 @@ export function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPw(p => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:text-gray-200 transition-colors"
                   tabIndex={-1}
                 >
                   {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -178,13 +178,13 @@ export function LoginPage() {
 
           {/* Tier Legend */}
           <div className="mt-6 pt-6 border-t border-dark-700">
-            <p className="text-xs text-gray-400 mb-3 font-medium">Account tiers</p>
+            <p className="text-xs text-white mb-3 font-medium">Account tiers</p>
             <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-red-600/20 border border-amber-500/50 text-amber-300 rounded-full text-xs font-semibold">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-red-600/20 border border-amber-500/50 text-gold rounded-full text-xs font-semibold">
                 <span className="w-1.5 h-1.5 bg-amber-400 rounded-full"></span>
                 Bronze
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-red-600/20 border border-blue-500/50 text-blue-300 rounded-full text-xs font-semibold">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-red-600/20 border border-blue-500/50 text-purple-600 rounded-full text-xs font-semibold">
                 <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
                 Silver
               </span>
@@ -197,7 +197,7 @@ export function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-gray-400 text-xs">
+        <p className="text-center text-white text-xs">
           RESTORE-SDD-001 v1.1 Lean MVP
         </p>
       </div>

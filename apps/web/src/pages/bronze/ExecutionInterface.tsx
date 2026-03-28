@@ -76,7 +76,7 @@ export function ExecutionInterface() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-sm text-gray-500">Generating Sequence of Events…</p>
+          <p className="text-sm text-gray-300">Generating Sequence of Events…</p>
         </div>
       </div>
     );
@@ -97,15 +97,15 @@ export function ExecutionInterface() {
               )}>
                 {event?.severity as string}
               </span>
-              <span className="text-xs text-gray-500 bg-dark-700 px-2 py-0.5 rounded">
+              <span className="text-xs text-gray-300 bg-dark-700 px-2 py-0.5 rounded">
                 {event?.event_type as string}
               </span>
               {event?.is_rehearsal && (
-                <span className="text-xs font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded">REHEARSAL</span>
+                <span className="text-xs font-bold bg-amber-100 text-gold px-2 py-0.5 rounded">REHEARSAL</span>
               )}
             </div>
             <h1 className="text-xl font-bold text-white">{event?.title as string}</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <p className="text-sm text-gray-300 mt-0.5">
               Opened {event?.opened_at ? formatDistanceToNow(new Date(event.opened_at as string), { addSuffix: true }) : ''}
             </p>
           </div>
@@ -113,7 +113,7 @@ export function ExecutionInterface() {
           {/* Progress */}
           <div className="text-right">
             <p className="text-2xl font-bold text-white">{pct}%</p>
-            <p className="text-xs text-gray-500">{completedCount} of {steps.length} steps complete</p>
+            <p className="text-xs text-gray-300">{completedCount} of {steps.length} steps complete</p>
           </div>
         </div>
 
@@ -170,7 +170,7 @@ export function ExecutionInterface() {
                 {/* Type indicator */}
                 {step.step_type === 'AUTOMATED'
                   ? <Bot size={15} className="text-purple-500 shrink-0" />
-                  : <User size={15} className="text-gray-400 shrink-0" />
+                  : <User size={15} className="text-white shrink-0" />
                 }
 
                 {/* Name */}
@@ -179,11 +179,11 @@ export function ExecutionInterface() {
                     {step.is_on_critical_path && <span className="text-red-500 mr-1">★</span>}
                     {step.name as string}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">{step.swim_lane as string}</p>
+                  <p className="text-xs text-gray-300 truncate">{step.swim_lane as string}</p>
                 </div>
 
                 {/* Duration */}
-                <span className="text-xs text-gray-400 shrink-0">
+                <span className="text-xs text-white shrink-0">
                   {step.ml_predicted_duration_minutes || step.estimated_duration_minutes || '?'} min
                 </span>
 
@@ -200,7 +200,7 @@ export function ExecutionInterface() {
                 </span>
 
                 {step.ml_missing_step_flag && (
-                  <Shield size={14} className="text-orange-500 shrink-0" title="ML: This step may be required" />
+                  <Shield size={14} className="text-gold shrink-0" title="ML: This step may be required" />
                 )}
               </div>
 
@@ -210,7 +210,7 @@ export function ExecutionInterface() {
                   <p className="text-sm text-gray-300">{step.description as string}</p>
 
                   {step.runbook_citation && (
-                    <p className="text-xs text-gray-400 italic">Source: {step.runbook_citation as string}</p>
+                    <p className="text-xs text-white italic">Source: {step.runbook_citation as string}</p>
                   )}
 
                   {step.ml_missing_step_flag && (
@@ -287,7 +287,7 @@ export function ExecutionInterface() {
         <div className="bg-dark-800 border border-blue-200 rounded-xl p-8 text-center">
           <div className="w-10 h-10 border-2 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="text-sm text-blue-700 font-medium">Generating Sequence of Events from runbooks…</p>
-          <p className="text-xs text-blue-500 mt-1">This typically takes 15-30 seconds</p>
+          <p className="text-xs text-purple-600 mt-1">This typically takes 15-30 seconds</p>
         </div>
       )}
     </div>

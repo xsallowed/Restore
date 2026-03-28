@@ -47,12 +47,12 @@ export function RehearsalPage() {
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white">Dress Rehearsals</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Practice recovery procedures in a sandboxed environment — no live systems affected</p>
+        <p className="text-sm text-gray-300 mt-0.5">Practice recovery procedures in a sandboxed environment — no live systems affected</p>
       </div>
 
       <div className="bg-dark-800 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-        <Play size={18} className="text-amber-600 shrink-0 mt-0.5" />
-        <div className="text-sm text-amber-800">
+        <Play size={18} className="text-gold shrink-0 mt-0.5" />
+        <div className="text-sm text-gold">
           <p className="font-medium mb-1">Rehearsal Mode</p>
           <p>All SOAR automation is mocked, notifications are sandboxed, and no live tickets are created. Evidence and step completions are recorded for the Assessment Report.</p>
         </div>
@@ -114,19 +114,19 @@ export function AssetRegistryPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">Technology Asset Registry</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{assets.length} assets registered</p>
+          <p className="text-sm text-gray-300 mt-0.5">{assets.length} assets registered</p>
         </div>
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center h-40 text-gray-400 text-sm">Loading assets…</div>
+        <div className="flex items-center justify-center h-40 text-white text-sm">Loading assets…</div>
       ) : (
         <div className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-dark-800 border-b border-gray-700 text-left">
                 {['Asset', 'Type', 'Environment', 'Tier', 'Status', 'Business Services'].map(h => (
-                  <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                  <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-300 uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -134,7 +134,7 @@ export function AssetRegistryPage() {
               {assets.map(asset => (
                 <tr key={asset.id as string} className="hover:bg-dark-800">
                   <td className="px-4 py-3 font-medium text-white">{asset.name as string}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{asset.asset_type as string}</td>
+                  <td className="px-4 py-3 text-gray-300 text-xs">{asset.asset_type as string}</td>
                   <td className="px-4 py-3 text-xs"><span className="bg-dark-700 text-gray-300 px-1.5 py-0.5 rounded">{asset.environment as string}</span></td>
                   <td className="px-4 py-3 text-center text-xs font-bold text-gray-300">T{asset.criticality_tier as number}</td>
                   <td className="px-4 py-3">
@@ -142,7 +142,7 @@ export function AssetRegistryPage() {
                       {asset.status as string}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-500">
+                  <td className="px-4 py-3 text-xs text-gray-300">
                     {(asset.business_services as string[])?.filter(Boolean).join(', ') || '—'}
                   </td>
                 </tr>
@@ -150,7 +150,7 @@ export function AssetRegistryPage() {
             </tbody>
           </table>
           {assets.length === 0 && (
-            <div className="px-4 py-12 text-center text-gray-400 text-sm">No assets registered — add assets via API or import from CMDB</div>
+            <div className="px-4 py-12 text-center text-white text-sm">No assets registered — add assets via API or import from CMDB</div>
           )}
         </div>
       )}
@@ -180,18 +180,18 @@ export function ConnectorsPage() {
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">Runbook Connectors</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Source integrations for runbooks and playbooks</p>
+        <p className="text-sm text-gray-300 mt-0.5">Source integrations for runbooks and playbooks</p>
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center h-40 text-gray-400 text-sm">Loading…</div>
+        <div className="flex items-center justify-center h-40 text-white text-sm">Loading…</div>
       ) : (
         <div className="space-y-3">
           {connectors.map(c => (
             <div key={c.id as string} className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl p-4 flex items-center gap-4">
               <div className="flex-1">
                 <p className="font-medium text-white">{c.name as string}</p>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <p className="text-xs text-white mt-0.5">
                   {c.connector_type as string} ·
                   Last synced: {c.last_synced_at ? formatDistanceToNow(new Date(c.last_synced_at as string), { addSuffix: true }) : 'Never'}
                 </p>
@@ -213,7 +213,7 @@ export function ConnectorsPage() {
             </div>
           ))}
           {connectors.length === 0 && (
-            <div className="bg-dark-800 border border-gray-600 rounded-xl p-8 text-center text-gray-400 text-sm">
+            <div className="bg-dark-800 border border-gray-600 rounded-xl p-8 text-center text-white text-sm">
               No connectors configured — add connectors via the API
             </div>
           )}

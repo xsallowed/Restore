@@ -61,7 +61,7 @@ export function GoldDashboard() {
             </span>
           </div>
           <h1 className="text-2xl font-bold text-white">Recovery Intelligence Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-sm text-gray-300 mt-0.5">
             Business service health overview — updated {new Date().toLocaleTimeString()}
           </p>
         </div>
@@ -81,21 +81,21 @@ export function GoldDashboard() {
             label: 'Active Recovery Events',
             value: activeEvents,
             icon: AlertTriangle,
-            color: activeEvents > 0 ? 'text-red-500' : 'text-green-500',
+            color: activeEvents > 0 ? 'text-red-500' : 'text-gold',
             bg: activeEvents > 0 ? 'bg-dark-800' : 'bg-dark-800',
           },
           {
             label: 'Services Impacted',
             value: impactedServices,
             icon: TrendingDown,
-            color: impactedServices > 0 ? 'text-orange-500' : 'text-green-500',
+            color: impactedServices > 0 ? 'text-gold' : 'text-gold',
             bg: impactedServices > 0 ? 'bg-orange-50' : 'bg-dark-800',
           },
           {
             label: 'Services Operational',
             value: operationalServices,
             icon: CheckCircle,
-            color: 'text-green-500',
+            color: 'text-gold',
             bg: 'bg-dark-800',
           },
           {
@@ -138,7 +138,7 @@ export function GoldDashboard() {
                         {String(service.status).replace('_', ' ')}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-xs text-white mt-0.5">
                       {service.business_unit as string} · RTO {service.rto_minutes as number} min
                     </p>
                   </div>
@@ -150,14 +150,14 @@ export function GoldDashboard() {
                         style={{ width: `${rtoPct}%`, background: cfg.bar }}
                       />
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5 text-right">RTO target</p>
+                    <p className="text-xs text-white mt-0.5 text-right">RTO target</p>
                   </div>
                 </div>
               );
             })}
 
             {services.length === 0 && (
-              <div className="px-5 py-10 text-center text-gray-400 text-sm">
+              <div className="px-5 py-10 text-center text-white text-sm">
                 No business services configured
               </div>
             )}
@@ -168,7 +168,7 @@ export function GoldDashboard() {
         <div className="space-y-4">
           {/* Service health pie */}
           <div className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl p-4">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Service Health Split</h3>
+            <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wide mb-3">Service Health Split</h3>
             {pieData.length > 0 ? (
               <ResponsiveContainer width="100%" height={140}>
                 <PieChart>
@@ -179,13 +179,13 @@ export function GoldDashboard() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-36 flex items-center justify-center text-green-500">
+              <div className="h-36 flex items-center justify-center text-gold">
                 <CheckCircle size={32} />
               </div>
             )}
             <div className="flex gap-3 justify-center flex-wrap mt-1">
               {pieData.map(d => (
-                <div key={d.name} className="flex items-center gap-1 text-xs text-gray-500">
+                <div key={d.name} className="flex items-center gap-1 text-xs text-gray-300">
                   <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: d.fill }} />
                   {d.name}: {d.value}
                 </div>
@@ -196,7 +196,7 @@ export function GoldDashboard() {
           {/* Note about abstraction */}
           <div className="bg-dark-800 border border-blue-100 rounded-xl p-4">
             <p className="text-xs text-blue-700 font-medium mb-1">Executive View</p>
-            <p className="text-xs text-blue-600">
+            <p className="text-xs text-purple-600">
               This view shows business service health only. Step-level operational detail is available to Silver and Bronze tier users during active recovery events.
             </p>
           </div>

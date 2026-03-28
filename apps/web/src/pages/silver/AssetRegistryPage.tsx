@@ -27,7 +27,7 @@ function AssetForm({ asset, onClose, onSaved }: { asset?: Asset; onClose: () => 
       <div className="bg-dark-900 bg-opacity-50 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700">
           <h2 className="font-semibold text-white">{asset ? 'Edit asset' : 'Add asset'}</h2>
-          <button onClick={onClose}><X size={16} className="text-gray-400" /></button>
+          <button onClick={onClose}><X size={16} className="text-white" /></button>
         </div>
         <div className="px-5 py-4 grid grid-cols-2 gap-4 max-h-96 overflow-y-auto">
           <div className="col-span-2">
@@ -95,21 +95,21 @@ function DependencyModal({ asset, allAssets, onClose }: { asset: Asset; allAsset
       <div className="bg-dark-900 bg-opacity-50 rounded-2xl shadow-2xl w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700">
           <div className="flex items-center gap-2"><Network size={16} className="text-brand-500" /><h2 className="font-semibold text-white text-sm">Dependencies — {asset.name}</h2></div>
-          <button onClick={onClose}><X size={16} className="text-gray-400" /></button>
+          <button onClick={onClose}><X size={16} className="text-white" /></button>
         </div>
         <div className="px-5 py-4 space-y-4">
           <div className="grid grid-cols-3 gap-2">
-            <div><label className="text-xs text-gray-500 mb-1 block">Source</label>
+            <div><label className="text-xs text-gray-300 mb-1 block">Source</label>
               <select value={sourceId} onChange={e => setSourceId(e.target.value)} className="w-full border border-gray-600 rounded-lg px-2 py-2 text-xs bg-dark-900 bg-opacity-50 focus:outline-none">
                 {allAssets.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
               </select>
             </div>
-            <div><label className="text-xs text-gray-500 mb-1 block">Relationship</label>
+            <div><label className="text-xs text-gray-300 mb-1 block">Relationship</label>
               <select value={relType} onChange={e => setRelType(e.target.value)} className="w-full border border-gray-600 rounded-lg px-2 py-2 text-xs bg-dark-900 bg-opacity-50 focus:outline-none">
                 {RELATIONSHIP_TYPES.map(r => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
-            <div><label className="text-xs text-gray-500 mb-1 block">Target *</label>
+            <div><label className="text-xs text-gray-300 mb-1 block">Target *</label>
               <select value={targetId} onChange={e => setTargetId(e.target.value)} className="w-full border border-gray-600 rounded-lg px-2 py-2 text-xs bg-dark-900 bg-opacity-50 focus:outline-none">
                 <option value="">Select…</option>
                 {allAssets.filter(a => a.id !== sourceId).map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
@@ -121,11 +121,11 @@ function DependencyModal({ asset, allAssets, onClose }: { asset: Asset; allAsset
           </button>
           {myDeps.length > 0 && (
             <div className="border-t border-gray-700 pt-3 space-y-1">
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-2">Current dependencies</p>
+              <p className="text-xs text-gray-300 font-medium uppercase tracking-wide mb-2">Current dependencies</p>
               {myDeps.map((d, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs bg-dark-800 rounded px-3 py-2">
                   <span className="font-medium">{assetName(d.source)}</span>
-                  <span className="text-gray-400 text-[10px] bg-gray-200 px-1.5 py-0.5 rounded">{d.relationship_type}</span>
+                  <span className="text-white text-[10px] bg-gray-200 px-1.5 py-0.5 rounded">{d.relationship_type}</span>
                   <span className="font-medium">{assetName(d.target)}</span>
                 </div>
               ))}
@@ -170,7 +170,7 @@ export function AssetRegistryPage() {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-2xl font-bold text-white">Technology Asset Registry</h1><p className="text-sm text-gray-500 mt-0.5">{assets.length} assets · FR0.1.1</p></div>
+        <div><h1 className="text-2xl font-bold text-white">Technology Asset Registry</h1><p className="text-sm text-gray-300 mt-0.5">{assets.length} assets · FR0.1.1</p></div>
         <div className="flex gap-2">
           <button onClick={() => navigate('/assets/graph')} className="flex items-center gap-1.5 text-sm border border-gray-600 px-3 py-2 rounded-lg hover:bg-dark-800"><Network size={14} /> Graph</button>
           <button onClick={() => setShowCsv(s => !s)} className="flex items-center gap-1.5 text-sm border border-gray-600 px-3 py-2 rounded-lg hover:bg-dark-800"><Upload size={14} /> CSV import</button>
@@ -181,41 +181,41 @@ export function AssetRegistryPage() {
       {showCsv && (
         <div className="bg-dark-800 border border-blue-200 rounded-xl p-4 mb-4">
           <p className="text-xs text-blue-700 font-medium mb-1">CSV columns: name, assetType, environment, criticalityTier, owner, location, recoveryGroup</p>
-          <p className="text-xs text-blue-500 mb-2">Row 1 is treated as a header and skipped. Example: prod-db-01, DATABASE, PRODUCTION, 1, DBA Team, us-east-1, DATABASE_TIER</p>
+          <p className="text-xs text-purple-600 mb-2">Row 1 is treated as a header and skipped. Example: prod-db-01, DATABASE, PRODUCTION, 1, DBA Team, us-east-1, DATABASE_TIER</p>
           <textarea value={csvText} onChange={e => setCsvText(e.target.value)} rows={4} placeholder="name,assetType,environment,criticalityTier,owner,location,recoveryGroup&#10;prod-db-01,DATABASE,PRODUCTION,1,DBA Team,us-east-1,DATABASE_TIER" className="w-full border border-blue-200 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none resize-none" />
           <div className="flex gap-2 mt-2">
             <button onClick={() => csvMutation.mutate(csvText)} disabled={!csvText.trim() || csvMutation.isPending} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 disabled:opacity-50">{csvMutation.isPending ? 'Importing…' : 'Import'}</button>
-            <button onClick={() => setShowCsv(false)} className="text-xs text-blue-600 px-3 py-1.5">Cancel</button>
+            <button onClick={() => setShowCsv(false)} className="text-xs text-purple-600 px-3 py-1.5">Cancel</button>
           </div>
         </div>
       )}
 
       {isLoading ? (
-        <div className="flex items-center justify-center h-40 text-gray-400 text-sm">Loading…</div>
+        <div className="flex items-center justify-center h-40 text-white text-sm">Loading…</div>
       ) : (
         <div className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead><tr className="bg-dark-800 border-b border-gray-700 text-left">
               {['Asset','Type','Env','Tier','Owner','Location','Recovery Group','Status','Actions'].map(h => (
-                <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-300 uppercase tracking-wide">{h}</th>
               ))}
             </tr></thead>
             <tbody className="divide-y divide-gray-50">
               {assets.map(asset => (
                 <tr key={asset.id} className="hover:bg-dark-800">
                   <td className="px-4 py-3 font-medium text-white">{asset.name}</td>
-                  <td className="px-4 py-3 text-xs text-gray-500">{asset.asset_type}</td>
+                  <td className="px-4 py-3 text-xs text-gray-300">{asset.asset_type}</td>
                   <td className="px-4 py-3 text-xs"><span className="bg-dark-700 text-gray-300 px-1.5 py-0.5 rounded">{asset.environment}</span></td>
                   <td className="px-4 py-3 text-center text-xs font-bold text-gray-300">T{asset.criticality_tier}</td>
-                  <td className="px-4 py-3 text-xs text-gray-500">{asset.owner || '—'}</td>
-                  <td className="px-4 py-3 text-xs text-gray-500">{asset.location || '—'}</td>
-                  <td className="px-4 py-3 text-xs text-gray-500">{asset.recovery_group || '—'}</td>
+                  <td className="px-4 py-3 text-xs text-gray-300">{asset.owner || '—'}</td>
+                  <td className="px-4 py-3 text-xs text-gray-300">{asset.location || '—'}</td>
+                  <td className="px-4 py-3 text-xs text-gray-300">{asset.recovery_group || '—'}</td>
                   <td className="px-4 py-3"><span className={clsx('text-xs font-medium px-2 py-0.5 rounded-full', STATUS_COLORS[asset.status] ?? STATUS_COLORS.UNKNOWN)}>{asset.status}</span></td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
-                      <button onClick={() => setEditAsset(asset)} className="p-1.5 hover:bg-dark-700 rounded text-gray-400 hover:text-gray-300" title="Edit"><Edit2 size={13} /></button>
-                      <button onClick={() => setDepAsset(asset)} className="p-1.5 hover:bg-dark-700 rounded text-gray-400 hover:text-blue-500" title="Dependencies"><Link size={13} /></button>
-                      <button onClick={() => { if (window.confirm(`Delete ${asset.name}?`)) deleteMutation.mutate(asset.id); }} className="p-1.5 hover:bg-dark-800 rounded text-gray-400 hover:text-red-500" title="Delete"><Trash2 size={13} /></button>
+                      <button onClick={() => setEditAsset(asset)} className="p-1.5 hover:bg-dark-700 rounded text-white hover:text-gray-300" title="Edit"><Edit2 size={13} /></button>
+                      <button onClick={() => setDepAsset(asset)} className="p-1.5 hover:bg-dark-700 rounded text-white hover:text-purple-600" title="Dependencies"><Link size={13} /></button>
+                      <button onClick={() => { if (window.confirm(`Delete ${asset.name}?`)) deleteMutation.mutate(asset.id); }} className="p-1.5 hover:bg-dark-800 rounded text-white hover:text-red-500" title="Delete"><Trash2 size={13} /></button>
                     </div>
                   </td>
                 </tr>
@@ -224,7 +224,7 @@ export function AssetRegistryPage() {
           </table>
           {assets.length === 0 && (
             <div className="px-4 py-12 text-center">
-              <p className="text-gray-400 text-sm mb-3">No assets yet — add your first asset or import via CSV</p>
+              <p className="text-white text-sm mb-3">No assets yet — add your first asset or import via CSV</p>
               <button onClick={() => setShowAdd(true)} className="text-sm bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 inline-flex items-center gap-2"><Plus size={14} /> Add first asset</button>
             </div>
           )}

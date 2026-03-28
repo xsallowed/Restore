@@ -64,14 +64,14 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
           <div className="text-right">
             <p className="text-xs font-semibold text-purple-300 uppercase tracking-wider mb-2">Severity Level</p>
             <p className="text-2xl font-bold text-white">{metrics.severity}</p>
-            <p className="text-xs text-dark-200 mt-1">{SEVERITY_LABEL[metrics.severity]}</p>
+            <p className="text-xs text-gray-300 mt-1">{SEVERITY_LABEL[metrics.severity]}</p>
           </div>
         </div>
 
         {/* Progress Bar */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-dark-200">Overall Progress</span>
+            <span className="text-xs font-medium text-gray-300">Overall Progress</span>
             <span className="text-xs font-semibold text-orange">{Math.round(progressPercent)}%</span>
           </div>
           <div className="w-full h-2 bg-dark-800 rounded-full overflow-hidden">
@@ -91,7 +91,7 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
             { label: 'Services Down', value: metrics.affected_services, icon: '⚠️' },
           ].map((stat, idx) => (
             <div key={idx} className="bg-dark-800 bg-opacity-50 rounded-lg p-3 border border-purple-600 border-opacity-20">
-              <p className="text-xs text-dark-200 font-medium mb-1">{stat.label}</p>
+              <p className="text-xs text-gray-300 font-medium mb-1">{stat.label}</p>
               <p className="text-lg font-semibold text-white">{stat.value}</p>
             </div>
           ))}
@@ -141,9 +141,9 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
           <div key={idx} className={clsx('rounded-lg border p-5 transition-all hover:shadow-glow bg-dark-900 bg-opacity-50 backdrop-blur', kpi.color)}>
             <div className="flex items-start justify-between mb-3">
               <div>
-                <p className="text-xs font-semibold text-dark-200 uppercase tracking-wider mb-2">{kpi.title}</p>
+                <p className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">{kpi.title}</p>
                 <p className="text-3xl font-bold text-white">{kpi.value}</p>
-                {kpi.detail && <p className="text-xs text-dark-200 mt-2">{kpi.detail}</p>}
+                {kpi.detail && <p className="text-xs text-gray-300 mt-2">{kpi.detail}</p>}
               </div>
               <kpi.icon size={24} className={clsx('shrink-0', kpi.textColor)} />
             </div>
@@ -168,7 +168,7 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
               { label: 'Increase team communication', impact: 'Low' },
             ].map((factor, idx) => (
               <div key={idx} className="flex items-center justify-between p-3 bg-dark-800 bg-opacity-50 rounded-lg hover:border-orange hover:border-opacity-50 border border-transparent transition-colors">
-                <span className="text-sm text-dark-200">{factor.label}</span>
+                <span className="text-sm text-gray-300">{factor.label}</span>
                 <span className={clsx('text-xs font-semibold px-2 py-1 rounded',
                   factor.impact === 'High' ? 'bg-red-600 bg-opacity-20 text-red-200' :
                   factor.impact === 'Medium' ? 'bg-orange bg-opacity-20 text-orange' :

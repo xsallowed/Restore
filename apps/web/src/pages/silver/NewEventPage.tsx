@@ -53,7 +53,7 @@ export function NewEventPage() {
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">Open Recovery Event</h1>
-        <p className="text-sm text-gray-500 mt-1">Restore will generate a Sequence of Events from your runbooks</p>
+        <p className="text-sm text-gray-300 mt-1">Restore will generate a Sequence of Events from your runbooks</p>
       </div>
 
       <form onSubmit={handleSubmit(d => createMutation.mutate(d))} className="space-y-5">
@@ -106,7 +106,7 @@ export function NewEventPage() {
                   {s.name}
                 </label>
               ))}
-              {services.length === 0 && <p className="text-xs text-gray-400">No services configured</p>}
+              {services.length === 0 && <p className="text-xs text-white">No services configured</p>}
             </div>
           </div>
 

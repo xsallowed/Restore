@@ -143,9 +143,9 @@ export function NewEventDialog({ isOpen, onClose, onCreate }: NewEventDialogProp
             <div>
               <label className="block text-sm font-semibold text-white mb-3">Import Runbooks</label>
               <label className="flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-300 rounded-xl py-8 px-4 hover:border-blue-400 hover:bg-dark-800 cursor-pointer transition-all">
-                <FileUp size={32} className="text-gray-400 mb-2" />
+                <FileUp size={32} className="text-white mb-2" />
                 <span className="text-sm font-medium text-gray-300">Drag & drop PDFs or click to select</span>
-                <span className="text-xs text-gray-500 mt-1">Runbooks will guide recovery steps</span>
+                <span className="text-xs text-gray-300 mt-1">Runbooks will guide recovery steps</span>
                 <input
                   type="file"
                   multiple
@@ -163,13 +163,13 @@ export function NewEventDialog({ isOpen, onClose, onCreate }: NewEventDialogProp
                 {runbooks.map((file, idx) => (
                   <div key={idx} className="flex items-center justify-between bg-dark-900 bg-opacity-50 p-3 rounded-lg border border-gray-600">
                     <div className="flex items-center gap-2">
-                      <FileUp size={16} className="text-blue-600" />
+                      <FileUp size={16} className="text-purple-600" />
                       <span className="text-sm text-gray-300">{file.name}</span>
-                      <span className="text-xs text-gray-500">({(file.size / 1024).toFixed(1)} KB)</span>
+                      <span className="text-xs text-gray-300">({(file.size / 1024).toFixed(1)} KB)</span>
                     </div>
                     <button
                       onClick={() => handleRemoveRunbook(idx)}
-                      className="text-gray-400 hover:text-red-600 transition-colors"
+                      className="text-white hover:text-red-600 transition-colors"
                     >
                       <X size={16} />
                     </button>
@@ -181,7 +181,7 @@ export function NewEventDialog({ isOpen, onClose, onCreate }: NewEventDialogProp
 
           {/* Alert */}
           <div className="bg-dark-800 border border-blue-200 rounded-xl p-4 flex gap-3">
-            <AlertTriangle size={20} className="text-blue-600 shrink-0 mt-0.5" />
+            <AlertTriangle size={20} className="text-purple-600 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-blue-900">This will trigger the recovery process</p>
               <p className="text-xs text-blue-700 mt-1">All configured teams will be notified and recovery steps will begin execution.</p>

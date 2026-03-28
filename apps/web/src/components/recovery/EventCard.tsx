@@ -26,7 +26,7 @@ const STATUS_CONFIG = {
   OPEN: { dot: 'bg-red-600', label: 'Open', badge: 'bg-red-600 text-red-100' },
   IN_PROGRESS: { dot: 'bg-purple-600', label: 'Active', badge: 'bg-purple-600 text-purple-100' },
   RESOLVED: { dot: 'bg-gold', label: 'Resolved', badge: 'bg-gold text-white' },
-  CLOSED: { dot: 'bg-dark-500', label: 'Closed', badge: 'bg-dark-600 text-dark-300' },
+  CLOSED: { dot: 'bg-dark-500', label: 'Closed', badge: 'bg-dark-600 text-gray-300' },
 };
 
 export function EventCard({
@@ -74,21 +74,21 @@ export function EventCard({
       {/* Details */}
       <div className="space-y-2.5 mb-5">
         <div className="flex items-center gap-2.5 text-sm">
-          <Clock size={14} className="text-gray-400 shrink-0" />
+          <Clock size={14} className="text-white shrink-0" />
           <span className="text-gray-300">{timeSinceOpen}</span>
         </div>
 
         {commander_name && (
           <div className="flex items-center gap-2.5 text-sm">
-            <Users size={14} className="text-gray-400 shrink-0" />
+            <Users size={14} className="text-white shrink-0" />
             <span className="text-gray-300">{commander_name}</span>
           </div>
         )}
 
         {affected_service_ids && affected_service_ids.length > 0 && (
           <div className="flex items-center gap-2.5 text-sm">
-            <Target size={14} className="text-gray-400 shrink-0" />
-            <span className="text-dark-200">{affected_service_ids.length} services affected</span>
+            <Target size={14} className="text-white shrink-0" />
+            <span className="text-gray-300">{affected_service_ids.length} services affected</span>
           </div>
         )}
       </div>

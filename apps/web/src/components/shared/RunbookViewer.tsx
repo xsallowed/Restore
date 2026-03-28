@@ -44,15 +44,15 @@ export function RunbookViewer({ runbookId, citation, stepName }: RunbookViewerPr
         <BookOpen size={14} className="text-purple-500 shrink-0" />
         <div className="flex-1 min-w-0">
           <span className="text-xs font-medium text-gray-300">Runbook source</span>
-          {citation && <span className="text-xs text-gray-400 ml-2 truncate">· {citation}</span>}
+          {citation && <span className="text-xs text-white ml-2 truncate">· {citation}</span>}
         </div>
-        {expanded ? <ChevronUp size={13} className="text-gray-400 shrink-0" /> : <ChevronDown size={13} className="text-gray-400 shrink-0" />}
+        {expanded ? <ChevronUp size={13} className="text-white shrink-0" /> : <ChevronDown size={13} className="text-white shrink-0" />}
       </button>
 
       {expanded && (
         <div className="px-3 pb-3 border-t border-purple-100">
           {isLoading ? (
-            <div className="flex items-center gap-2 py-3 text-xs text-gray-400">
+            <div className="flex items-center gap-2 py-3 text-xs text-white">
               <div className="w-3 h-3 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
               Loading runbook…
             </div>
@@ -72,7 +72,7 @@ export function RunbookViewer({ runbookId, citation, stepName }: RunbookViewerPr
               </div>
             </>
           ) : (
-            <p className="text-xs text-gray-400 py-2">Runbook content not available</p>
+            <p className="text-xs text-white py-2">Runbook content not available</p>
           )}
         </div>
       )}
@@ -105,10 +105,10 @@ export function RunbookModal({ runbookId, title, onClose }: { runbookId: string;
             <BookOpen size={16} className="text-purple-500" />
             <div>
               <p className="font-semibold text-white">{title || runbook?.title || 'Runbook'}</p>
-              {runbook && <p className="text-xs text-gray-400 font-mono mt-0.5">{runbook.source_ref}</p>}
+              {runbook && <p className="text-xs text-white font-mono mt-0.5">{runbook.source_ref}</p>}
             </div>
           </div>
-          <button onClick={onClose}><X size={16} className="text-gray-400" /></button>
+          <button onClick={onClose}><X size={16} className="text-white" /></button>
         </div>
 
         {!isLoading && (
@@ -119,17 +119,17 @@ export function RunbookModal({ runbookId, title, onClose }: { runbookId: string;
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {isLoading ? (
-            <div className="flex items-center justify-center h-32 text-gray-400 text-sm">Loading runbook content…</div>
+            <div className="flex items-center justify-center h-32 text-white text-sm">Loading runbook content…</div>
           ) : runbook ? (
             <pre className="text-sm text-gray-600 whitespace-pre-wrap font-mono leading-relaxed">{highlighted}</pre>
           ) : (
-            <p className="text-gray-400 text-sm text-center py-8">Runbook not found</p>
+            <p className="text-white text-sm text-center py-8">Runbook not found</p>
           )}
         </div>
 
         {runbook?.event_tags?.length > 0 && (
           <div className="px-5 py-3 border-t border-gray-700 shrink-0 flex gap-2 flex-wrap">
-            <span className="text-xs text-gray-400">Tags:</span>
+            <span className="text-xs text-white">Tags:</span>
             {runbook.event_tags.map(t => <span key={t} className="text-xs bg-dark-800 text-blue-700 px-2 py-0.5 rounded">{t}</span>)}
           </div>
         )}

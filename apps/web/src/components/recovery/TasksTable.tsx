@@ -24,7 +24,7 @@ interface TasksTableProps {
 }
 
 const STATUS_BADGE = {
-  NOT_STARTED: { bg: 'bg-dark-700', text: 'text-dark-200', label: 'Not Started' },
+  NOT_STARTED: { bg: 'bg-dark-700', text: 'text-gray-300', label: 'Not Started' },
   IN_PROGRESS: { bg: 'bg-purple-600', text: 'text-purple-100', label: 'In Progress' },
   COMPLETED: { bg: 'bg-gold', text: 'text-white', label: 'Completed' },
   SKIPPED: { bg: 'bg-dark-600', text: 'text-gray-200', label: 'Skipped' },
@@ -79,7 +79,7 @@ export function TasksTable({ tasks, onAddTask, onDeleteTask }: TasksTableProps) 
         <div className="bg-dark-800 border border-dark-700 rounded-lg p-4 mb-6">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
-              <label className="block text-xs font-medium text-dark-300 mb-1">Task Name *</label>
+              <label className="block text-xs font-medium text-gray-300 mb-1">Task Name *</label>
               <input
                 type="text"
                 value={formData.name}
@@ -89,7 +89,7 @@ export function TasksTable({ tasks, onAddTask, onDeleteTask }: TasksTableProps) 
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-dark-300 mb-1">Assigned To</label>
+              <label className="block text-xs font-medium text-gray-300 mb-1">Assigned To</label>
               <input
                 type="text"
                 value={formData.assigned_to}
@@ -99,7 +99,7 @@ export function TasksTable({ tasks, onAddTask, onDeleteTask }: TasksTableProps) 
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-dark-300 mb-1">Description</label>
+              <label className="block text-xs font-medium text-gray-300 mb-1">Description</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData(f => ({ ...f, description: e.target.value }))}
@@ -116,7 +116,7 @@ export function TasksTable({ tasks, onAddTask, onDeleteTask }: TasksTableProps) 
                 onChange={(e) => setFormData(f => ({ ...f, is_on_critical_path: e.target.checked }))}
                 className="rounded border-dark-600 bg-dark-900"
               />
-              <label htmlFor="critical" className="text-xs font-medium text-dark-300">Critical Path</label>
+              <label htmlFor="critical" className="text-xs font-medium text-gray-300">Critical Path</label>
             </div>
           </div>
           <div className="flex gap-2 mt-4">
@@ -128,7 +128,7 @@ export function TasksTable({ tasks, onAddTask, onDeleteTask }: TasksTableProps) 
             </button>
             <button
               onClick={() => setShowAddForm(false)}
-              className="px-3 py-1.5 bg-dark-700 hover:bg-dark-600 text-dark-200 text-sm rounded-lg transition-colors"
+              className="px-3 py-1.5 bg-dark-700 hover:bg-dark-600 text-gray-300 text-sm rounded-lg transition-colors"
             >
               Cancel
             </button>
@@ -141,20 +141,20 @@ export function TasksTable({ tasks, onAddTask, onDeleteTask }: TasksTableProps) 
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-dark-700 bg-dark-800">
-              <th className="text-left px-4 py-3 font-medium text-dark-300">Ref</th>
-              <th className="text-left px-4 py-3 font-medium text-dark-300">Description</th>
-              <th className="text-left px-4 py-3 font-medium text-dark-300">Assigned To</th>
-              <th className="text-left px-4 py-3 font-medium text-dark-300">Status</th>
-              <th className="text-left px-4 py-3 font-medium text-dark-300">Start</th>
-              <th className="text-left px-4 py-3 font-medium text-dark-300">End</th>
-              <th className="text-left px-4 py-3 font-medium text-dark-300">Dependencies</th>
-              <th className="text-left px-4 py-3 font-medium text-dark-300">Action</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-300">Ref</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-300">Description</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-300">Assigned To</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-300">Status</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-300">Start</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-300">End</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-300">Dependencies</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-300">Action</th>
             </tr>
           </thead>
           <tbody>
             {tasks.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-dark-400">
+                <td colSpan={8} className="px-4 py-8 text-center text-gray-400">
                   No tasks yet. Click "Add Task" to create one.
                 </td>
               </tr>
@@ -163,26 +163,26 @@ export function TasksTable({ tasks, onAddTask, onDeleteTask }: TasksTableProps) 
                 const status = STATUS_BADGE[task.status];
                 return (
                   <tr key={task.id} className="border-b border-dark-700 hover:bg-dark-800 hover:bg-opacity-50">
-                    <td className="px-4 py-3 font-mono text-xs text-dark-400">#{task.sequence}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-gray-400">#{task.sequence}</td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-white">{task.name}</div>
-                      {task.description && <div className="text-xs text-dark-400 mt-0.5">{task.description}</div>}
+                      {task.description && <div className="text-xs text-gray-400 mt-0.5">{task.description}</div>}
                     </td>
-                    <td className="px-4 py-3 text-sm text-dark-300">{task.assignee_name || '-'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-300">{task.assignee_name || '-'}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${status.bg} ${status.text}`}>
                         {status.label}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-400">
+                    <td className="px-4 py-3 text-xs text-white">
                       {task.started_at ? format(new Date(task.started_at), 'MMM dd, HH:mm') : '-'}
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-400">
+                    <td className="px-4 py-3 text-xs text-white">
                       {task.completed_at ? format(new Date(task.completed_at), 'MMM dd, HH:mm') : '-'}
                     </td>
                     <td className="px-4 py-3 text-xs">
                       {task.dependencies && task.dependencies.length > 0 ? (
-                        <span className="px-2 py-1 bg-dark-700 text-dark-200 rounded">
+                        <span className="px-2 py-1 bg-dark-700 text-gray-300 rounded">
                           {task.dependencies.length} dep
                         </span>
                       ) : (

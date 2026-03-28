@@ -84,9 +84,9 @@ export function FileUpload({ eventId, stepId, onUploaded }: FileUploadProps) {
   const STATUS_ICON: Record<string, React.ReactNode> = {
     uploading:   <div className="w-3.5 h-3.5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />,
     scanning:    <div className="w-3.5 h-3.5 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />,
-    done:        <CheckCircle2 size={14} className="text-green-500" />,
+    done:        <CheckCircle2 size={14} className="text-gold" />,
     error:       <AlertTriangle size={14} className="text-red-500" />,
-    quarantined: <AlertTriangle size={14} className="text-orange-500" />,
+    quarantined: <AlertTriangle size={14} className="text-gold" />,
   };
 
   return (
@@ -111,10 +111,10 @@ export function FileUpload({ eventId, stepId, onUploaded }: FileUploadProps) {
           onChange={e => Array.from(e.target.files || []).forEach(processFile)}
         />
         <Upload size={20} className={clsx('mx-auto mb-2', isDragging ? 'text-brand-500' : 'text-gray-300')} />
-        <p className={clsx('text-sm font-medium', isDragging ? 'text-brand-700' : 'text-gray-500')}>
+        <p className={clsx('text-sm font-medium', isDragging ? 'text-brand-700' : 'text-gray-300')}>
           {isDragging ? 'Drop files here' : 'Drag files here or click to browse'}
         </p>
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="text-xs text-white mt-1">
           Images, PDFs, logs, JSON, ZIP — max {MAX_SIZE_MB}MB each
         </p>
       </div>
@@ -124,11 +124,11 @@ export function FileUpload({ eventId, stepId, onUploaded }: FileUploadProps) {
         <div className="space-y-2">
           {files.map((file, idx) => (
             <div key={idx} className="flex items-center gap-3 bg-dark-900 bg-opacity-50 border border-gray-600 rounded-lg px-3 py-2.5">
-              <File size={15} className="text-gray-400 shrink-0" />
+              <File size={15} className="text-white shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium text-gray-300 truncate">{file.name}</span>
-                  <span className="text-xs text-gray-400 shrink-0">{formatSize(file.size)}</span>
+                  <span className="text-xs text-white shrink-0">{formatSize(file.size)}</span>
                 </div>
                 {(file.status === 'uploading' || file.status === 'scanning') && (
                   <div className="mt-1.5 h-1 bg-dark-700 rounded-full overflow-hidden">
@@ -153,7 +153,7 @@ export function FileUpload({ eventId, stepId, onUploaded }: FileUploadProps) {
               </div>
               <div className="shrink-0">{STATUS_ICON[file.status]}</div>
               {(file.status === 'done' || file.status === 'error') && (
-                <button onClick={() => setFiles(prev => prev.filter((_, i) => i !== idx))} className="shrink-0 text-gray-300 hover:text-gray-500">
+                <button onClick={() => setFiles(prev => prev.filter((_, i) => i !== idx))} className="shrink-0 text-gray-300 hover:text-gray-300">
                   <X size={13} />
                 </button>
               )}

@@ -193,11 +193,11 @@ export function BlastRadiusView() {
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Asset Dependency Graph</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Click any asset to reveal its blast radius</p>
+          <p className="text-sm text-gray-300 mt-0.5">Click any asset to reveal its blast radius</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 bg-dark-900 bg-opacity-50 border border-gray-600 rounded-lg px-3 py-2">
-            <Search size={14} className="text-gray-400" />
+            <Search size={14} className="text-white" />
             <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Filter assets…" className="text-sm bg-transparent focus:outline-none w-32" />
           </div>
         </div>
@@ -219,7 +219,7 @@ export function BlastRadiusView() {
           </div>
 
           {nodes.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
+            <div className="absolute inset-0 flex items-center justify-center text-white text-sm">
               <div className="text-center">
                 <Layers size={32} className="mx-auto mb-2 opacity-30" />
                 No assets registered
@@ -244,7 +244,7 @@ export function BlastRadiusView() {
                   ['Services', (selectedNode.business_services || []).filter(Boolean).join(', ') || '—'],
                 ].map(([k, v]) => (
                   <div key={k as string} className="px-4 py-2.5 flex justify-between">
-                    <span className="text-gray-400">{k as string}</span>
+                    <span className="text-white">{k as string}</span>
                     <span className="text-gray-300 font-medium text-right">{v as string}</span>
                   </div>
                 ))}
@@ -259,7 +259,7 @@ export function BlastRadiusView() {
               )}
             </div>
           ) : (
-            <div className="bg-dark-800 border border-gray-600 rounded-xl p-4 text-center text-sm text-gray-400">
+            <div className="bg-dark-800 border border-gray-600 rounded-xl p-4 text-center text-sm text-white">
               Click an asset node to see details and blast radius
             </div>
           )}
@@ -274,14 +274,14 @@ export function BlastRadiusView() {
                 <div key={status} className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full" style={{ background: color }} />
-                    <span className="text-gray-500">{status}</span>
+                    <span className="text-gray-300">{status}</span>
                   </div>
                   <span className="font-medium text-gray-300">{count}</span>
                 </div>
               );
             })}
             <div className="pt-1 border-t border-gray-700 flex justify-between">
-              <span className="text-gray-400">Total</span>
+              <span className="text-white">Total</span>
               <span className="font-semibold">{nodes.length}</span>
             </div>
           </div>
