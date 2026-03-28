@@ -1,10 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { servicesApi, eventsApi } from '../../lib/api';
 import { useSSE } from '../../lib/api';
 import { AlertTriangle, CheckCircle, Clock, Zap, TrendingDown, Activity } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import clsx from 'clsx';
+import { GanttChart } from '../../components/recovery/GanttChart';
+import { TasksTable } from '../../components/recovery/TasksTable';
+import { useState } from 'react';
 
 const STATUS_CONFIG: Record<string, { color: string; dot: string; label: string }> = {
   OPERATIONAL:        { color: 'bg-green-50 text-green-800 border-green-200',   dot: 'bg-green-500', label: 'Operational' },
@@ -25,6 +28,8 @@ const SEVERITY_COLOR: Record<string, string> = {
 export function OrchestratorDashboard() {
   useSSE(); // Subscribe to all health and step events
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [tasks, setTasks] = useState<any[]>([]);
 
   const { data: servicesData } = useQuery({
     queryKey: ['business-services'],
@@ -38,8 +43,16 @@ export function OrchestratorDashboard() {
     refetchInterval: 15_000,
   });
 
+  const { data: soeData } = useQuery({
+    queryKey: ['soe', eventsData?.[0]?.id],
+    queryFn: () => eventsData?.[0] ? eventsApi.getSoe(eventsData[0].id as string).then(r => r.data.data) : null,
+    enabled: !!eventsData?.[0]?.id,
+    refetchInterval: 15_000,
+  });
+
   const services: Record<string, unknown>[] = servicesData ?? [];
   const activeEvents: Record<string, unknown>[] = eventsData ?? [];
+  const soeSteps = soeData?.steps ?? [];
 
   const downCount = services.filter(s => s.status === 'DOWN').length;
   const degradedCount = services.filter(s => ['DEGRADED', 'PARTIALLY_IMPACTED'].includes(s.status as string)).length;
@@ -107,6 +120,41 @@ export function OrchestratorDashboard() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Recovery Timeline & Tasks - shown when event is active */}
+      {activeEvents.length > 0 && soeData && (
+        <div className="space-y-6">
+          <GanttChart
+            steps={soeSteps}
+            totalMinutes={soeData.total_estimated_minutes || 180}
+          />
+          <TasksTable
+            tasks={soeSteps.map((step: any, idx: number) => ({
+              id: step.id,
+              sequence: step.sequence,
+              name: step.name,
+              description: step.description,
+              assigned_to: step.assigned_to,
+              assignee_name: step.assignee_name,
+              status: step.status,
+              started_at: step.started_at,
+              completed_at: step.completed_at,
+              dependencies: step.dependencies || [],
+              is_on_critical_path: step.is_on_critical_path,
+            }))}
+            onAddTask={(newTask) => {
+              const task = {
+                id: 'task-' + Date.now(),
+                ...newTask,
+              };
+              setTasks([...tasks, task]);
+            }}
+            onDeleteTask={(taskId) => {
+              setTasks(tasks.filter(t => t.id !== taskId));
+            }}
+          />
         </div>
       )}
 
