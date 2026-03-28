@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { servicesApi, eventsApi } from '../../lib/api';
 import { useSSE } from '../../lib/api';
 import { AlertTriangle, CheckCircle, Clock, Zap, TrendingDown, Activity, Plus } from 'lucide-react';
@@ -11,7 +11,7 @@ import { IncidentDashboard } from '../../components/recovery/IncidentDashboard';
 import { EventCard } from '../../components/recovery/EventCard';
 import { EventDetailsModal } from '../../components/recovery/EventDetailsModal';
 import { NewEventDialog } from '../../components/recovery/NewEventDialog';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { themeClasses } from '../../lib/themeClasses';
 
 const STATUS_CONFIG: Record<string, { color: string; dot: string; label: string }> = {
@@ -34,11 +34,12 @@ export function OrchestratorDashboard() {
   useSSE(); // Subscribe to all health and step events
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const [searchParams] = useSearchParams();
   const [tasks, setTasks] = useState<any[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [showEventDetailsModal, setShowEventDetailsModal] = useState(false);
   const [showNewEventDialog, setShowNewEventDialog] = useState(false);
-  const [activeEventId, setActiveEventId] = useState<string | null>(null);
+  const [activeEventId, setActiveEventId] = useState<string | null>(searchParams.get('eventId'));
 
   const { data: servicesData } = useQuery({
     queryKey: ['business-services'],
