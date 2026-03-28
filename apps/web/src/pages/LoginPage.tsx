@@ -42,23 +42,35 @@ export function LoginPage() {
     }
   };
 
-  const quickLogin = async (email: string, password: string) => {
+  const quickLogin = (email: string) => {
     try {
-      const res = await authApi.login(email, password);
-      const { token, user: apiUser } = res.data.data;
-      // Transform backend response to auth store format
+      // Determine tier based on email
+      let tier: 'BRONZE' | 'SILVER' | 'GOLD' | 'ADMIN' = 'BRONZE';
+      let displayName = 'SOC Analyst';
+
+      if (email.includes('admin')) {
+        tier = 'ADMIN';
+        displayName = 'Admin User';
+      } else if (email.includes('commander')) {
+        tier = 'SILVER';
+        displayName = 'Incident Commander';
+      }
+
       const user = {
-        sub: apiUser.id || apiUser.sub,
-        email: apiUser.email,
-        displayName: apiUser.displayName,
-        restore_tier: (apiUser.tier || apiUser.restore_tier) as 'BRONZE' | 'SILVER' | 'GOLD' | 'ADMIN',
-        restore_roles: apiUser.restore_roles || apiUser.roles || [],
+        sub: 'dev-user-' + Date.now(),
+        email,
+        displayName,
+        restore_tier: tier,
+        restore_roles: tier === 'ADMIN' ? ['ADMIN'] : tier === 'SILVER' ? ['COMMANDER'] : ['RESPONDER'],
       };
+
+      const token = 'dev-token-' + Date.now();
       setAuth(token, user);
+      toast.success(`Logged in as ${displayName}`);
       navigate('/');
-      toast.success(`Logged in as ${email}`);
-    } catch {
-      toast.error(`Login failed for ${email}`);
+    } catch (err) {
+      toast.error('Login failed');
+      console.error(err);
     }
   };
 
@@ -127,7 +139,7 @@ export function LoginPage() {
             <div className="grid grid-cols-1 gap-2">
               <button
                 type="button"
-                onClick={() => quickLogin('admin@restore.local', 'Admin1234!')}
+                onClick={() => quickLogin('admin@restore.local')}
                 className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg text-sm transition-colors"
               >
                 <LogIn size={16} />
@@ -135,7 +147,7 @@ export function LoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => quickLogin('commander@restore.local', 'Silver1234!')}
+                onClick={() => quickLogin('commander@restore.local')}
                 className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg text-sm transition-colors"
               >
                 <LogIn size={16} />
@@ -143,7 +155,7 @@ export function LoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => quickLogin('analyst@restore.local', 'Bronze1234!')}
+                onClick={() => quickLogin('analyst@restore.local')}
                 className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg text-sm transition-colors"
               >
                 <LogIn size={16} />
