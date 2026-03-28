@@ -2,6 +2,8 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { Badge } from '../ui/Badge';
 import { ChevronDown, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import clsx from 'clsx';
+import { themeClasses } from '../../lib/themeClasses';
 
 interface Task {
   id: string;
@@ -24,11 +26,11 @@ interface TasksTableProps {
 }
 
 const STATUS_BADGE = {
-  NOT_STARTED: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Not Started' },
-  IN_PROGRESS: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'In Progress' },
-  COMPLETED: { bg: 'bg-green-100', text: 'text-green-800', label: 'Completed' },
-  SKIPPED: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Skipped' },
-  BLOCKED: { bg: 'bg-red-100', text: 'text-red-800', label: 'Blocked' },
+  NOT_STARTED: { bg: 'bg-gray-300 dark:bg-gray-700', text: 'text-gray-900 dark:text-gray-300', label: 'Not Started' },
+  IN_PROGRESS: { bg: 'bg-purple-600 dark:bg-purple-600', text: 'text-purple-50', label: 'In Progress' },
+  COMPLETED: { bg: 'bg-yellow-500 dark:bg-yellow-600', text: 'text-white dark:text-gray-900', label: 'Completed' },
+  SKIPPED: { bg: 'bg-gray-400 dark:bg-gray-700', text: 'text-gray-800 dark:text-gray-200', label: 'Skipped' },
+  BLOCKED: { bg: 'bg-red-600 dark:bg-red-600', text: 'text-red-50', label: 'Blocked' },
 };
 
 export function TasksTable({ tasks, onAddTask, onDeleteTask }: TasksTableProps) {
@@ -62,12 +64,12 @@ export function TasksTable({ tasks, onAddTask, onDeleteTask }: TasksTableProps) 
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6">
+    <div className={clsx(themeClasses.card, 'border-gray-300 dark:border-gray-700 rounded-xl p-6 shadow-sm dark:shadow-md')}>
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Recovery Tasks</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recovery Tasks</h3>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-2 px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-sm rounded-lg transition-colors"
+          className={clsx(themeClasses.button.primary, 'flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg')}
         >
           <Plus size={14} />
           Add Task
@@ -76,35 +78,35 @@ export function TasksTable({ tasks, onAddTask, onDeleteTask }: TasksTableProps) 
 
       {/* Add Task Form */}
       {showAddForm && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+        <div className={clsx(themeClasses.bg.secondary, 'border border-gray-300 dark:border-gray-700 rounded-lg p-4 mb-6')}>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Task Name *</label>
+              <label className={clsx(themeClasses.text.secondary, 'block text-xs font-medium mb-1')}>Task Name *</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData(f => ({ ...f, name: e.target.value }))}
                 placeholder="e.g. Verify incident scope"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+                className={clsx(themeClasses.input, 'w-full rounded-lg px-3 py-2 text-sm')}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Assigned To</label>
+              <label className={clsx(themeClasses.text.secondary, 'block text-xs font-medium mb-1')}>Assigned To</label>
               <input
                 type="text"
                 value={formData.assigned_to}
                 onChange={(e) => setFormData(f => ({ ...f, assigned_to: e.target.value }))}
                 placeholder="Assignee name"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+                className={clsx(themeClasses.input, 'w-full rounded-lg px-3 py-2 text-sm')}
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-gray-600 mb-1">Description</label>
+              <label className={clsx(themeClasses.text.secondary, 'block text-xs font-medium mb-1')}>Description</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData(f => ({ ...f, description: e.target.value }))}
                 placeholder="Task details..."
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none"
+                className={clsx(themeClasses.input, 'w-full rounded-lg px-3 py-2 text-sm resize-none')}
                 rows={2}
               />
             </div>
@@ -114,21 +116,21 @@ export function TasksTable({ tasks, onAddTask, onDeleteTask }: TasksTableProps) 
                 id="critical"
                 checked={formData.is_on_critical_path}
                 onChange={(e) => setFormData(f => ({ ...f, is_on_critical_path: e.target.checked }))}
-                className="rounded"
+                className="rounded border-gray-300 dark:border-gray-700"
               />
-              <label htmlFor="critical" className="text-xs font-medium text-gray-600">Critical Path</label>
+              <label htmlFor="critical" className={clsx(themeClasses.text.secondary, 'text-xs font-medium')}>Critical Path</label>
             </div>
           </div>
           <div className="flex gap-2 mt-4">
             <button
               onClick={handleAddTask}
-              className="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-sm rounded-lg transition-colors"
+              className={clsx(themeClasses.button.primary, 'px-3 py-1.5 text-sm rounded-lg')}
             >
               Add Task
             </button>
             <button
               onClick={() => setShowAddForm(false)}
-              className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-900 text-sm rounded-lg transition-colors"
+              className={clsx(themeClasses.button.secondary, 'px-3 py-1.5 text-sm rounded-lg')}
             >
               Cancel
             </button>
@@ -140,21 +142,21 @@ export function TasksTable({ tasks, onAddTask, onDeleteTask }: TasksTableProps) 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="text-left px-4 py-3 font-medium text-gray-700">Ref</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-700">Description</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-700">Assigned To</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-700">Status</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-700">Start</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-700">End</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-700">Dependencies</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-700">Action</th>
+            <tr className={clsx('border-b border-gray-300 dark:border-gray-700', themeClasses.bg.tertiary)}>
+              <th className={clsx(themeClasses.text.secondary, 'text-left px-4 py-3 font-medium')}>Ref</th>
+              <th className={clsx(themeClasses.text.secondary, 'text-left px-4 py-3 font-medium')}>Description</th>
+              <th className={clsx(themeClasses.text.secondary, 'text-left px-4 py-3 font-medium')}>Assigned To</th>
+              <th className={clsx(themeClasses.text.secondary, 'text-left px-4 py-3 font-medium')}>Status</th>
+              <th className={clsx(themeClasses.text.secondary, 'text-left px-4 py-3 font-medium')}>Start</th>
+              <th className={clsx(themeClasses.text.secondary, 'text-left px-4 py-3 font-medium')}>End</th>
+              <th className={clsx(themeClasses.text.secondary, 'text-left px-4 py-3 font-medium')}>Dependencies</th>
+              <th className={clsx(themeClasses.text.secondary, 'text-left px-4 py-3 font-medium')}>Action</th>
             </tr>
           </thead>
           <tbody>
             {tasks.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={8} className={clsx(themeClasses.text.tertiary, 'px-4 py-8 text-center')}>
                   No tasks yet. Click "Add Task" to create one.
                 </td>
               </tr>
@@ -162,27 +164,27 @@ export function TasksTable({ tasks, onAddTask, onDeleteTask }: TasksTableProps) 
               tasks.map((task) => {
                 const status = STATUS_BADGE[task.status];
                 return (
-                  <tr key={task.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="px-4 py-3 font-mono text-xs text-gray-600">#{task.sequence}</td>
+                  <tr key={task.id} className={clsx('border-b border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 hover:bg-opacity-50 dark:hover:bg-opacity-50')}>
+                    <td className={clsx(themeClasses.text.tertiary, 'px-4 py-3 font-mono text-xs')}>#{task.sequence}</td>
                     <td className="px-4 py-3">
-                      <div className="font-medium text-gray-900">{task.name}</div>
-                      {task.description && <div className="text-xs text-gray-500 mt-0.5">{task.description}</div>}
+                      <div className={clsx('font-medium', themeClasses.text.primary)}>{task.name}</div>
+                      {task.description && <div className={clsx(themeClasses.text.tertiary, 'text-xs mt-0.5')}>{task.description}</div>}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{task.assignee_name || '-'}</td>
+                    <td className={clsx(themeClasses.text.secondary, 'px-4 py-3 text-sm')}>{task.assignee_name || '-'}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${status.bg} ${status.text}`}>
+                      <span className={clsx('inline-block px-2 py-0.5 rounded text-xs font-medium', status.bg, status.text)}>
                         {status.label}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-600">
+                    <td className={clsx(themeClasses.text.primary, 'px-4 py-3 text-xs')}>
                       {task.started_at ? format(new Date(task.started_at), 'MMM dd, HH:mm') : '-'}
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-600">
+                    <td className={clsx(themeClasses.text.primary, 'px-4 py-3 text-xs')}>
                       {task.completed_at ? format(new Date(task.completed_at), 'MMM dd, HH:mm') : '-'}
                     </td>
                     <td className="px-4 py-3 text-xs">
                       {task.dependencies && task.dependencies.length > 0 ? (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded">
+                        <span className={clsx(themeClasses.bg.tertiary, themeClasses.text.secondary, 'px-2 py-1 rounded')}>
                           {task.dependencies.length} dep
                         </span>
                       ) : (
@@ -192,7 +194,7 @@ export function TasksTable({ tasks, onAddTask, onDeleteTask }: TasksTableProps) 
                     <td className="px-4 py-3">
                       <button
                         onClick={() => onDeleteTask(task.id)}
-                        className="p-1 hover:bg-red-50 text-red-600 rounded transition-colors"
+                        className="p-1 hover:bg-red-200 dark:hover:bg-red-900 dark:hover:bg-opacity-30 text-red-600 dark:text-red-400 rounded transition-colors"
                         title="Delete task"
                       >
                         <Trash2 size={14} />

@@ -2,7 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { useAuth } from './store/auth';
+import { ThemeProvider } from './lib/themeContext';
 import { LoginPage } from './pages/LoginPage';
+import { HomePage } from './pages/HomePage';
 import { OrchestratorDashboard } from './pages/silver/OrchestratorDashboard';
 import { ExecutionInterface } from './pages/bronze/ExecutionInterface';
 import { EventCommandView } from './pages/silver/EventCommandView';
@@ -38,14 +40,6 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function TierRouter() {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/login" />;
-  if (user.restore_tier === 'GOLD') return <Navigate to="/gold" replace />;
-  if (user.restore_tier === 'BRONZE') return <Navigate to="/events" replace />;
-  return <Navigate to="/dashboard" replace />;
-}
-
 function EventPage() {
   const { isAtLeast } = useAuth();
   return isAtLeast('SILVER') ? <EventCommandView /> : <ExecutionInterface />;
@@ -53,13 +47,14 @@ function EventPage() {
 
 export default function App() {
   return (
-    <QueryClientProvider client={qc}>
-      <BrowserRouter>
+    <ThemeProvider>
+      <QueryClientProvider client={qc}>
+        <BrowserRouter>
         <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<RequireAuth><TierRouter /></RequireAuth>} />
           <Route element={<RequireAuth><AppShell /></RequireAuth>}>
+            <Route path="/"                  element={<HomePage />} />
             <Route path="/gold"              element={<GoldDashboard />} />
             <Route path="/dashboard"         element={<OrchestratorDashboard />} />
             <Route path="/events"            element={<EventListPage />} />
@@ -76,5 +71,6 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
+    </ThemeProvider>
   );
 }

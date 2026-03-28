@@ -9,12 +9,12 @@ import { CheckCircle, AlertTriangle, TrendingDown, Clock, FileDown } from 'lucid
 import clsx from 'clsx';
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; bar: string }> = {
-  OPERATIONAL:        { bg: 'bg-green-50',  text: 'text-green-800',  bar: '#22c55e' },
+  OPERATIONAL:        { bg: 'bg-dark-800',  text: 'text-green-800',  bar: '#22c55e' },
   DEGRADED:           { bg: 'bg-yellow-50', text: 'text-yellow-800', bar: '#eab308' },
   PARTIALLY_IMPACTED: { bg: 'bg-orange-50', text: 'text-orange-800', bar: '#f97316' },
-  DOWN:               { bg: 'bg-red-50',    text: 'text-red-800',    bar: '#ef4444' },
-  RECOVERING:         { bg: 'bg-blue-50',   text: 'text-blue-800',   bar: '#3b82f6' },
-  RESTORED:           { bg: 'bg-green-50',  text: 'text-green-700',  bar: '#4ade80' },
+  DOWN:               { bg: 'bg-dark-800',    text: 'text-red-800',    bar: '#ef4444' },
+  RECOVERING:         { bg: 'bg-dark-800',   text: 'text-blue-800',   bar: '#3b82f6' },
+  RESTORED:           { bg: 'bg-dark-800',  text: 'text-green-700',  bar: '#4ade80' },
 };
 
 export function GoldDashboard() {
@@ -60,14 +60,14 @@ export function GoldDashboard() {
               Gold — Executive View
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Recovery Intelligence Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-white">Recovery Intelligence Dashboard</h1>
+          <p className="text-sm text-gray-300 mt-0.5">
             Business service health overview — updated {new Date().toLocaleTimeString()}
           </p>
         </div>
         <button
           onClick={() => window.print()}
-          className="flex items-center gap-2 text-sm text-gray-600 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50"
+          className="flex items-center gap-2 text-sm text-gray-600 border border-gray-600 px-4 py-2 rounded-lg hover:bg-dark-800"
         >
           <FileDown size={15} />
           Export Summary
@@ -81,35 +81,35 @@ export function GoldDashboard() {
             label: 'Active Recovery Events',
             value: activeEvents,
             icon: AlertTriangle,
-            color: activeEvents > 0 ? 'text-red-500' : 'text-green-500',
-            bg: activeEvents > 0 ? 'bg-red-50' : 'bg-green-50',
+            color: activeEvents > 0 ? 'text-red-500' : 'text-gold',
+            bg: activeEvents > 0 ? 'bg-dark-800' : 'bg-dark-800',
           },
           {
             label: 'Services Impacted',
             value: impactedServices,
             icon: TrendingDown,
-            color: impactedServices > 0 ? 'text-orange-500' : 'text-green-500',
-            bg: impactedServices > 0 ? 'bg-orange-50' : 'bg-green-50',
+            color: impactedServices > 0 ? 'text-gold' : 'text-gold',
+            bg: impactedServices > 0 ? 'bg-orange-50' : 'bg-dark-800',
           },
           {
             label: 'Services Operational',
             value: operationalServices,
             icon: CheckCircle,
-            color: 'text-green-500',
-            bg: 'bg-green-50',
+            color: 'text-gold',
+            bg: 'bg-dark-800',
           },
           {
             label: 'Avg MTTR (90 days)',
             value: mttr > 0 ? `${Math.round(mttr / 60 * 10) / 10}h` : '–',
             icon: Clock,
-            color: 'text-brand-500',
-            bg: 'bg-blue-50',
+            color: 'text-purple-500',
+            bg: 'bg-dark-800',
           },
         ].map(metric => (
           <div key={metric.label} className={clsx('rounded-xl p-4 flex items-center gap-3', metric.bg)}>
             <metric.icon size={22} className={metric.color} />
             <div>
-              <p className="text-2xl font-bold text-gray-900">{metric.value}</p>
+              <p className="text-2xl font-bold text-white">{metric.value}</p>
               <p className="text-xs text-gray-600 mt-0.5">{metric.label}</p>
             </div>
           </div>
@@ -118,9 +118,9 @@ export function GoldDashboard() {
 
       <div className="grid grid-cols-3 gap-6">
         {/* Business service health panel — 2/3 width */}
-        <div className="col-span-2 bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <div className="px-5 py-3 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900 text-sm">Business Service Health</h2>
+        <div className="col-span-2 bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl overflow-hidden">
+          <div className="px-5 py-3 border-b border-gray-700">
+            <h2 className="font-semibold text-white text-sm">Business Service Health</h2>
           </div>
           <div className="divide-y divide-gray-50">
             {services.map(service => {
@@ -133,12 +133,12 @@ export function GoldDashboard() {
                 <div key={service.id as string} className={clsx('px-5 py-3 flex items-center gap-4', cfg.bg)}>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm text-gray-900">{service.name as string}</span>
+                      <span className="font-medium text-sm text-white">{service.name as string}</span>
                       <span className={clsx('text-xs px-1.5 py-0.5 rounded font-medium', cfg.text, cfg.bg)}>
                         {String(service.status).replace('_', ' ')}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-xs text-white mt-0.5">
                       {service.business_unit as string} · RTO {service.rto_minutes as number} min
                     </p>
                   </div>
@@ -150,14 +150,14 @@ export function GoldDashboard() {
                         style={{ width: `${rtoPct}%`, background: cfg.bar }}
                       />
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5 text-right">RTO target</p>
+                    <p className="text-xs text-white mt-0.5 text-right">RTO target</p>
                   </div>
                 </div>
               );
             })}
 
             {services.length === 0 && (
-              <div className="px-5 py-10 text-center text-gray-400 text-sm">
+              <div className="px-5 py-10 text-center text-white text-sm">
                 No business services configured
               </div>
             )}
@@ -167,8 +167,8 @@ export function GoldDashboard() {
         {/* Right panel */}
         <div className="space-y-4">
           {/* Service health pie */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Service Health Split</h3>
+          <div className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl p-4">
+            <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wide mb-3">Service Health Split</h3>
             {pieData.length > 0 ? (
               <ResponsiveContainer width="100%" height={140}>
                 <PieChart>
@@ -179,13 +179,13 @@ export function GoldDashboard() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-36 flex items-center justify-center text-green-500">
+              <div className="h-36 flex items-center justify-center text-gold">
                 <CheckCircle size={32} />
               </div>
             )}
             <div className="flex gap-3 justify-center flex-wrap mt-1">
               {pieData.map(d => (
-                <div key={d.name} className="flex items-center gap-1 text-xs text-gray-500">
+                <div key={d.name} className="flex items-center gap-1 text-xs text-gray-300">
                   <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: d.fill }} />
                   {d.name}: {d.value}
                 </div>
@@ -194,9 +194,9 @@ export function GoldDashboard() {
           </div>
 
           {/* Note about abstraction */}
-          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+          <div className="bg-dark-800 border border-blue-100 rounded-xl p-4">
             <p className="text-xs text-blue-700 font-medium mb-1">Executive View</p>
-            <p className="text-xs text-blue-600">
+            <p className="text-xs text-purple-600">
               This view shows business service health only. Step-level operational detail is available to Silver and Bronze tier users during active recovery events.
             </p>
           </div>
