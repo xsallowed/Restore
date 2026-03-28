@@ -12,22 +12,22 @@ import { EventCard } from '../../components/recovery/EventCard';
 import { EventDetailsModal } from '../../components/recovery/EventDetailsModal';
 import { NewEventDialog } from '../../components/recovery/NewEventDialog';
 import { useState } from 'react';
-import { Buttons, Typography, Cards, Badges } from '../../lib/styleConstants';
+import { themeClasses } from '../../lib/themeClasses';
 
 const STATUS_CONFIG: Record<string, { color: string; dot: string; label: string }> = {
-  OPERATIONAL:        { color: 'bg-gray-800 bg-opacity-30 text-gray-300 border border-gold border-opacity-30',   dot: 'bg-gold', label: 'Operational' },
-  DEGRADED:           { color: 'bg-gray-800 bg-opacity-30 text-gray-300 border border-orange border-opacity-30', dot: 'bg-orange', label: 'Degraded' },
-  PARTIALLY_IMPACTED: { color: 'bg-gray-800 bg-opacity-30 text-gray-300 border border-orange border-opacity-30', dot: 'bg-orange', label: 'Partial Impact' },
-  DOWN:               { color: 'bg-gray-800 bg-opacity-30 text-gray-300 border border-red-500 border-opacity-30',      dot: 'bg-red-600',    label: 'Down' },
-  RECOVERING:         { color: 'bg-gray-800 bg-opacity-30 text-gray-300 border border-purple-600 border-opacity-30',       dot: 'bg-purple-600',   label: 'Recovering' },
-  RESTORED:           { color: 'bg-gray-800 bg-opacity-30 text-gray-300 border border-gold border-opacity-30',    dot: 'bg-gold',  label: 'Restored' },
+  OPERATIONAL:        { color: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-900 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-700',   dot: 'bg-yellow-400 dark:bg-yellow-500', label: 'Operational' },
+  DEGRADED:           { color: 'bg-orange-50 dark:bg-orange-900/20 text-orange-900 dark:text-orange-200 border border-orange-200 dark:border-orange-700', dot: 'bg-orange dark:bg-orange', label: 'Degraded' },
+  PARTIALLY_IMPACTED: { color: 'bg-orange-50 dark:bg-orange-900/20 text-orange-900 dark:text-orange-200 border border-orange-200 dark:border-orange-700', dot: 'bg-orange dark:bg-orange', label: 'Partial Impact' },
+  DOWN:               { color: 'bg-red-50 dark:bg-red-900/20 text-red-900 dark:text-red-200 border border-red-200 dark:border-red-700',      dot: 'bg-red-600 dark:bg-red-500',    label: 'Down' },
+  RECOVERING:         { color: 'bg-purple-50 dark:bg-purple-900/20 text-purple-900 dark:text-purple-200 border border-purple-200 dark:border-purple-700',       dot: 'bg-purple-600 dark:bg-purple-500',   label: 'Recovering' },
+  RESTORED:           { color: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-900 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-700',    dot: 'bg-yellow-400 dark:bg-yellow-500',  label: 'Restored' },
 };
 
 const SEVERITY_COLOR: Record<string, string> = {
-  P1: 'bg-red-600 text-white',
-  P2: 'bg-orange text-white',
-  P3: 'bg-gold text-white',
-  P4: 'bg-purple-600 text-white',
+  P1: 'bg-red-600 dark:bg-red-600 text-white',
+  P2: 'bg-orange dark:bg-orange text-white',
+  P3: 'bg-yellow-500 dark:bg-yellow-500 text-white dark:text-gray-900',
+  P4: 'bg-purple-600 dark:bg-purple-600 text-white',
 };
 
 export function OrchestratorDashboard() {
@@ -74,14 +74,14 @@ export function OrchestratorDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <div className="mb-3">
-            <span className={Badges.purpleOutline}>Crisis Response Platform</span>
+            <span className={themeClasses.badge.default}>Crisis Response Platform</span>
           </div>
-          <h1 className={Typography.sectionHeading}>Incident Recovery Center</h1>
-          <p className={Typography.bodyText + ' mt-2'}>Manage and orchestrate cyber incident responses with AI-powered insights</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-50">Incident Recovery Center</h1>
+          <p className={clsx(themeClasses.text.secondary, 'mt-2')}>Manage and orchestrate cyber incident responses with AI-powered insights</p>
         </div>
         <button
           onClick={() => setShowNewEventDialog(true)}
-          className={Buttons.primary}
+          className={clsx(themeClasses.button.primary, 'flex items-center gap-2 px-4 py-2 rounded-lg font-medium')}
         >
           <Plus size={18} />
           Create Incident
@@ -91,16 +91,16 @@ export function OrchestratorDashboard() {
       {/* Summary stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Active Events', value: activeEvents.length, icon: AlertTriangle, color: activeEvents.length > 0 ? 'text-red-500' : 'text-gray-500' },
-          { label: 'Services Down', value: downCount, icon: TrendingDown, color: downCount > 0 ? 'text-red-500' : 'text-gray-500' },
-          { label: 'Degraded', value: degradedCount, icon: Activity, color: degradedCount > 0 ? 'text-orange' : 'text-gray-500' },
-          { label: 'Operational', value: healthyCount, icon: CheckCircle, color: 'text-gold' },
+          { label: 'Active Events', value: activeEvents.length, icon: AlertTriangle, color: activeEvents.length > 0 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500' },
+          { label: 'Services Down', value: downCount, icon: TrendingDown, color: downCount > 0 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500' },
+          { label: 'Degraded', value: degradedCount, icon: Activity, color: degradedCount > 0 ? 'text-orange' : 'text-gray-400 dark:text-gray-500' },
+          { label: 'Operational', value: healthyCount, icon: CheckCircle, color: 'text-yellow-500' },
         ].map(stat => (
-          <div key={stat.label} className={Cards.base + ' p-4'}>
+          <div key={stat.label} className={clsx(themeClasses.card, 'p-4')}>
             <stat.icon size={20} className={stat.color} />
             <div>
-              <p className="text-2xl font-bold text-white">{stat.value}</p>
-              <p className="text-xs text-gray-300">{stat.label}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+              <p className={clsx(themeClasses.text.tertiary, 'text-xs')}>{stat.label}</p>
             </div>
           </div>
         ))}
@@ -161,7 +161,7 @@ export function OrchestratorDashboard() {
 
           <button
             onClick={() => setActiveEventId(null)}
-            className={Buttons.secondary + ' w-full'}
+            className={clsx(themeClasses.button.secondary, 'w-full px-4 py-2 rounded-lg font-medium')}
           >
             Back to Events List
           </button>
@@ -171,7 +171,7 @@ export function OrchestratorDashboard() {
       {/* Events Grid - Show when no event is active */}
       {!activeEventId && (
         <div>
-          <h2 className={Typography.subsectionHeading + ' mb-4'}>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-4">
             {activeEvents.length > 0 ? 'Active Incidents' : 'No Active Incidents'}
           </h2>
           {activeEvents.length > 0 ? (
@@ -194,13 +194,13 @@ export function OrchestratorDashboard() {
               ))}
             </div>
           ) : (
-            <div className={Cards.large + ' border-gold border-opacity-30 text-center'}>
-              <CheckCircle size={48} className="text-gold mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-white mb-2">All Systems Operational</h3>
-              <p className={Typography.bodyText + ' mb-6'}>No active incidents. Create one to test the recovery platform.</p>
+            <div className={clsx(themeClasses.card, 'border-yellow-200 dark:border-yellow-700 text-center')}>
+              <CheckCircle size={48} className="text-yellow-500 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">All Systems Operational</h3>
+              <p className={clsx(themeClasses.text.secondary, 'mb-6')}>No active incidents. Create one to test the recovery platform.</p>
               <button
                 onClick={() => setShowNewEventDialog(true)}
-                className={Buttons.primary}
+                className={clsx(themeClasses.button.primary, 'flex items-center gap-2 px-4 py-2 rounded-lg font-medium mx-auto')}
               >
                 <Plus size={18} />
                 Create Test Incident
@@ -213,7 +213,7 @@ export function OrchestratorDashboard() {
       {/* Business Service Health Panel - Always show */}
       {!activeEventId && (
         <div>
-          <h2 className={Badges.purpleOutline + ' mb-4'}>Business Service Health</h2>
+          <h2 className={clsx(themeClasses.badge.default, 'inline-block mb-4')}>Business Service Health</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {services.map(service => {
               const cfg = STATUS_CONFIG[service.status as string] ?? STATUS_CONFIG.OPERATIONAL;
@@ -225,19 +225,19 @@ export function OrchestratorDashboard() {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span className={clsx('w-2 h-2 rounded-full shrink-0', cfg.dot)} />
-                      <span className="font-medium text-sm text-white">{service.name as string}</span>
+                      <span className="font-medium text-sm text-gray-900 dark:text-white">{service.name as string}</span>
                     </div>
-                    <p className="text-xs text-gray-300">{service.business_unit as string}</p>
-                    <p className="text-xs text-gray-300 mt-0.5">RTO: {service.rto_minutes as number} min</p>
+                    <p className={clsx(themeClasses.text.tertiary, 'text-xs')}>{service.business_unit as string}</p>
+                    <p className={clsx(themeClasses.text.tertiary, 'text-xs mt-0.5')}>RTO: {service.rto_minutes as number} min</p>
                   </div>
-                  <span className="text-xs font-semibold shrink-0 ml-2 text-gray-300">{cfg.label}</span>
+                  <span className={clsx(themeClasses.text.tertiary, 'text-xs font-semibold shrink-0 ml-2')}>{cfg.label}</span>
                 </div>
               );
             })}
 
             {services.length === 0 && (
-              <div className="col-span-3 bg-dark-900 bg-opacity-50 border border-purple-600 border-opacity-20 rounded-lg p-8 text-center text-gray-300 text-sm">
-                No business services configured — add assets and services in the Asset Registry.
+              <div className={clsx(themeClasses.card, 'col-span-3 border-purple-200 dark:border-purple-700 rounded-lg p-8 text-center text-sm')}>
+                <p className={themeClasses.text.secondary}>No business services configured — add assets and services in the Asset Registry.</p>
               </div>
             )}
           </div>
