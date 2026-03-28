@@ -40,9 +40,9 @@ export function AppShell() {
   const visibleNav = NAV.filter(n => n.tiers.includes(tier));
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-dark-950">
       {/* Sidebar */}
-      <aside className="w-56 flex flex-col bg-gradient-to-b from-brand-900 to-brand-800 text-white shrink-0">
+      <aside className="w-56 flex flex-col bg-dark-900 border-r border-brand-600 border-opacity-20 text-white shrink-0">
         {/* Logo */}
         <div className="px-4 py-5 border-b border-white/10">
           <div className="flex items-center gap-2">

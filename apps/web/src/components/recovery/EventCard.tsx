@@ -16,17 +16,17 @@ interface EventCardProps {
 }
 
 const SEVERITY_CONFIG = {
-  P1: { bg: 'bg-red-50', border: 'border-red-200', badge: 'bg-red-100 text-red-700', text: 'text-red-600', label: 'Critical', icon: '🔴' },
-  P2: { bg: 'bg-amber-50', border: 'border-amber-200', badge: 'bg-amber-100 text-amber-700', text: 'text-amber-600', label: 'High', icon: '🟠' },
-  P3: { bg: 'bg-yellow-50', border: 'border-yellow-200', badge: 'bg-yellow-100 text-yellow-700', text: 'text-yellow-600', label: 'Medium', icon: '🟡' },
-  P4: { bg: 'bg-slate-50', border: 'border-slate-200', badge: 'bg-slate-100 text-slate-700', text: 'text-slate-600', label: 'Low', icon: '⚪' },
+  P1: { border: 'border-red-500 border-opacity-30', badge: 'bg-red-500 bg-opacity-20 text-red-200', text: 'text-red-400', label: 'Critical', icon: '🔴' },
+  P2: { border: 'border-accent-orange border-opacity-30', badge: 'bg-accent-orange bg-opacity-20 text-accent-orange', text: 'text-accent-orange', label: 'High', icon: '🟠' },
+  P3: { border: 'border-accent-gold border-opacity-30', badge: 'bg-accent-gold bg-opacity-20 text-dark-950', text: 'text-accent-gold', label: 'Medium', icon: '🟡' },
+  P4: { border: 'border-brand-600 border-opacity-30', badge: 'bg-brand-600 bg-opacity-20 text-brand-200', text: 'text-brand-400', label: 'Low', icon: '⚪' },
 };
 
 const STATUS_CONFIG = {
-  OPEN: { dot: 'bg-red-500', label: 'Open', badge: 'bg-red-100 text-red-700' },
-  IN_PROGRESS: { dot: 'bg-blue-500', label: 'Active', badge: 'bg-blue-100 text-blue-700' },
-  RESOLVED: { dot: 'bg-emerald-500', label: 'Resolved', badge: 'bg-emerald-100 text-emerald-700' },
-  CLOSED: { dot: 'bg-slate-400', label: 'Closed', badge: 'bg-slate-100 text-slate-600' },
+  OPEN: { dot: 'bg-red-500', label: 'Open', badge: 'bg-red-500 bg-opacity-20 text-red-200' },
+  IN_PROGRESS: { dot: 'bg-brand-500', label: 'Active', badge: 'bg-brand-500 bg-opacity-20 text-brand-200' },
+  RESOLVED: { dot: 'bg-accent-gold', label: 'Resolved', badge: 'bg-accent-gold bg-opacity-20 text-dark-950' },
+  CLOSED: { dot: 'bg-dark-200', label: 'Closed', badge: 'bg-dark-200 bg-opacity-20 text-dark-200' },
 };
 
 export function EventCard({
@@ -48,24 +48,15 @@ export function EventCard({
     <div
       onClick={onClick}
       className={clsx(
-        'group relative rounded-xl border p-6 cursor-pointer transition-all duration-300',
-        'hover:shadow-lg hover:-translate-y-1',
-        'bg-white',
+        'group relative rounded-lg border p-5 cursor-pointer transition-all duration-300',
+        'hover:shadow-glow hover:border-opacity-100 hover:-translate-y-0.5',
+        'bg-dark-900 bg-opacity-50 backdrop-blur-sm',
         severityCfg.border,
         'border'
       )}
     >
-      {/* Gradient accent top */}
-      <div className={clsx(
-        'absolute top-0 left-0 right-0 h-1 rounded-t-xl transition-all',
-        severity === 'P1' ? 'bg-gradient-to-r from-red-500 to-red-400' :
-        severity === 'P2' ? 'bg-gradient-to-r from-amber-500 to-amber-400' :
-        severity === 'P3' ? 'bg-gradient-to-r from-yellow-500 to-yellow-400' :
-        'bg-gradient-to-r from-slate-500 to-slate-400'
-      )} />
-
       {/* Header */}
-      <div className="flex items-start justify-between mb-4 pt-2">
+      <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-3">
             <span className={clsx('text-xs font-semibold px-2.5 py-1.5 rounded-md', severityCfg.badge)}>
@@ -75,29 +66,29 @@ export function EventCard({
               {statusCfg.label}
             </span>
           </div>
-          <h3 className="text-base font-semibold text-slate-900 mb-1.5">{title}</h3>
-          <p className="text-sm text-slate-500">{event_type}</p>
+          <h3 className="text-base font-semibold text-white mb-1.5">{title}</h3>
+          <p className="text-sm text-dark-200">{event_type}</p>
         </div>
       </div>
 
       {/* Details */}
       <div className="space-y-2.5 mb-5">
         <div className="flex items-center gap-2.5 text-sm">
-          <Clock size={14} className="text-slate-400 shrink-0" />
-          <span className="text-slate-600">{timeSinceOpen}</span>
+          <Clock size={14} className="text-dark-200 shrink-0" />
+          <span className="text-dark-200">{timeSinceOpen}</span>
         </div>
 
         {commander_name && (
           <div className="flex items-center gap-2.5 text-sm">
-            <Users size={14} className="text-slate-400 shrink-0" />
-            <span className="text-slate-600">{commander_name}</span>
+            <Users size={14} className="text-dark-200 shrink-0" />
+            <span className="text-dark-200">{commander_name}</span>
           </div>
         )}
 
         {affected_service_ids && affected_service_ids.length > 0 && (
           <div className="flex items-center gap-2.5 text-sm">
-            <Target size={14} className="text-slate-400 shrink-0" />
-            <span className="text-slate-600">{affected_service_ids.length} services affected</span>
+            <Target size={14} className="text-dark-200 shrink-0" />
+            <span className="text-dark-200">{affected_service_ids.length} services affected</span>
           </div>
         )}
       </div>
@@ -107,8 +98,9 @@ export function EventCard({
         className={clsx(
           'w-full text-sm font-medium py-2.5 rounded-lg transition-all duration-200',
           'flex items-center justify-center gap-2',
-          'bg-slate-50 hover:bg-brand-50',
-          'text-brand-600 hover:text-brand-700',
+          'border border-brand-600 hover:border-accent-orange hover:shadow-glow',
+          'text-brand-400 hover:text-accent-orange',
+          'bg-transparent hover:bg-brand-600 hover:bg-opacity-10',
           'group-hover:gap-3'
         )}
       >
