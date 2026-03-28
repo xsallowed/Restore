@@ -12,6 +12,7 @@ import { EventCard } from '../../components/recovery/EventCard';
 import { EventDetailsModal } from '../../components/recovery/EventDetailsModal';
 import { NewEventDialog } from '../../components/recovery/NewEventDialog';
 import { useState } from 'react';
+import { Buttons, Typography, Cards, Badges } from '../../lib/styleConstants';
 
 const STATUS_CONFIG: Record<string, { color: string; dot: string; label: string }> = {
   OPERATIONAL:        { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-gold border-opacity-40',   dot: 'bg-gold', label: 'Operational' },
@@ -72,12 +73,15 @@ export function OrchestratorDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Incident Recovery Center</h1>
-          <p className="text-sm text-dark-200 mt-0.5">Manage and orchestrate cyber incident responses</p>
+          <div className="mb-3">
+            <span className={Badges.purpleOutline}>Crisis Response Platform</span>
+          </div>
+          <h1 className={Typography.sectionHeading}>Incident Recovery Center</h1>
+          <p className={Typography.bodyText + ' mt-2'}>Manage and orchestrate cyber incident responses with AI-powered insights</p>
         </div>
         <button
           onClick={() => setShowNewEventDialog(true)}
-          className="flex items-center gap-2 bg-gradient-purple-orange text-white px-6 py-3 rounded-lg text-sm font-semibold hover:shadow-glow transition-all"
+          className={Buttons.primary}
         >
           <Plus size={18} />
           Create Incident
@@ -92,7 +96,7 @@ export function OrchestratorDashboard() {
           { label: 'Degraded', value: degradedCount, icon: Activity, color: degradedCount > 0 ? 'text-orange' : 'text-dark-400' },
           { label: 'Operational', value: healthyCount, icon: CheckCircle, color: 'text-gold' },
         ].map(stat => (
-          <div key={stat.label} className="bg-dark-900 bg-opacity-50 backdrop-blur rounded-lg border border-purple-600 border-opacity-20 p-4 flex items-center gap-3">
+          <div key={stat.label} className={Cards.base + ' p-4'}>
             <stat.icon size={20} className={stat.color} />
             <div>
               <p className="text-2xl font-bold text-white">{stat.value}</p>
@@ -157,7 +161,7 @@ export function OrchestratorDashboard() {
 
           <button
             onClick={() => setActiveEventId(null)}
-            className="w-full py-3 bg-dark-900 border border-purple-600 hover:border-orange text-purple-400 hover:text-orange font-semibold rounded-lg transition-all"
+            className={Buttons.secondary + ' w-full'}
           >
             Back to Events List
           </button>
@@ -167,7 +171,7 @@ export function OrchestratorDashboard() {
       {/* Events Grid - Show when no event is active */}
       {!activeEventId && (
         <div>
-          <h2 className="text-lg font-bold text-white mb-4">
+          <h2 className={Typography.subsectionHeading + ' mb-4'}>
             {activeEvents.length > 0 ? 'Active Incidents' : 'No Active Incidents'}
           </h2>
           {activeEvents.length > 0 ? (
@@ -190,13 +194,13 @@ export function OrchestratorDashboard() {
               ))}
             </div>
           ) : (
-            <div className="bg-dark-900 bg-opacity-50 backdrop-blur border-2 border-gold border-opacity-30 rounded-xl p-12 text-center">
+            <div className={Cards.large + ' border-gold border-opacity-30 text-center'}>
               <CheckCircle size={48} className="text-gold mx-auto mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">All Systems Operational</h3>
-              <p className="text-dark-200 mb-6">No active incidents. Create one to test the recovery platform.</p>
+              <p className={Typography.bodyText + ' mb-6'}>No active incidents. Create one to test the recovery platform.</p>
               <button
                 onClick={() => setShowNewEventDialog(true)}
-                className="inline-flex items-center gap-2 bg-gradient-purple-orange text-white px-6 py-3 rounded-lg font-semibold transition-all hover:shadow-glow"
+                className={Buttons.primary}
               >
                 <Plus size={18} />
                 Create Test Incident
@@ -209,7 +213,7 @@ export function OrchestratorDashboard() {
       {/* Business Service Health Panel - Always show */}
       {!activeEventId && (
         <div>
-          <h2 className="text-sm font-semibold text-purple-300 uppercase tracking-wide mb-3">Business Service Health</h2>
+          <h2 className={Badges.purpleOutline + ' mb-4'}>Business Service Health</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {services.map(service => {
               const cfg = STATUS_CONFIG[service.status as string] ?? STATUS_CONFIG.OPERATIONAL;

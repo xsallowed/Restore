@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { Shield, Eye, EyeOff, LogIn } from 'lucide-react';
 import { authApi } from '../lib/api';
 import { useAuth } from '../store/auth';
+import { Buttons, Badges } from '../lib/styleConstants';
 
 const schema = z.object({
   email:    z.string().email('Valid email required'),
@@ -27,7 +28,6 @@ export function LoginPage() {
     try {
       const res = await authApi.login(data.email, data.password);
       const { token, user: apiUser } = res.data.data;
-      // Transform backend response to auth store format
       const user = {
         sub: apiUser.id || apiUser.sub,
         email: apiUser.email,
@@ -44,7 +44,6 @@ export function LoginPage() {
 
   const quickLogin = (email: string) => {
     try {
-      // Determine tier based on email
       let tier: 'BRONZE' | 'SILVER' | 'GOLD' | 'ADMIN' = 'BRONZE';
       let displayName = 'SOC Analyst';
 
@@ -75,72 +74,85 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 mb-4">
-            <Shield size={28} className="text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background gradient orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        {/* Logo & Branding */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-purple-orange shadow-glow mb-6">
+            <Shield size={32} className="text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Restore</h1>
-          <p className="text-blue-200 text-sm mt-1">Operational Resilience & Recovery Platform</p>
+          <h1 className="text-4xl font-bold text-white mb-2">Restore</h1>
+          <p className={Badges.purpleOutline + ' justify-center mx-auto'}>
+            AI-Powered Crisis Management
+          </p>
+          <p className="text-dark-300 text-sm mt-4">Build organisational resilience through intelligent response coordination and recovery strategies</p>
         </div>
 
-        {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-5">Sign in to your account</h2>
+        {/* Login Card */}
+        <div className="bg-dark-900 bg-opacity-40 backdrop-blur-xl border border-purple-600 border-opacity-30 rounded-xl shadow-2xl p-8 mb-6">
+          <h2 className="text-xl font-semibold text-white mb-6">Sign in to your account</h2>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {/* Email Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+              <label className="block text-sm font-medium text-dark-200 mb-2">Email address</label>
               <input
                 {...register('email')}
                 type="email"
                 autoComplete="email"
-                placeholder="analyst@org.com"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                placeholder="analyst@restore.local"
+                className="w-full bg-dark-800 border border-dark-700 hover:border-purple-600 hover:border-opacity-50 focus:border-purple-600 text-white rounded-lg px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-purple-500 focus:ring-opacity-30"
               />
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+              {errors.email && <p className="text-red-400 text-xs mt-1.5">{errors.email.message}</p>}
             </div>
 
+            {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-sm font-medium text-dark-200 mb-2">Password</label>
               <div className="relative">
                 <input
                   {...register('password')}
                   type={showPw ? 'text' : 'password'}
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent pr-10"
+                  className="w-full bg-dark-800 border border-dark-700 hover:border-purple-600 hover:border-opacity-50 focus:border-purple-600 text-white rounded-lg px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-purple-500 focus:ring-opacity-30 pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPw(p => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 hover:text-dark-200 transition-colors"
+                  tabIndex={-1}
                 >
-                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+              {errors.password && <p className="text-red-400 text-xs mt-1.5">{errors.password.message}</p>}
             </div>
 
+            {/* Sign In Button */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg text-sm transition-colors"
+              className={Buttons.primary + ' w-full disabled:opacity-50 disabled:cursor-not-allowed'}
             >
-              {isSubmitting ? 'Signing in…' : 'Sign in'}
+              {isSubmitting ? 'Signing in…' : 'Sign In'}
             </button>
           </form>
 
-          {/* Quick login buttons for development */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-600 mb-3 font-medium">Quick Login (Dev)</p>
-            <div className="grid grid-cols-1 gap-2">
+          {/* Quick Login Section */}
+          <div className="mt-8 pt-8 border-t border-dark-700">
+            <p className="text-xs font-semibold text-dark-300 uppercase tracking-wider mb-4">Quick Login (Development)</p>
+            <div className="space-y-2">
               <button
                 type="button"
                 onClick={() => quickLogin('admin@restore.local')}
-                className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg text-sm transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-dark-800 hover:bg-dark-700 border border-dark-600 text-white py-2.5 rounded-lg text-sm font-medium transition-all"
               >
                 <LogIn size={16} />
                 Admin
@@ -148,7 +160,7 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={() => quickLogin('commander@restore.local')}
-                className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg text-sm transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-dark-800 hover:bg-dark-700 border border-dark-600 text-white py-2.5 rounded-lg text-sm font-medium transition-all"
               >
                 <LogIn size={16} />
                 Commander
@@ -156,7 +168,7 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={() => quickLogin('analyst@restore.local')}
-                className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg text-sm transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-dark-800 hover:bg-dark-700 border border-dark-600 text-white py-2.5 rounded-lg text-sm font-medium transition-all"
               >
                 <LogIn size={16} />
                 Analyst
@@ -164,17 +176,28 @@ export function LoginPage() {
             </div>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <div className="flex gap-2 text-xs text-gray-500">
-              <span className="inline-block px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-medium">Bronze</span>
-              <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-800 rounded font-medium">Silver</span>
-              <span className="inline-block px-2 py-0.5 bg-green-100 text-green-800 rounded font-medium">Gold</span>
-              <span className="text-gray-400 self-center">— tier assigned at login</span>
+          {/* Tier Legend */}
+          <div className="mt-6 pt-6 border-t border-dark-700">
+            <p className="text-xs text-dark-400 mb-3 font-medium">Account tiers</p>
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-500/20 border border-amber-500/50 text-amber-300 rounded-full text-xs font-semibold">
+                <span className="w-1.5 h-1.5 bg-amber-400 rounded-full"></span>
+                Bronze
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-500/20 border border-blue-500/50 text-blue-300 rounded-full text-xs font-semibold">
+                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+                Silver
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-yellow-500/20 border border-yellow-500/50 text-yellow-300 rounded-full text-xs font-semibold">
+                <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></span>
+                Gold
+              </span>
             </div>
           </div>
         </div>
 
-        <p className="text-center text-blue-200/60 text-xs mt-6">
+        {/* Footer */}
+        <p className="text-center text-dark-400 text-xs">
           RESTORE-SDD-001 v1.1 Lean MVP
         </p>
       </div>
