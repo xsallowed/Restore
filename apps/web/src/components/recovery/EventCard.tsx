@@ -17,15 +17,15 @@ interface EventCardProps {
 
 const SEVERITY_CONFIG = {
   P1: { border: 'border-red-500 border-opacity-40', badge: 'bg-red-600 text-red-100', text: 'text-red-400', label: 'Critical', icon: '🔴' },
-  P2: { border: 'border-orange border-opacity-40', badge: 'bg-orange text-gray-900', text: 'text-orange', label: 'High', icon: '🟠' },
-  P3: { border: 'border-gold border-opacity-40', badge: 'bg-gold text-gray-900', text: 'text-gold', label: 'Medium', icon: '🟡' },
+  P2: { border: 'border-orange border-opacity-40', badge: 'bg-orange text-white', text: 'text-orange', label: 'High', icon: '🟠' },
+  P3: { border: 'border-gold border-opacity-40', badge: 'bg-gold text-white', text: 'text-gold', label: 'Medium', icon: '🟡' },
   P4: { border: 'border-purple-600 border-opacity-40', badge: 'bg-purple-600 text-purple-100', text: 'text-purple-400', label: 'Low', icon: '⚪' },
 };
 
 const STATUS_CONFIG = {
-  OPEN: { dot: 'bg-red-500', label: 'Open', badge: 'bg-red-600 text-red-100' },
+  OPEN: { dot: 'bg-red-600', label: 'Open', badge: 'bg-red-600 text-red-100' },
   IN_PROGRESS: { dot: 'bg-purple-600', label: 'Active', badge: 'bg-purple-600 text-purple-100' },
-  RESOLVED: { dot: 'bg-gold', label: 'Resolved', badge: 'bg-gold text-gray-900' },
+  RESOLVED: { dot: 'bg-gold', label: 'Resolved', badge: 'bg-gold text-white' },
   CLOSED: { dot: 'bg-dark-500', label: 'Closed', badge: 'bg-dark-600 text-dark-300' },
 };
 

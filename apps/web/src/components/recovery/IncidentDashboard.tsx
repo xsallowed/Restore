@@ -51,7 +51,7 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
             <div className="flex items-center gap-3 mb-3">
               <div className={clsx(
                 'w-3 h-3 rounded-full',
-                metrics.severity === 'P1' ? 'bg-red-500' :
+                metrics.severity === 'P1' ? 'bg-red-600' :
                 metrics.severity === 'P2' ? 'bg-orange' :
                 metrics.severity === 'P3' ? 'bg-gold' :
                 'bg-purple-500'
@@ -170,7 +170,7 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
               <div key={idx} className="flex items-center justify-between p-3 bg-dark-800 bg-opacity-50 rounded-lg hover:border-orange hover:border-opacity-50 border border-transparent transition-colors">
                 <span className="text-sm text-dark-200">{factor.label}</span>
                 <span className={clsx('text-xs font-semibold px-2 py-1 rounded',
-                  factor.impact === 'High' ? 'bg-red-500 bg-opacity-20 text-red-200' :
+                  factor.impact === 'High' ? 'bg-red-600 bg-opacity-20 text-red-200' :
                   factor.impact === 'Medium' ? 'bg-orange bg-opacity-20 text-orange' :
                   'bg-purple-600 bg-opacity-20 text-purple-200'
                 )}>
@@ -206,7 +206,7 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
                     </p>
                   </div>
                   <span className={clsx('text-xs font-semibold px-2 py-1 rounded',
-                    risk.severity === 'high' ? 'bg-red-500 bg-opacity-20 text-red-200' :
+                    risk.severity === 'high' ? 'bg-red-600 bg-opacity-20 text-red-200' :
                     'bg-orange bg-opacity-20 text-orange'
                   )}>
                     {risk.severity}

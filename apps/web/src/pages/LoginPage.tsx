@@ -180,11 +180,11 @@ export function LoginPage() {
           <div className="mt-6 pt-6 border-t border-dark-700">
             <p className="text-xs text-gray-400 mb-3 font-medium">Account tiers</p>
             <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-500/20 border border-amber-500/50 text-amber-300 rounded-full text-xs font-semibold">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-red-600/20 border border-amber-500/50 text-amber-300 rounded-full text-xs font-semibold">
                 <span className="w-1.5 h-1.5 bg-amber-400 rounded-full"></span>
                 Bronze
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-500/20 border border-blue-500/50 text-blue-300 rounded-full text-xs font-semibold">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-red-600/20 border border-blue-500/50 text-blue-300 rounded-full text-xs font-semibold">
                 <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
                 Silver
               </span>

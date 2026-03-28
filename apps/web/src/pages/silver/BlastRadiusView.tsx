@@ -192,11 +192,11 @@ export function BlastRadiusView() {
     <div className="max-w-6xl mx-auto">
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Asset Dependency Graph</h1>
+          <h1 className="text-2xl font-bold text-white">Asset Dependency Graph</h1>
           <p className="text-sm text-gray-500 mt-0.5">Click any asset to reveal its blast radius</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-lg px-3 py-2">
+          <div className="flex items-center gap-1.5 bg-dark-900 bg-opacity-50 border border-gray-600 rounded-lg px-3 py-2">
             <Search size={14} className="text-gray-400" />
             <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Filter assets…" className="text-sm bg-transparent focus:outline-none w-32" />
           </div>
@@ -205,11 +205,11 @@ export function BlastRadiusView() {
 
       <div className="grid grid-cols-4 gap-4">
         {/* Graph canvas */}
-        <div className="col-span-3 bg-white border border-gray-200 rounded-xl overflow-hidden relative" style={{ height: 520 }}>
+        <div className="col-span-3 bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl overflow-hidden relative" style={{ height: 520 }}>
           <canvas ref={canvasRef} className="w-full h-full cursor-pointer" onClick={handleCanvasClick} />
 
           {/* Legend */}
-          <div className="absolute bottom-3 left-3 bg-white/90 rounded-lg px-3 py-2 text-xs space-y-1">
+          <div className="absolute bottom-3 left-3 bg-dark-900 bg-opacity-50/90 rounded-lg px-3 py-2 text-xs space-y-1">
             {Object.entries(STATUS_COLOR).map(([s, c]) => (
               <div key={s} className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-full inline-block" style={{ background: c }} />
@@ -231,10 +231,10 @@ export function BlastRadiusView() {
         {/* Side panel */}
         <div className="space-y-3">
           {selectedNode ? (
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+            <div className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-700 flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full" style={{ background: STATUS_COLOR[selectedNode.status] }} />
-                <span className="font-medium text-sm text-gray-900">{selectedNode.name}</span>
+                <span className="font-medium text-sm text-white">{selectedNode.name}</span>
               </div>
               <div className="divide-y divide-gray-50 text-xs">
                 {[
@@ -245,12 +245,12 @@ export function BlastRadiusView() {
                 ].map(([k, v]) => (
                   <div key={k as string} className="px-4 py-2.5 flex justify-between">
                     <span className="text-gray-400">{k as string}</span>
-                    <span className="text-gray-700 font-medium text-right">{v as string}</span>
+                    <span className="text-gray-300 font-medium text-right">{v as string}</span>
                   </div>
                 ))}
               </div>
               {blastRadiusIds.size > 1 && (
-                <div className="px-4 py-3 bg-red-50 border-t border-red-100">
+                <div className="px-4 py-3 bg-dark-800 border-t border-red-100">
                   <div className="flex items-center gap-1.5 text-red-700 text-xs font-medium mb-1">
                     <AlertTriangle size={12} /> Blast Radius
                   </div>
@@ -259,14 +259,14 @@ export function BlastRadiusView() {
               )}
             </div>
           ) : (
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-center text-sm text-gray-400">
+            <div className="bg-dark-800 border border-gray-600 rounded-xl p-4 text-center text-sm text-gray-400">
               Click an asset node to see details and blast radius
             </div>
           )}
 
           {/* Stats */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4 text-xs space-y-2">
-            <p className="font-semibold text-gray-700 text-sm">Asset summary</p>
+          <div className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl p-4 text-xs space-y-2">
+            <p className="font-semibold text-gray-300 text-sm">Asset summary</p>
             {Object.entries(STATUS_COLOR).map(([status, color]) => {
               const count = nodes.filter(n => n.status === status).length;
               if (!count) return null;
@@ -276,11 +276,11 @@ export function BlastRadiusView() {
                     <span className="w-2 h-2 rounded-full" style={{ background: color }} />
                     <span className="text-gray-500">{status}</span>
                   </div>
-                  <span className="font-medium text-gray-700">{count}</span>
+                  <span className="font-medium text-gray-300">{count}</span>
                 </div>
               );
             })}
-            <div className="pt-1 border-t border-gray-100 flex justify-between">
+            <div className="pt-1 border-t border-gray-700 flex justify-between">
               <span className="text-gray-400">Total</span>
               <span className="font-semibold">{nodes.length}</span>
             </div>

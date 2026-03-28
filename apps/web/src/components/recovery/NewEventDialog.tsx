@@ -82,11 +82,11 @@ export function NewEventDialog({ isOpen, onClose, onCreate }: NewEventDialogProp
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-dark-900 bg-opacity-50 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200 px-6 py-4 flex items-start justify-between">
+        <div className="sticky top-0 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-600 px-6 py-4 flex items-start justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Create New Incident</h2>
+            <h2 className="text-2xl font-bold text-white">Create New Incident</h2>
             <p className="text-sm text-gray-600 mt-1">Start a new recovery operation</p>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded-lg transition-colors">
@@ -98,24 +98,24 @@ export function NewEventDialog({ isOpen, onClose, onCreate }: NewEventDialogProp
         <div className="px-6 py-6 space-y-6">
           {/* Event Title */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Incident Title *</label>
+            <label className="block text-sm font-semibold text-white mb-2">Incident Title *</label>
             <input
               type="text"
               value={form.title}
               onChange={(e) => setForm(f => ({ ...f, title: e.target.value }))}
               placeholder="e.g. Ransomware Attack on Production Database"
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              className="w-full border-2 border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
             />
           </div>
 
           {/* Event Type & Severity */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Event Type</label>
+              <label className="block text-sm font-semibold text-white mb-2">Event Type</label>
               <select
                 value={form.event_type}
                 onChange={(e) => setForm(f => ({ ...f, event_type: e.target.value }))}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                className="w-full border-2 border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
               >
                 {EVENT_TYPES.map(type => (
                   <option key={type} value={type}>{type}</option>
@@ -124,11 +124,11 @@ export function NewEventDialog({ isOpen, onClose, onCreate }: NewEventDialogProp
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Severity</label>
+              <label className="block text-sm font-semibold text-white mb-2">Severity</label>
               <select
                 value={form.severity}
                 onChange={(e) => setForm(f => ({ ...f, severity: e.target.value as 'P1' | 'P2' | 'P3' | 'P4' }))}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                className="w-full border-2 border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
               >
                 <option value="P1">🔴 Critical (P1)</option>
                 <option value="P2">🟠 High (P2)</option>
@@ -141,10 +141,10 @@ export function NewEventDialog({ isOpen, onClose, onCreate }: NewEventDialogProp
           {/* Runbook Upload */}
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-3">Import Runbooks</label>
-              <label className="flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-300 rounded-xl py-8 px-4 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition-all">
+              <label className="block text-sm font-semibold text-white mb-3">Import Runbooks</label>
+              <label className="flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-300 rounded-xl py-8 px-4 hover:border-blue-400 hover:bg-dark-800 cursor-pointer transition-all">
                 <FileUp size={32} className="text-gray-400 mb-2" />
-                <span className="text-sm font-medium text-gray-700">Drag & drop PDFs or click to select</span>
+                <span className="text-sm font-medium text-gray-300">Drag & drop PDFs or click to select</span>
                 <span className="text-xs text-gray-500 mt-1">Runbooks will guide recovery steps</span>
                 <input
                   type="file"
@@ -158,13 +158,13 @@ export function NewEventDialog({ isOpen, onClose, onCreate }: NewEventDialogProp
 
             {/* Uploaded Runbooks */}
             {runbooks.length > 0 && (
-              <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-                <p className="text-sm font-medium text-gray-700">Imported Runbooks ({runbooks.length})</p>
+              <div className="bg-dark-800 rounded-xl p-4 space-y-2">
+                <p className="text-sm font-medium text-gray-300">Imported Runbooks ({runbooks.length})</p>
                 {runbooks.map((file, idx) => (
-                  <div key={idx} className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
+                  <div key={idx} className="flex items-center justify-between bg-dark-900 bg-opacity-50 p-3 rounded-lg border border-gray-600">
                     <div className="flex items-center gap-2">
                       <FileUp size={16} className="text-blue-600" />
-                      <span className="text-sm text-gray-700">{file.name}</span>
+                      <span className="text-sm text-gray-300">{file.name}</span>
                       <span className="text-xs text-gray-500">({(file.size / 1024).toFixed(1)} KB)</span>
                     </div>
                     <button
@@ -180,7 +180,7 @@ export function NewEventDialog({ isOpen, onClose, onCreate }: NewEventDialogProp
           </div>
 
           {/* Alert */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
+          <div className="bg-dark-800 border border-blue-200 rounded-xl p-4 flex gap-3">
             <AlertTriangle size={20} className="text-blue-600 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-blue-900">This will trigger the recovery process</p>
@@ -190,11 +190,11 @@ export function NewEventDialog({ isOpen, onClose, onCreate }: NewEventDialogProp
         </div>
 
         {/* Action Buttons */}
-        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex gap-3 justify-end">
+        <div className="sticky bottom-0 bg-dark-800 border-t border-gray-600 px-6 py-4 flex gap-3 justify-end">
           <button
             onClick={onClose}
             disabled={isCreating}
-            className="px-6 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-xl font-medium transition-colors disabled:opacity-50"
+            className="px-6 py-2 text-gray-300 bg-gray-200 hover:bg-gray-300 rounded-xl font-medium transition-colors disabled:opacity-50"
           >
             Cancel
           </button>

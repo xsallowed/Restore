@@ -38,9 +38,9 @@ function ConnectorForm({ onClose, onSaved }: { onClose: () => void; onSaved: () 
 
   return (
     <div style={{ minHeight: 540, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-900">Add runbook connector</h2>
+      <div className="bg-dark-900 bg-opacity-50 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700">
+          <h2 className="font-semibold text-white">Add runbook connector</h2>
           <button onClick={onClose}><X size={16} className="text-gray-400" /></button>
         </div>
         <div className="px-5 py-4 space-y-4 max-h-[65vh] overflow-y-auto">
@@ -48,7 +48,7 @@ function ConnectorForm({ onClose, onSaved }: { onClose: () => void; onSaved: () 
             <label className="block text-xs font-medium text-gray-600 mb-1">Type *</label>
             <div className="grid grid-cols-3 gap-2">
               {CONNECTOR_TYPES.map(t => (
-                <button key={t} onClick={() => setType(t)} className={clsx('text-left px-3 py-2.5 rounded-lg border text-sm transition-colors', type === t ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-gray-200 hover:border-gray-300')}>
+                <button key={t} onClick={() => setType(t)} className={clsx('text-left px-3 py-2.5 rounded-lg border text-sm transition-colors', type === t ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-gray-600 hover:border-gray-300')}>
                   <p className="font-medium text-xs">{t}</p>
                   <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">{TYPE_DESC[t]}</p>
                 </button>
@@ -57,33 +57,33 @@ function ConnectorForm({ onClose, onSaved }: { onClose: () => void; onSaved: () 
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Name *</label>
-            <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Security Runbooks Repo" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
+            <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Security Runbooks Repo" className="w-full border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
           </div>
           {type === 'GITHUB' && (
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="block text-xs font-medium text-gray-600 mb-1">Owner *</label><input value={ghOwner} onChange={e => setGhOwner(e.target.value)} placeholder="org-name" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" /></div>
-              <div><label className="block text-xs font-medium text-gray-600 mb-1">Repository *</label><input value={ghRepo} onChange={e => setGhRepo(e.target.value)} placeholder="repo-name" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" /></div>
-              <div><label className="block text-xs font-medium text-gray-600 mb-1">Branch</label><input value={ghBranch} onChange={e => setGhBranch(e.target.value)} placeholder="main" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" /></div>
-              <div><label className="block text-xs font-medium text-gray-600 mb-1">Paths (comma-separated)</label><input value={ghPaths} onChange={e => setGhPaths(e.target.value)} placeholder="runbooks, playbooks" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" /></div>
+              <div><label className="block text-xs font-medium text-gray-600 mb-1">Owner *</label><input value={ghOwner} onChange={e => setGhOwner(e.target.value)} placeholder="org-name" className="w-full border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" /></div>
+              <div><label className="block text-xs font-medium text-gray-600 mb-1">Repository *</label><input value={ghRepo} onChange={e => setGhRepo(e.target.value)} placeholder="repo-name" className="w-full border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" /></div>
+              <div><label className="block text-xs font-medium text-gray-600 mb-1">Branch</label><input value={ghBranch} onChange={e => setGhBranch(e.target.value)} placeholder="main" className="w-full border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" /></div>
+              <div><label className="block text-xs font-medium text-gray-600 mb-1">Paths (comma-separated)</label><input value={ghPaths} onChange={e => setGhPaths(e.target.value)} placeholder="runbooks, playbooks" className="w-full border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" /></div>
             </div>
           )}
           {type === 'CONFLUENCE' && (
             <div className="space-y-3">
-              <div><label className="block text-xs font-medium text-gray-600 mb-1">Base URL *</label><input value={cfUrl} onChange={e => setCfUrl(e.target.value)} placeholder="https://yourorg.atlassian.net/wiki" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" /></div>
-              <div><label className="block text-xs font-medium text-gray-600 mb-1">Space key *</label><input value={cfSpace} onChange={e => setCfSpace(e.target.value)} placeholder="RUNBOOKS" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" /></div>
+              <div><label className="block text-xs font-medium text-gray-600 mb-1">Base URL *</label><input value={cfUrl} onChange={e => setCfUrl(e.target.value)} placeholder="https://yourorg.atlassian.net/wiki" className="w-full border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" /></div>
+              <div><label className="block text-xs font-medium text-gray-600 mb-1">Space key *</label><input value={cfSpace} onChange={e => setCfSpace(e.target.value)} placeholder="RUNBOOKS" className="w-full border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" /></div>
             </div>
           )}
           {type === 'HTTP' && (
-            <div><label className="block text-xs font-medium text-gray-600 mb-1">URLs (one per line) *</label><textarea value={httpUrls} onChange={e => setHttpUrls(e.target.value)} rows={3} placeholder="https://example.com/runbook.md" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none font-mono" /></div>
+            <div><label className="block text-xs font-medium text-gray-600 mb-1">URLs (one per line) *</label><textarea value={httpUrls} onChange={e => setHttpUrls(e.target.value)} rows={3} placeholder="https://example.com/runbook.md" className="w-full border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none font-mono" /></div>
           )}
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Credential env var name</label>
-            <input value={credRef} onChange={e => setCredRef(e.target.value)} placeholder="e.g. GITHUB_TOKEN" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-400" />
+            <input value={credRef} onChange={e => setCredRef(e.target.value)} placeholder="e.g. GITHUB_TOKEN" className="w-full border border-gray-600 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-400" />
             <p className="text-xs text-gray-400 mt-1">Add this variable to your .env file. Never stored in the database.</p>
           </div>
         </div>
-        <div className="px-5 pb-5 pt-3 flex gap-3 border-t border-gray-100">
-          <button onClick={onClose} className="flex-1 text-sm border border-gray-200 py-2.5 rounded-lg hover:bg-gray-50">Cancel</button>
+        <div className="px-5 pb-5 pt-3 flex gap-3 border-t border-gray-700">
+          <button onClick={onClose} className="flex-1 text-sm border border-gray-600 py-2.5 rounded-lg hover:bg-dark-800">Cancel</button>
           <button onClick={() => mutation.mutate()} disabled={!name || mutation.isPending} className="flex-1 text-sm bg-brand-600 text-white py-2.5 rounded-lg hover:bg-brand-700 disabled:opacity-50">{mutation.isPending ? 'Adding…' : 'Add connector'}</button>
         </div>
       </div>
@@ -111,10 +111,10 @@ function PdfUpload({ onIngested }: { onIngested: () => void }) {
     setUploading(false); setProgress('');
   };
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2"><Upload size={14} className="text-purple-500" /><span className="text-sm font-medium text-gray-900">PDF upload (FR1.6)</span></div>
+    <div className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-gray-700 flex items-center gap-2"><Upload size={14} className="text-purple-500" /><span className="text-sm font-medium text-white">PDF upload (FR1.6)</span></div>
       <div className="p-4">
-        <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-colors"
+        <div className="border-2 border-dashed border-gray-600 rounded-xl p-6 text-center cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-colors"
           onClick={() => fileRef.current?.click()}
           onDragOver={e => e.preventDefault()}
           onDrop={e => { e.preventDefault(); handleFiles(e.dataTransfer.files); }}>
@@ -151,27 +151,27 @@ export function ConnectorsPage() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-bold text-gray-900">Runbook Connectors</h1><p className="text-sm text-gray-500 mt-0.5">Source integrations · FR1</p></div>
+        <div><h1 className="text-2xl font-bold text-white">Runbook Connectors</h1><p className="text-sm text-gray-500 mt-0.5">Source integrations · FR1</p></div>
         <button onClick={() => setShowAdd(true)} className="flex items-center gap-1.5 text-sm bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700"><Plus size={14} /> Add connector</button>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-gray-700">Configured connectors</h2>
+          <h2 className="text-sm font-semibold text-gray-300">Configured connectors</h2>
           {connectors.length === 0 ? (
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-center"><p className="text-sm text-gray-400 mb-3">No connectors yet</p><button onClick={() => setShowAdd(true)} className="text-sm bg-brand-600 text-white px-3 py-2 rounded-lg hover:bg-brand-700 inline-flex items-center gap-1.5"><Plus size={13} /> Add connector</button></div>
+            <div className="bg-dark-800 border border-gray-600 rounded-xl p-6 text-center"><p className="text-sm text-gray-400 mb-3">No connectors yet</p><button onClick={() => setShowAdd(true)} className="text-sm bg-brand-600 text-white px-3 py-2 rounded-lg hover:bg-brand-700 inline-flex items-center gap-1.5"><Plus size={13} /> Add connector</button></div>
           ) : connectors.map(c => (
-            <div key={c.id} className="bg-white border border-gray-200 rounded-xl p-4">
+            <div key={c.id} className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl p-4">
               <div className="flex items-center gap-2">
                 <StatusDot s={c.last_sync_status} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm text-gray-900 truncate">{c.name}</p>
+                  <p className="font-medium text-sm text-white truncate">{c.name}</p>
                   <p className="text-xs text-gray-400">{c.connector_type} · {c.last_synced_at ? formatDistanceToNow(new Date(c.last_synced_at), { addSuffix: true }) : 'Never synced'}</p>
                 </div>
-                <button onClick={() => syncMut.mutate(c.id)} className="text-xs border border-gray-200 px-2.5 py-1.5 rounded-lg hover:bg-gray-50 text-gray-600 flex items-center gap-1"><RefreshCw size={11} /> Sync</button>
+                <button onClick={() => syncMut.mutate(c.id)} className="text-xs border border-gray-600 px-2.5 py-1.5 rounded-lg hover:bg-dark-800 text-gray-600 flex items-center gap-1"><RefreshCw size={11} /> Sync</button>
                 <button onClick={() => { if (window.confirm(`Delete ${c.name}?`)) delMut.mutate(c.id); }} className="text-xs text-red-400 hover:text-red-600 px-2 py-1.5">✕</button>
               </div>
-              {c.last_sync_status === 'ERROR' && <p className="text-xs text-red-500 mt-2 bg-red-50 px-2 py-1 rounded">Last sync failed — check credentials</p>}
+              {c.last_sync_status === 'ERROR' && <p className="text-xs text-red-500 mt-2 bg-dark-800 px-2 py-1 rounded">Last sync failed — check credentials</p>}
             </div>
           ))}
         </div>
@@ -180,19 +180,19 @@ export function ConnectorsPage() {
 
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-gray-700 flex items-center gap-2"><BookOpen size={15} className="text-brand-500" /> Runbook library ({runbooks.length})</h2>
-          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2"><Search size={13} className="text-gray-400" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…" className="text-sm bg-transparent focus:outline-none w-40" /></div>
+          <h2 className="text-sm font-semibold text-gray-300 flex items-center gap-2"><BookOpen size={15} className="text-brand-500" /> Runbook library ({runbooks.length})</h2>
+          <div className="flex items-center gap-2 bg-dark-900 bg-opacity-50 border border-gray-600 rounded-lg px-3 py-2"><Search size={13} className="text-gray-400" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…" className="text-sm bg-transparent focus:outline-none w-40" /></div>
         </div>
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl overflow-hidden">
           {filtered.length === 0 ? <div className="py-10 text-center text-sm text-gray-400">{runbooks.length === 0 ? 'No runbooks ingested yet — add a connector or upload a PDF' : 'No matches'}</div> : (
             <table className="w-full text-sm">
-              <thead><tr className="bg-gray-50 border-b border-gray-100">{['Title','Source','Tags','Last synced',''].map(h => <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide text-left">{h}</th>)}</tr></thead>
+              <thead><tr className="bg-dark-800 border-b border-gray-700">{['Title','Source','Tags','Last synced',''].map(h => <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide text-left">{h}</th>)}</tr></thead>
               <tbody className="divide-y divide-gray-50">
                 {filtered.map(r => (
-                  <tr key={r.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate">{r.title}</td>
+                  <tr key={r.id} className="hover:bg-dark-800">
+                    <td className="px-4 py-3 font-medium text-white max-w-xs truncate">{r.title}</td>
                     <td className="px-4 py-3 text-xs text-gray-400 font-mono max-w-xs truncate">{r.source_ref}</td>
-                    <td className="px-4 py-3"><div className="flex gap-1 flex-wrap">{(r.event_tags||[]).slice(0,2).map(t => <span key={t} className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">{t}</span>)}{(r.event_tags||[]).length===0&&<span className="text-xs text-gray-300">—</span>}</div></td>
+                    <td className="px-4 py-3"><div className="flex gap-1 flex-wrap">{(r.event_tags||[]).slice(0,2).map(t => <span key={t} className="text-[10px] bg-dark-800 text-blue-700 px-1.5 py-0.5 rounded">{t}</span>)}{(r.event_tags||[]).length===0&&<span className="text-xs text-gray-300">—</span>}</div></td>
                     <td className="px-4 py-3 text-xs text-gray-400">{formatDistanceToNow(new Date(r.fetched_at), { addSuffix: true })}</td>
                     <td className="px-4 py-3"><button onClick={() => setPreview(r)} className="text-xs text-brand-600 flex items-center gap-1"><Eye size={12} /> Preview</button></td>
                   </tr>
@@ -205,9 +205,9 @@ export function ConnectorsPage() {
 
       {preview && (
         <div style={{ minHeight: 500, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="fixed inset-0 z-50" onClick={() => setPreview(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-              <div><p className="font-semibold text-gray-900">{preview.title}</p><p className="text-xs text-gray-400 font-mono mt-0.5">{preview.source_ref}</p></div>
+          <div className="bg-dark-900 bg-opacity-50 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700 shrink-0">
+              <div><p className="font-semibold text-white">{preview.title}</p><p className="text-xs text-gray-400 font-mono mt-0.5">{preview.source_ref}</p></div>
               <button onClick={() => setPreview(null)}><X size={16} className="text-gray-400" /></button>
             </div>
             <div className="px-5 py-4 overflow-y-auto flex-1"><pre className="text-xs text-gray-600 whitespace-pre-wrap font-mono leading-relaxed">{preview.content_text?.slice(0, 4000)}{(preview.content_text?.length ?? 0) > 4000 ? '\n\n…[truncated]' : ''}</pre></div>

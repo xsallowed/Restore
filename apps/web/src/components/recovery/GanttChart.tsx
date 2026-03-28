@@ -24,7 +24,7 @@ const STATUS_COLOR = {
   IN_PROGRESS: 'bg-purple-500',
   COMPLETED: 'bg-gold',
   SKIPPED: 'bg-dark-600',
-  BLOCKED: 'bg-red-500',
+  BLOCKED: 'bg-red-600',
 };
 
 const STATUS_TEXT = {
@@ -121,7 +121,7 @@ export function GanttChart({ steps, totalMinutes }: GanttChartProps) {
               { color: 'bg-gold', label: 'Completed' },
               { color: 'bg-purple-500', label: 'In Progress' },
               { color: 'bg-dark-500', label: 'Not Started' },
-              { color: 'bg-red-500', label: 'Blocked' },
+              { color: 'bg-red-600', label: 'Blocked' },
               { color: 'ring-2 ring-orange ring-inset bg-dark-800', label: 'Critical Path' },
             ].map((item, idx) => (
               <div key={idx} className="flex items-center gap-2">

@@ -204,14 +204,14 @@ function DependencyGraphCanvas({ assets, dependencies, selectedId, onSelect }: {
         </div>
       )}
       {/* Legend */}
-      <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur rounded-lg px-3 py-2 text-xs border border-gray-100 space-y-1">
+      <div className="absolute bottom-3 left-3 bg-dark-900 bg-opacity-50/90 backdrop-blur rounded-lg px-3 py-2 text-xs border border-gray-700 space-y-1">
         {Object.entries(STATUS_DOT).slice(0, 5).map(([s, c]) => (
           <div key={s} className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full inline-block shrink-0" style={{ background: c }} />
             <span className="text-gray-500">{s}</span>
           </div>
         ))}
-        <div className="border-t border-gray-100 pt-1 text-gray-400">Click node to select</div>
+        <div className="border-t border-gray-700 pt-1 text-gray-400">Click node to select</div>
       </div>
     </div>
   );
@@ -246,12 +246,12 @@ function DependencyTable({ assets, dependencies, selectedId, onSelect }: {
     REQUIRES: 'bg-blue-100 text-blue-800',
     CONSUMES: 'bg-green-100 text-green-800',
     REPLICATES_TO: 'bg-amber-100 text-amber-800',
-    LOAD_BALANCES: 'bg-gray-100 text-gray-700',
+    LOAD_BALANCES: 'bg-dark-700 text-gray-300',
   };
 
   return (
     <div className="flex-1 overflow-hidden flex flex-col">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 shrink-0">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700 shrink-0">
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-gray-500">{filtered.length} dependencies {selectedId ? '(filtered)' : ''}</span>
           {selectedId && <button onClick={() => onSelect('')} className="text-xs text-brand-600 hover:underline">Clear filter</button>}
@@ -262,15 +262,15 @@ function DependencyTable({ assets, dependencies, selectedId, onSelect }: {
       </div>
 
       {addRow && (
-        <div className="px-4 py-3 bg-blue-50 border-b border-blue-100 flex items-center gap-2 flex-wrap shrink-0">
-          <select value={src} onChange={e => setSrc(e.target.value)} className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-brand-400">
+        <div className="px-4 py-3 bg-dark-800 border-b border-blue-100 flex items-center gap-2 flex-wrap shrink-0">
+          <select value={src} onChange={e => setSrc(e.target.value)} className="text-xs border border-gray-600 rounded-lg px-2 py-1.5 bg-dark-900 bg-opacity-50 focus:outline-none focus:ring-1 focus:ring-brand-400">
             <option value="">Source asset…</option>
             {assets.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
           </select>
-          <select value={rel} onChange={e => setRel(e.target.value)} className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-brand-400">
+          <select value={rel} onChange={e => setRel(e.target.value)} className="text-xs border border-gray-600 rounded-lg px-2 py-1.5 bg-dark-900 bg-opacity-50 focus:outline-none focus:ring-1 focus:ring-brand-400">
             {REL_TYPES.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
-          <select value={tgt} onChange={e => setTgt(e.target.value)} className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-brand-400">
+          <select value={tgt} onChange={e => setTgt(e.target.value)} className="text-xs border border-gray-600 rounded-lg px-2 py-1.5 bg-dark-900 bg-opacity-50 focus:outline-none focus:ring-1 focus:ring-brand-400">
             <option value="">Target asset…</option>
             {assets.filter(a => a.id !== src).map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
           </select>
@@ -283,7 +283,7 @@ function DependencyTable({ assets, dependencies, selectedId, onSelect }: {
 
       <div className="overflow-y-auto flex-1">
         <table className="w-full text-xs">
-          <thead className="sticky top-0 bg-gray-50 border-b border-gray-100">
+          <thead className="sticky top-0 bg-dark-800 border-b border-gray-700">
             <tr>{['Source','Relationship','Target','Source Tier','Target Tier'].map(h => <th key={h} className="px-4 py-2.5 text-left font-semibold text-gray-500 uppercase tracking-wide">{h}</th>)}</tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -292,24 +292,24 @@ function DependencyTable({ assets, dependencies, selectedId, onSelect }: {
               const tgt = assetMap.get(d.target);
               const isHighlighted = d.source === selectedId || d.target === selectedId;
               return (
-                <tr key={i} className={clsx('hover:bg-gray-50 cursor-pointer', isHighlighted && 'bg-blue-50/50')}>
+                <tr key={i} className={clsx('hover:bg-dark-800 cursor-pointer', isHighlighted && 'bg-dark-800/50')}>
                   <td className="px-4 py-2.5" onClick={() => onSelect(d.source)}>
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full shrink-0" style={{ background: STATUS_DOT[src?.status ?? 'UNKNOWN'] }} />
-                      <span className="font-medium text-gray-900">{src?.name ?? d.source.slice(0, 8)}</span>
+                      <span className="font-medium text-white">{src?.name ?? d.source.slice(0, 8)}</span>
                     </div>
                     <p className="text-gray-400 ml-3.5">{src?.asset_type}</p>
                   </td>
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-1">
-                      <span className={clsx('px-1.5 py-0.5 rounded text-[10px] font-medium', REL_BADGE[d.relationship_type] ?? 'bg-gray-100 text-gray-600')}>{d.relationship_type}</span>
+                      <span className={clsx('px-1.5 py-0.5 rounded text-[10px] font-medium', REL_BADGE[d.relationship_type] ?? 'bg-dark-700 text-gray-600')}>{d.relationship_type}</span>
                       <ArrowRight size={10} className="text-gray-300" />
                     </div>
                   </td>
                   <td className="px-4 py-2.5" onClick={() => onSelect(d.target)}>
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full shrink-0" style={{ background: STATUS_DOT[tgt?.status ?? 'UNKNOWN'] }} />
-                      <span className="font-medium text-gray-900">{tgt?.name ?? d.target.slice(0, 8)}</span>
+                      <span className="font-medium text-white">{tgt?.name ?? d.target.slice(0, 8)}</span>
                     </div>
                     <p className="text-gray-400 ml-3.5">{tgt?.asset_type}</p>
                   </td>
@@ -368,22 +368,22 @@ function RunbookAssociationPanel({ asset, service, runbooks, onClose }: {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700 shrink-0">
         <div className="flex items-center gap-2">
           <BookOpen size={15} className="text-purple-500" />
           <div>
-            <p className="text-sm font-semibold text-gray-900">Runbook association</p>
+            <p className="text-sm font-semibold text-white">Runbook association</p>
             <p className="text-xs text-gray-400">{name} · {runbooks.length} available</p>
           </div>
         </div>
         <button onClick={onClose}><X size={15} className="text-gray-400 hover:text-gray-600" /></button>
       </div>
 
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 space-y-2 shrink-0">
+      <div className="px-4 py-3 bg-dark-800 border-b border-gray-700 space-y-2 shrink-0">
         <div className="flex gap-2">
           <div className="flex-1">
             <label className="text-xs text-gray-500 mb-1 block">Event type to associate</label>
-            <select value={eventType} onChange={e => setEventType(e.target.value)} className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none">
+            <select value={eventType} onChange={e => setEventType(e.target.value)} className="w-full text-xs border border-gray-600 rounded-lg px-2 py-1.5 bg-dark-900 bg-opacity-50 focus:outline-none">
               {EVENT_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}
             </select>
           </div>
@@ -391,8 +391,8 @@ function RunbookAssociationPanel({ asset, service, runbooks, onClose }: {
         <p className="text-xs text-gray-400">Select runbooks to associate with this {asset ? 'component' : 'service'} for {eventType.replace(/_/g, ' ')} recovery. These will be used by the SOE generator when this component is affected.</p>
       </div>
 
-      <div className="px-4 py-2 border-b border-gray-100 shrink-0">
-        <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-2.5 py-1.5">
+      <div className="px-4 py-2 border-b border-gray-700 shrink-0">
+        <div className="flex items-center gap-2 bg-dark-800 rounded-lg px-2.5 py-1.5">
           <Search size={13} className="text-gray-400" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search runbooks…" className="text-xs bg-transparent focus:outline-none flex-1" />
         </div>
@@ -406,22 +406,22 @@ function RunbookAssociationPanel({ asset, service, runbooks, onClose }: {
         ) : filtered.map(r => {
           const isLinked = linked.has(r.id) || (r.event_tags || []).includes(eventType);
           return (
-            <div key={r.id} className={clsx('px-4 py-3 hover:bg-gray-50 transition-colors', isLinked && 'bg-green-50/50')}>
+            <div key={r.id} className={clsx('px-4 py-3 hover:bg-dark-800 transition-colors', isLinked && 'bg-dark-800/50')}>
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5">
                     {isLinked && <CheckCircle2 size={12} className="text-green-500 shrink-0" />}
-                    <p className="text-xs font-medium text-gray-900 truncate">{r.title}</p>
+                    <p className="text-xs font-medium text-white truncate">{r.title}</p>
                   </div>
                   <p className="text-[10px] text-gray-400 font-mono truncate">{r.source_ref}</p>
                   <div className="flex gap-1 mt-1 flex-wrap">
                     {(r.event_tags || []).map(t => (
-                      <span key={t} className={clsx('text-[10px] px-1.5 py-0.5 rounded', t === eventType ? 'bg-blue-100 text-blue-800 font-medium' : 'bg-gray-100 text-gray-500')}>{t}</span>
+                      <span key={t} className={clsx('text-[10px] px-1.5 py-0.5 rounded', t === eventType ? 'bg-blue-100 text-blue-800 font-medium' : 'bg-dark-700 text-gray-500')}>{t}</span>
                     ))}
                   </div>
                 </div>
                 <div className="flex gap-1 shrink-0">
-                  <button onClick={() => setPreview(r)} className="p-1.5 hover:bg-gray-100 rounded text-gray-400"><Eye size={12} /></button>
+                  <button onClick={() => setPreview(r)} className="p-1.5 hover:bg-dark-700 rounded text-gray-400"><Eye size={12} /></button>
                   <button
                     onClick={() => tagMutation.mutate(r.id)}
                     disabled={isLinked || tagMutation.isPending}
@@ -438,9 +438,9 @@ function RunbookAssociationPanel({ asset, service, runbooks, onClose }: {
 
       {preview && (
         <div style={{ minHeight: 400, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="fixed inset-0 z-50" onClick={() => setPreview(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl mx-4 max-h-[75vh] flex flex-col" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-              <p className="font-semibold text-gray-900 text-sm">{preview.title}</p>
+          <div className="bg-dark-900 bg-opacity-50 rounded-2xl shadow-2xl w-full max-w-xl mx-4 max-h-[75vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700 shrink-0">
+              <p className="font-semibold text-white text-sm">{preview.title}</p>
               <button onClick={() => setPreview(null)}><X size={15} className="text-gray-400" /></button>
             </div>
             <div className="px-5 py-4 overflow-y-auto flex-1">
@@ -486,7 +486,7 @@ function ServiceDetailPanel({ service, assets, runbooks, allAssets }: { service:
                 <span className="w-2 h-2 rounded-full" style={{ background: STATUS_DOT[service.status] }} />
                 <span className="text-xs text-gray-500">{service.status}</span>
               </div>
-              <h3 className="font-bold text-gray-900">{service.name}</h3>
+              <h3 className="font-bold text-white">{service.name}</h3>
               <p className="text-xs text-gray-500 mt-0.5">{service.business_unit}</p>
             </div>
             <div className="text-right">
@@ -505,14 +505,14 @@ function ServiceDetailPanel({ service, assets, runbooks, allAssets }: { service:
         {/* Component assets */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Component assets ({assets.length})</p>
+            <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Component assets ({assets.length})</p>
           </div>
           <div className="space-y-1.5">
             {assets.map(a => (
-              <div key={a.id} className="flex items-center gap-2 bg-white border border-gray-100 rounded-lg px-3 py-2 group">
+              <div key={a.id} className="flex items-center gap-2 bg-dark-900 bg-opacity-50 border border-gray-700 rounded-lg px-3 py-2 group">
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ background: STATUS_DOT[a.status] }} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-gray-900 truncate">{a.name}</p>
+                  <p className="text-xs font-medium text-white truncate">{a.name}</p>
                   <p className="text-[10px] text-gray-400">{a.asset_type} · T{a.criticality_tier}</p>
                 </div>
                 <button onClick={() => unlinkMutation.mutate(a.id)} className="opacity-0 group-hover:opacity-100 p-1 text-gray-300 hover:text-red-400 transition-all"><X size={11} /></button>
@@ -526,7 +526,7 @@ function ServiceDetailPanel({ service, assets, runbooks, allAssets }: { service:
               <p className="text-[10px] text-gray-400 mb-1">Add asset:</p>
               <div className="flex flex-wrap gap-1">
                 {unlinkedAssets.slice(0, 8).map(a => (
-                  <button key={a.id} onClick={() => linkMutation.mutate(a.id)} className="text-[10px] bg-gray-100 text-gray-600 hover:bg-brand-100 hover:text-brand-700 px-2 py-1 rounded-full transition-colors">
+                  <button key={a.id} onClick={() => linkMutation.mutate(a.id)} className="text-[10px] bg-dark-700 text-gray-600 hover:bg-brand-100 hover:text-brand-700 px-2 py-1 rounded-full transition-colors">
                     + {a.name}
                   </button>
                 ))}
@@ -538,22 +538,22 @@ function ServiceDetailPanel({ service, assets, runbooks, allAssets }: { service:
         {/* Runbook associations */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Recovery runbooks ({serviceRunbooks.length})</p>
+            <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Recovery runbooks ({serviceRunbooks.length})</p>
             <button onClick={() => setShowRunbooks(s => !s)} className="text-xs text-brand-600 hover:text-brand-700 flex items-center gap-1">
               <Link size={11} /> Associate
             </button>
           </div>
           {serviceRunbooks.length === 0 ? (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
+            <div className="bg-dark-800 border border-amber-200 rounded-lg px-3 py-2.5">
               <p className="text-xs text-amber-700 font-medium">No runbooks linked</p>
               <p className="text-[10px] text-amber-600 mt-0.5">Associate runbooks to enable AI-powered SOE generation for this service</p>
             </div>
           ) : serviceRunbooks.slice(0, 4).map(r => (
-            <div key={r.id} className="flex items-center gap-2 bg-white border border-gray-100 rounded-lg px-3 py-2 mb-1.5">
+            <div key={r.id} className="flex items-center gap-2 bg-dark-900 bg-opacity-50 border border-gray-700 rounded-lg px-3 py-2 mb-1.5">
               <FileText size={12} className="text-purple-400 shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-gray-800 truncate">{r.title}</p>
-                <div className="flex gap-1 mt-0.5">{(r.event_tags || []).slice(0, 2).map(t => <span key={t} className="text-[9px] bg-blue-50 text-blue-700 px-1 py-0.5 rounded">{t}</span>)}</div>
+                <p className="text-xs font-medium text-gray-100 truncate">{r.title}</p>
+                <div className="flex gap-1 mt-0.5">{(r.event_tags || []).slice(0, 2).map(t => <span key={t} className="text-[9px] bg-dark-800 text-blue-700 px-1 py-0.5 rounded">{t}</span>)}</div>
               </div>
             </div>
           ))}
@@ -561,7 +561,7 @@ function ServiceDetailPanel({ service, assets, runbooks, allAssets }: { service:
 
         {showRunbooks && (
           <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center" onClick={() => setShowRunbooks(false)}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 h-[70vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="bg-dark-900 bg-opacity-50 rounded-2xl shadow-2xl w-full max-w-md mx-4 h-[70vh] flex flex-col" onClick={e => e.stopPropagation()}>
               <RunbookAssociationPanel service={service} runbooks={runbooks} onClose={() => setShowRunbooks(false)} />
             </div>
           </div>
@@ -581,14 +581,14 @@ function AssetDetailPanel({ asset, dependencies, assets, runbooks }: { asset: As
   return (
     <div className="h-full overflow-y-auto">
       <div className="p-4 space-y-4">
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
+        <div className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <span className="w-3 h-3 rounded-full shrink-0" style={{ background: STATUS_DOT[asset.status] }} />
-            <h3 className="font-bold text-gray-900">{asset.name}</h3>
+            <h3 className="font-bold text-white">{asset.name}</h3>
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs">
             {[['Type', asset.asset_type], ['Env', asset.environment], ['Tier', `T${asset.criticality_tier}`], ['Owner', asset.owner || '—'], ['Status', asset.status]].map(([k, v]) => (
-              <div key={k as string}><span className="text-gray-400">{k}</span><p className="font-medium text-gray-800 mt-0.5">{v}</p></div>
+              <div key={k as string}><span className="text-gray-400">{k}</span><p className="font-medium text-gray-100 mt-0.5">{v}</p></div>
             ))}
           </div>
         </div>
@@ -599,7 +599,7 @@ function AssetDetailPanel({ asset, dependencies, assets, runbooks }: { asset: As
             <div className="space-y-1">
               {upstreamDeps.map((d, i) => {
                 const src = assetMap.get(d.source);
-                return <div key={i} className="flex items-center gap-2 text-xs bg-gray-50 rounded-lg px-3 py-2">
+                return <div key={i} className="flex items-center gap-2 text-xs bg-dark-800 rounded-lg px-3 py-2">
                   <ArrowRight size={11} className="text-gray-300 rotate-180" />
                   <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: STATUS_DOT[src?.status ?? 'UNKNOWN'] }} />
                   <span className="font-medium flex-1 truncate">{src?.name}</span>
@@ -616,7 +616,7 @@ function AssetDetailPanel({ asset, dependencies, assets, runbooks }: { asset: As
             <div className="space-y-1">
               {downstreamDeps.map((d, i) => {
                 const tgt = assetMap.get(d.target);
-                return <div key={i} className="flex items-center gap-2 text-xs bg-gray-50 rounded-lg px-3 py-2">
+                return <div key={i} className="flex items-center gap-2 text-xs bg-dark-800 rounded-lg px-3 py-2">
                   <ArrowRight size={11} className="text-gray-300" />
                   <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: STATUS_DOT[tgt?.status ?? 'UNKNOWN'] }} />
                   <span className="font-medium flex-1 truncate">{tgt?.name}</span>
@@ -633,20 +633,20 @@ function AssetDetailPanel({ asset, dependencies, assets, runbooks }: { asset: As
             <button onClick={() => setShowRunbooks(true)} className="text-xs text-brand-600 flex items-center gap-1"><Link size={11} /> Associate</button>
           </div>
           {runbooks.length === 0 ? (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+            <div className="bg-dark-800 border border-amber-200 rounded-lg px-3 py-2">
               <p className="text-xs text-amber-700">No runbooks linked to this component</p>
             </div>
           ) : runbooks.slice(0, 3).map(r => (
-            <div key={r.id} className="flex items-center gap-2 bg-white border border-gray-100 rounded-lg px-3 py-2 mb-1.5">
+            <div key={r.id} className="flex items-center gap-2 bg-dark-900 bg-opacity-50 border border-gray-700 rounded-lg px-3 py-2 mb-1.5">
               <FileText size={11} className="text-purple-400 shrink-0" />
-              <p className="text-xs text-gray-700 truncate">{r.title}</p>
+              <p className="text-xs text-gray-300 truncate">{r.title}</p>
             </div>
           ))}
         </div>
 
         {showRunbooks && (
           <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center" onClick={() => setShowRunbooks(false)}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 h-[70vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="bg-dark-900 bg-opacity-50 rounded-2xl shadow-2xl w-full max-w-md mx-4 h-[70vh] flex flex-col" onClick={e => e.stopPropagation()}>
               <RunbookAssociationPanel asset={asset} runbooks={runbooks} onClose={() => setShowRunbooks(false)} />
             </div>
           </div>
@@ -697,26 +697,26 @@ export function DependencyMappingPage() {
   return (
     <div className="h-[calc(100vh-48px)] flex flex-col max-w-full -m-6">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between shrink-0">
+      <div className="px-6 py-4 border-b border-gray-600 bg-dark-900 bg-opacity-50 flex items-center justify-between shrink-0">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Application Dependency Mapping</h1>
+          <h1 className="text-xl font-bold text-white">Application Dependency Mapping</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             {assets.length} components · {dependencies.length} dependencies · {services.length} business services · {runbooks.length} runbooks
           </p>
         </div>
         <div className="flex gap-2">
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-            <button onClick={() => setView('graph')} className={clsx('flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md transition-colors', view === 'graph' ? 'bg-white shadow-sm text-gray-900 font-medium' : 'text-gray-500 hover:text-gray-700')}>
+          <div className="flex items-center gap-1 bg-dark-700 rounded-lg p-1">
+            <button onClick={() => setView('graph')} className={clsx('flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md transition-colors', view === 'graph' ? 'bg-dark-900 bg-opacity-50 shadow-sm text-white font-medium' : 'text-gray-500 hover:text-gray-300')}>
               <Network size={13} /> Graph
             </button>
-            <button onClick={() => setView('table')} className={clsx('flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md transition-colors', view === 'table' ? 'bg-white shadow-sm text-gray-900 font-medium' : 'text-gray-500 hover:text-gray-700')}>
+            <button onClick={() => setView('table')} className={clsx('flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md transition-colors', view === 'table' ? 'bg-dark-900 bg-opacity-50 shadow-sm text-white font-medium' : 'text-gray-500 hover:text-gray-300')}>
               <Table size={13} /> Table
             </button>
           </div>
-          <button onClick={() => navigate('/assets')} className="text-xs border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-1.5 text-gray-600">
+          <button onClick={() => navigate('/assets')} className="text-xs border border-gray-600 px-3 py-2 rounded-lg hover:bg-dark-800 flex items-center gap-1.5 text-gray-600">
             <Plus size={13} /> Add Component
           </button>
-          <button onClick={() => navigate('/connectors')} className="text-xs border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-1.5 text-gray-600">
+          <button onClick={() => navigate('/connectors')} className="text-xs border border-gray-600 px-3 py-2 rounded-lg hover:bg-dark-800 flex items-center gap-1.5 text-gray-600">
             <BookOpen size={13} /> Runbooks
           </button>
           <button onClick={() => navigate('/events/new')} className="text-xs bg-brand-600 text-white px-3 py-2 rounded-lg hover:bg-brand-700 flex items-center gap-1.5">
@@ -727,8 +727,8 @@ export function DependencyMappingPage() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Left sidebar — Business Services */}
-        <div className="w-56 border-r border-gray-200 bg-gray-50 flex flex-col shrink-0">
-          <div className="px-3 py-2.5 border-b border-gray-200">
+        <div className="w-56 border-r border-gray-600 bg-dark-800 flex flex-col shrink-0">
+          <div className="px-3 py-2.5 border-b border-gray-600">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Business Services</p>
           </div>
           <div className="flex-1 overflow-y-auto py-1">
@@ -736,11 +736,11 @@ export function DependencyMappingPage() {
               <button
                 key={s.id}
                 onClick={() => handleServiceSelect(s.id)}
-                className={clsx('w-full text-left px-3 py-2.5 border-b border-gray-100 transition-colors hover:bg-white', selectedServiceId === s.id && 'bg-white border-l-2 border-l-brand-500')}
+                className={clsx('w-full text-left px-3 py-2.5 border-b border-gray-700 transition-colors hover:bg-dark-900 bg-opacity-50', selectedServiceId === s.id && 'bg-dark-900 bg-opacity-50 border-l-2 border-l-brand-500')}
               >
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: STATUS_DOT[s.status] }} />
-                  <span className="text-xs font-medium text-gray-900 truncate">{s.name}</span>
+                  <span className="text-xs font-medium text-white truncate">{s.name}</span>
                 </div>
                 <p className="text-[10px] text-gray-400 ml-3">{s.business_unit} · T{s.impact_tier}</p>
                 <p className="text-[10px] text-gray-400 ml-3">RTO: {s.rto_minutes >= 60 ? `${Math.round(s.rto_minutes/60*10)/10}h` : `${s.rto_minutes}m`}</p>
@@ -753,7 +753,7 @@ export function DependencyMappingPage() {
               </div>
             )}
           </div>
-          <div className="px-3 py-2.5 border-t border-gray-200 shrink-0">
+          <div className="px-3 py-2.5 border-t border-gray-600 shrink-0">
             <button onClick={() => navigate('/services')} className="w-full text-xs text-center text-brand-600 hover:text-brand-700 py-1.5 flex items-center justify-center gap-1">
               <Plus size={11} /> Manage services
             </button>
@@ -764,15 +764,15 @@ export function DependencyMappingPage() {
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Search bar (graph view) */}
           {view === 'graph' && (
-            <div className="px-4 py-2 border-b border-gray-100 bg-white flex items-center gap-3 shrink-0">
-              <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1.5 flex-1 max-w-xs">
+            <div className="px-4 py-2 border-b border-gray-700 bg-dark-900 bg-opacity-50 flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-2 bg-dark-800 rounded-lg px-3 py-1.5 flex-1 max-w-xs">
                 <Search size={13} className="text-gray-400" />
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter components…" className="text-xs bg-transparent focus:outline-none flex-1" />
               </div>
               {selectedAsset && (
                 <div className="flex items-center gap-2 text-xs text-gray-500">
                   <span className="w-2 h-2 rounded-full" style={{ background: STATUS_DOT[selectedAsset.status] }} />
-                  <span className="font-medium text-gray-700">{selectedAsset.name}</span>
+                  <span className="font-medium text-gray-300">{selectedAsset.name}</span>
                   <button onClick={() => handleAssetSelect(null)} className="text-gray-300 hover:text-gray-500"><X size={12} /></button>
                 </div>
               )}
@@ -805,7 +805,7 @@ export function DependencyMappingPage() {
 
         {/* Right panel — Detail */}
         {(selectedAsset || selectedService) && (
-          <div className="w-72 border-l border-gray-200 bg-white flex flex-col shrink-0 overflow-hidden">
+          <div className="w-72 border-l border-gray-600 bg-dark-900 bg-opacity-50 flex flex-col shrink-0 overflow-hidden">
             {selectedService ? (
               <ServiceDetailPanel
                 service={selectedService}

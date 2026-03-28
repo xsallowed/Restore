@@ -18,16 +18,16 @@ const STATUS_CONFIG: Record<string, { color: string; dot: string; label: string 
   OPERATIONAL:        { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-gold border-opacity-40',   dot: 'bg-gold', label: 'Operational' },
   DEGRADED:           { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-orange border-opacity-40', dot: 'bg-orange', label: 'Degraded' },
   PARTIALLY_IMPACTED: { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-orange border-opacity-40', dot: 'bg-orange', label: 'Partial Impact' },
-  DOWN:               { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-red-500 border-opacity-40',      dot: 'bg-red-500',    label: 'Down' },
+  DOWN:               { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-red-500 border-opacity-40',      dot: 'bg-red-600',    label: 'Down' },
   RECOVERING:         { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-purple-600 border-opacity-40',       dot: 'bg-purple-600',   label: 'Recovering' },
   RESTORED:           { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-gold border-opacity-40',    dot: 'bg-gold',  label: 'Restored' },
 };
 
 const SEVERITY_COLOR: Record<string, string> = {
-  P1: 'bg-red-600 text-red-100',
-  P2: 'bg-orange text-gray-900',
-  P3: 'bg-gold text-gray-900',
-  P4: 'bg-purple-600 text-purple-100',
+  P1: 'bg-red-600 text-white',
+  P2: 'bg-orange text-white',
+  P3: 'bg-gold text-white',
+  P4: 'bg-purple-600 text-white',
 };
 
 export function OrchestratorDashboard() {

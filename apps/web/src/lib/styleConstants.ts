@@ -88,10 +88,10 @@ export const Badges = {
   purpleOutline: 'inline-flex items-center gap-2 border border-purple-600 border-opacity-60 px-3 py-1.5 rounded-full text-xs font-semibold text-purple-300 uppercase tracking-wider',
   
   // Severity badges
-  p1: 'inline-flex px-2.5 py-1.5 rounded-md bg-red-600 text-red-100 text-xs font-semibold',
-  p2: 'inline-flex px-2.5 py-1.5 rounded-md bg-orange text-gray-900 text-xs font-semibold',
-  p3: 'inline-flex px-2.5 py-1.5 rounded-md bg-gold text-gray-900 text-xs font-semibold',
-  p4: 'inline-flex px-2.5 py-1.5 rounded-md bg-purple-600 text-purple-100 text-xs font-semibold',
+  p1: 'inline-flex px-2.5 py-1.5 rounded-md bg-red-600 text-white text-xs font-semibold',
+  p2: 'inline-flex px-2.5 py-1.5 rounded-md bg-orange text-dark-900 text-xs font-semibold',
+  p3: 'inline-flex px-2.5 py-1.5 rounded-md bg-gold text-dark-900 text-xs font-semibold',
+  p4: 'inline-flex px-2.5 py-1.5 rounded-md bg-purple-600 text-white text-xs font-semibold',
 };
 
 // ═══════════════════════════════════════════════════════════════

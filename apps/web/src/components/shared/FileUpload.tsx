@@ -99,7 +99,7 @@ export function FileUpload({ eventId, stepId, onUploaded }: FileUploadProps) {
         onClick={() => inputRef.current?.click()}
         className={clsx(
           'border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors',
-          isDragging ? 'border-brand-500 bg-brand-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+          isDragging ? 'border-brand-500 bg-brand-50' : 'border-gray-600 hover:border-gray-300 hover:bg-dark-800'
         )}
       >
         <input
@@ -123,15 +123,15 @@ export function FileUpload({ eventId, stepId, onUploaded }: FileUploadProps) {
       {files.length > 0 && (
         <div className="space-y-2">
           {files.map((file, idx) => (
-            <div key={idx} className="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-3 py-2.5">
+            <div key={idx} className="flex items-center gap-3 bg-dark-900 bg-opacity-50 border border-gray-600 rounded-lg px-3 py-2.5">
               <File size={15} className="text-gray-400 shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-medium text-gray-700 truncate">{file.name}</span>
+                  <span className="text-xs font-medium text-gray-300 truncate">{file.name}</span>
                   <span className="text-xs text-gray-400 shrink-0">{formatSize(file.size)}</span>
                 </div>
                 {(file.status === 'uploading' || file.status === 'scanning') && (
-                  <div className="mt-1.5 h-1 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="mt-1.5 h-1 bg-dark-700 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-300"
                       style={{

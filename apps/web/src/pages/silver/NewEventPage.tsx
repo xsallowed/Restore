@@ -52,23 +52,23 @@ export function NewEventPage() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Open Recovery Event</h1>
+        <h1 className="text-2xl font-bold text-white">Open Recovery Event</h1>
         <p className="text-sm text-gray-500 mt-1">Restore will generate a Sequence of Events from your runbooks</p>
       </div>
 
       <form onSubmit={handleSubmit(d => createMutation.mutate(d))} className="space-y-5">
-        <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+        <div className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl p-5 space-y-4">
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Event title</label>
-            <input {...register('title')} placeholder="e.g. Ransomware attack on Finance systems" className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
+            <label className="block text-sm font-medium text-gray-300 mb-1">Event title</label>
+            <input {...register('title')} placeholder="e.g. Ransomware attack on Finance systems" className="w-full border border-gray-600 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
             {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Event type</label>
-              <select {...register('eventType')} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white">
+              <label className="block text-sm font-medium text-gray-300 mb-1">Event type</label>
+              <select {...register('eventType')} className="w-full border border-gray-600 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 bg-dark-900 bg-opacity-50">
                 <option value="">Select type…</option>
                 {EVENT_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}
               </select>
@@ -76,8 +76,8 @@ export function NewEventPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Severity</label>
-              <select {...register('severity')} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white">
+              <label className="block text-sm font-medium text-gray-300 mb-1">Severity</label>
+              <select {...register('severity')} className="w-full border border-gray-600 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 bg-dark-900 bg-opacity-50">
                 <option value="P1">P1 — Critical</option>
                 <option value="P2">P2 — High</option>
                 <option value="P3">P3 — Medium</option>
@@ -87,7 +87,7 @@ export function NewEventPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Affected business services</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Affected business services</label>
             <div className="flex flex-wrap gap-2">
               {services.map(s => (
                 <label key={s.id} className="flex items-center gap-1.5 text-sm cursor-pointer">
@@ -111,8 +111,8 @@ export function NewEventPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-            <textarea {...register('notes')} placeholder="Initial observations, affected systems, context…" rows={3} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none" />
+            <label className="block text-sm font-medium text-gray-300 mb-1">Notes</label>
+            <textarea {...register('notes')} placeholder="Initial observations, affected systems, context…" rows={3} className="w-full border border-gray-600 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none" />
           </div>
 
           <label className="flex items-center gap-2 text-sm cursor-pointer">
@@ -122,7 +122,7 @@ export function NewEventPage() {
         </div>
 
         <div className="flex gap-3">
-          <button type="button" onClick={() => navigate(-1)} className="px-4 py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">
+          <button type="button" onClick={() => navigate(-1)} className="px-4 py-2.5 text-sm font-medium text-gray-600 border border-gray-600 rounded-lg hover:bg-dark-800">
             Cancel
           </button>
           <button type="submit" disabled={isSubmitting} className="flex-1 bg-brand-600 text-white font-medium py-2.5 rounded-lg text-sm hover:bg-brand-700 disabled:opacity-50 transition-colors">

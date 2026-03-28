@@ -16,11 +16,11 @@ import clsx from 'clsx';
 import { formatDistanceToNow } from 'date-fns';
 
 const STATUS_STYLES: Record<string, { border: string; bg: string; label: string; icon: React.ElementType }> = {
-  NOT_STARTED: { border: 'border-gray-200', bg: 'bg-gray-50',   label: 'Not Started', icon: Clock },
-  IN_PROGRESS: { border: 'border-blue-400', bg: 'bg-blue-50',   label: 'In Progress', icon: Clock },
-  COMPLETED:   { border: 'border-green-400', bg: 'bg-green-50',  label: 'Completed',   icon: CheckCircle2 },
+  NOT_STARTED: { border: 'border-gray-600', bg: 'bg-dark-800',   label: 'Not Started', icon: Clock },
+  IN_PROGRESS: { border: 'border-blue-400', bg: 'bg-dark-800',   label: 'In Progress', icon: Clock },
+  COMPLETED:   { border: 'border-green-400', bg: 'bg-dark-800',  label: 'Completed',   icon: CheckCircle2 },
   SKIPPED:     { border: 'border-yellow-400', bg: 'bg-yellow-50', label: 'Skipped',    icon: SkipForward },
-  BLOCKED:     { border: 'border-red-400',  bg: 'bg-red-50',    label: 'Blocked',     icon: AlertTriangle },
+  BLOCKED:     { border: 'border-red-400',  bg: 'bg-dark-800',    label: 'Blocked',     icon: AlertTriangle },
 };
 
 export function ExecutionInterface() {
@@ -97,14 +97,14 @@ export function ExecutionInterface() {
               )}>
                 {event?.severity as string}
               </span>
-              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+              <span className="text-xs text-gray-500 bg-dark-700 px-2 py-0.5 rounded">
                 {event?.event_type as string}
               </span>
               {event?.is_rehearsal && (
                 <span className="text-xs font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded">REHEARSAL</span>
               )}
             </div>
-            <h1 className="text-xl font-bold text-gray-900">{event?.title as string}</h1>
+            <h1 className="text-xl font-bold text-white">{event?.title as string}</h1>
             <p className="text-sm text-gray-500 mt-0.5">
               Opened {event?.opened_at ? formatDistanceToNow(new Date(event.opened_at as string), { addSuffix: true }) : ''}
             </p>
@@ -112,7 +112,7 @@ export function ExecutionInterface() {
 
           {/* Progress */}
           <div className="text-right">
-            <p className="text-2xl font-bold text-gray-900">{pct}%</p>
+            <p className="text-2xl font-bold text-white">{pct}%</p>
             <p className="text-xs text-gray-500">{completedCount} of {steps.length} steps complete</p>
           </div>
         </div>
@@ -139,7 +139,7 @@ export function ExecutionInterface() {
 
       {/* Gantt chart */}
       {showGantt && isAtLeast('SILVER') && (
-        <div className="mb-6 bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="mb-6 bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl overflow-hidden">
           <GanttChart eventId={eventId!} />
         </div>
       )}
@@ -163,7 +163,7 @@ export function ExecutionInterface() {
                 onClick={() => setExpandedStep(isExpanded ? null : step.id as string)}
               >
                 {/* Step number */}
-                <span className="w-6 h-6 rounded-full bg-gray-200 text-gray-700 text-xs font-bold flex items-center justify-center shrink-0">
+                <span className="w-6 h-6 rounded-full bg-gray-200 text-gray-300 text-xs font-bold flex items-center justify-center shrink-0">
                   {idx + 1}
                 </span>
 
@@ -206,8 +206,8 @@ export function ExecutionInterface() {
 
               {/* Expanded detail */}
               {isExpanded && (
-                <div className="px-4 pb-4 border-t border-gray-200/60 pt-3 space-y-3">
-                  <p className="text-sm text-gray-700">{step.description as string}</p>
+                <div className="px-4 pb-4 border-t border-gray-600/60 pt-3 space-y-3">
+                  <p className="text-sm text-gray-300">{step.description as string}</p>
 
                   {step.runbook_citation && (
                     <p className="text-xs text-gray-400 italic">Source: {step.runbook_citation as string}</p>
@@ -247,7 +247,7 @@ export function ExecutionInterface() {
                       </button>
                       <button
                         onClick={() => updateStepMutation.mutate({ stepId: step.id as string, body: { status: 'SKIPPED', skippedReason: 'Manually skipped' } })}
-                        className="text-xs font-medium bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200"
+                        className="text-xs font-medium bg-dark-700 text-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-200"
                       >
                         Skip
                       </button>
@@ -265,7 +265,7 @@ export function ExecutionInterface() {
                       value={expandedStep === step.id ? noteText : ''}
                       onChange={e => setNoteText(e.target.value)}
                       placeholder="Add a note or observation…"
-                      className="flex-1 text-xs border border-gray-200 rounded-lg px-3 py-2 resize-none h-16 focus:outline-none focus:ring-1 focus:ring-brand-400"
+                      className="flex-1 text-xs border border-gray-600 rounded-lg px-3 py-2 resize-none h-16 focus:outline-none focus:ring-1 focus:ring-brand-400"
                     />
                     <button
                       onClick={() => noteText.trim() && addEvidenceMutation.mutate({ stepId: step.id as string, content: noteText })}
@@ -284,7 +284,7 @@ export function ExecutionInterface() {
       </div>
 
       {steps.length === 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-8 text-center">
+        <div className="bg-dark-800 border border-blue-200 rounded-xl p-8 text-center">
           <div className="w-10 h-10 border-2 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="text-sm text-blue-700 font-medium">Generating Sequence of Events from runbooks…</p>
           <p className="text-xs text-blue-500 mt-1">This typically takes 15-30 seconds</p>

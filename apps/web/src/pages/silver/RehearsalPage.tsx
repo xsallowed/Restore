@@ -46,11 +46,11 @@ export function RehearsalPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dress Rehearsals</h1>
+        <h1 className="text-2xl font-bold text-white">Dress Rehearsals</h1>
         <p className="text-sm text-gray-500 mt-0.5">Practice recovery procedures in a sandboxed environment — no live systems affected</p>
       </div>
 
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+      <div className="bg-dark-800 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
         <Play size={18} className="text-amber-600 shrink-0 mt-0.5" />
         <div className="text-sm text-amber-800">
           <p className="font-medium mb-1">Rehearsal Mode</p>
@@ -59,18 +59,18 @@ export function RehearsalPage() {
       </div>
 
       {/* Create form */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <h2 className="font-semibold text-gray-900 mb-4">Schedule New Rehearsal</h2>
+      <div className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl p-5">
+        <h2 className="font-semibold text-white mb-4">Schedule New Rehearsal</h2>
         <form onSubmit={handleSubmit(d => createMutation.mutate(d))} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Rehearsal name</label>
-              <input {...register('name')} placeholder="Q1 Ransomware Drill" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
+              <label className="block text-sm font-medium text-gray-300 mb-1">Rehearsal name</label>
+              <input {...register('name')} placeholder="Q1 Ransomware Drill" className="w-full border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
               {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Event type to simulate</label>
-              <select {...register('eventType')} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white">
+              <label className="block text-sm font-medium text-gray-300 mb-1">Event type to simulate</label>
+              <select {...register('eventType')} className="w-full border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 bg-dark-900 bg-opacity-50">
                 <option value="">Select…</option>
                 {EVENT_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}
               </select>
@@ -78,8 +78,8 @@ export function RehearsalPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Scheduled date/time (optional)</label>
-            <input type="datetime-local" {...register('scheduledAt')} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
+            <label className="block text-sm font-medium text-gray-300 mb-1">Scheduled date/time (optional)</label>
+            <input type="datetime-local" {...register('scheduledAt')} className="w-full border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
           </div>
           <button type="submit" disabled={isSubmitting} className="bg-brand-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-brand-700 disabled:opacity-50">
             Schedule Rehearsal
@@ -106,14 +106,14 @@ export function AssetRegistryPage() {
     DEGRADED: 'bg-yellow-100 text-yellow-800',
     CRITICAL: 'bg-orange-100 text-orange-800',
     OFFLINE: 'bg-red-100 text-red-800',
-    UNKNOWN: 'bg-gray-100 text-gray-600',
+    UNKNOWN: 'bg-dark-700 text-gray-600',
   };
 
   return (
     <div className="max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Technology Asset Registry</h1>
+          <h1 className="text-2xl font-bold text-white">Technology Asset Registry</h1>
           <p className="text-sm text-gray-500 mt-0.5">{assets.length} assets registered</p>
         </div>
       </div>
@@ -121,10 +121,10 @@ export function AssetRegistryPage() {
       {isLoading ? (
         <div className="flex items-center justify-center h-40 text-gray-400 text-sm">Loading assets…</div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-100 text-left">
+              <tr className="bg-dark-800 border-b border-gray-700 text-left">
                 {['Asset', 'Type', 'Environment', 'Tier', 'Status', 'Business Services'].map(h => (
                   <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
                 ))}
@@ -132,11 +132,11 @@ export function AssetRegistryPage() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {assets.map(asset => (
-                <tr key={asset.id as string} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{asset.name as string}</td>
+                <tr key={asset.id as string} className="hover:bg-dark-800">
+                  <td className="px-4 py-3 font-medium text-white">{asset.name as string}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{asset.asset_type as string}</td>
-                  <td className="px-4 py-3 text-xs"><span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded">{asset.environment as string}</span></td>
-                  <td className="px-4 py-3 text-center text-xs font-bold text-gray-700">T{asset.criticality_tier as number}</td>
+                  <td className="px-4 py-3 text-xs"><span className="bg-dark-700 text-gray-300 px-1.5 py-0.5 rounded">{asset.environment as string}</span></td>
+                  <td className="px-4 py-3 text-center text-xs font-bold text-gray-300">T{asset.criticality_tier as number}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLOR[asset.status as string] ?? STATUS_COLOR.UNKNOWN}`}>
                       {asset.status as string}
@@ -179,7 +179,7 @@ export function ConnectorsPage() {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Runbook Connectors</h1>
+        <h1 className="text-2xl font-bold text-white">Runbook Connectors</h1>
         <p className="text-sm text-gray-500 mt-0.5">Source integrations for runbooks and playbooks</p>
       </div>
 
@@ -188,9 +188,9 @@ export function ConnectorsPage() {
       ) : (
         <div className="space-y-3">
           {connectors.map(c => (
-            <div key={c.id as string} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4">
+            <div key={c.id as string} className="bg-dark-900 bg-opacity-50 border border-gray-600 rounded-xl p-4 flex items-center gap-4">
               <div className="flex-1">
-                <p className="font-medium text-gray-900">{c.name as string}</p>
+                <p className="font-medium text-white">{c.name as string}</p>
                 <p className="text-xs text-gray-400 mt-0.5">
                   {c.connector_type as string} ·
                   Last synced: {c.last_synced_at ? formatDistanceToNow(new Date(c.last_synced_at as string), { addSuffix: true }) : 'Never'}
@@ -199,7 +199,7 @@ export function ConnectorsPage() {
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                 c.last_sync_status === 'OK' ? 'bg-green-100 text-green-800' :
                 c.last_sync_status === 'ERROR' ? 'bg-red-100 text-red-800' :
-                'bg-gray-100 text-gray-600'
+                'bg-dark-700 text-gray-600'
               }`}>
                 {c.last_sync_status as string ?? 'Never synced'}
               </span>
@@ -213,7 +213,7 @@ export function ConnectorsPage() {
             </div>
           ))}
           {connectors.length === 0 && (
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
+            <div className="bg-dark-800 border border-gray-600 rounded-xl p-8 text-center text-gray-400 text-sm">
               No connectors configured — add connectors via the API
             </div>
           )}

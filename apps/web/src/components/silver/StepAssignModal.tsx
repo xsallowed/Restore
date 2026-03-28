@@ -37,7 +37,7 @@ export function StepAssignModal({ step, eventId, onClose, onAssigned }: {
     SILVER: 'bg-blue-100 text-blue-800',
     GOLD: 'bg-green-100 text-green-800',
     AUTHOR: 'bg-purple-100 text-purple-800',
-    ADMIN: 'bg-gray-100 text-gray-700',
+    ADMIN: 'bg-dark-700 text-gray-300',
   };
 
   return (
@@ -46,14 +46,14 @@ export function StepAssignModal({ step, eventId, onClose, onAssigned }: {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4"
+        className="bg-dark-900 bg-opacity-50 rounded-2xl shadow-2xl w-full max-w-md mx-4"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700">
           <div className="flex items-center gap-2">
             <Users size={16} className="text-purple-500" />
-            <h2 className="font-semibold text-gray-900 text-sm">Assign step</h2>
+            <h2 className="font-semibold text-white text-sm">Assign step</h2>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X size={16} />
@@ -61,16 +61,16 @@ export function StepAssignModal({ step, eventId, onClose, onAssigned }: {
         </div>
 
         {/* Step info */}
-        <div className="px-5 py-3 bg-gray-50 border-b border-gray-100">
-          <p className="text-sm font-medium text-gray-900 truncate">{step.name}</p>
+        <div className="px-5 py-3 bg-dark-800 border-b border-gray-700">
+          <p className="text-sm font-medium text-white truncate">{step.name}</p>
           {step.assignee_name && (
             <p className="text-xs text-gray-400 mt-0.5">Currently: {step.assignee_name}</p>
           )}
         </div>
 
         {/* Search */}
-        <div className="px-5 py-3 border-b border-gray-100">
-          <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+        <div className="px-5 py-3 border-b border-gray-700">
+          <div className="flex items-center gap-2 bg-dark-800 rounded-lg px-3 py-2">
             <Search size={14} className="text-gray-400" />
             <input
               autoFocus
@@ -91,16 +91,16 @@ export function StepAssignModal({ step, eventId, onClose, onAssigned }: {
               key={user.id}
               onClick={() => assignMutation.mutate(user.id)}
               disabled={assignMutation.isPending}
-              className="w-full flex items-center gap-3 px-5 py-3 hover:bg-blue-50 transition-colors text-left disabled:opacity-50"
+              className="w-full flex items-center gap-3 px-5 py-3 hover:bg-dark-800 transition-colors text-left disabled:opacity-50"
             >
               <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-bold text-xs shrink-0">
                 {user.display_name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{user.display_name}</p>
+                <p className="text-sm font-medium text-white truncate">{user.display_name}</p>
                 <p className="text-xs text-gray-400 truncate">{user.email}</p>
               </div>
-              <span className={clsx('text-xs px-1.5 py-0.5 rounded shrink-0', TIER_BADGE[user.tier] ?? 'bg-gray-100 text-gray-600')}>
+              <span className={clsx('text-xs px-1.5 py-0.5 rounded shrink-0', TIER_BADGE[user.tier] ?? 'bg-dark-700 text-gray-600')}>
                 {user.tier}
               </span>
             </button>
@@ -108,10 +108,10 @@ export function StepAssignModal({ step, eventId, onClose, onAssigned }: {
         </div>
 
         {/* Unassign */}
-        <div className="px-5 py-3 border-t border-gray-100">
+        <div className="px-5 py-3 border-t border-gray-700">
           <button
             onClick={() => assignMutation.mutate('')}
-            className="w-full text-xs text-gray-500 hover:text-gray-700 py-1"
+            className="w-full text-xs text-gray-500 hover:text-gray-300 py-1"
           >
             Remove assignment
           </button>

@@ -55,7 +55,7 @@ export function AppShell() {
         {/* User + Tier badge */}
         <div className="px-4 py-3 border-b border-white/10">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold shrink-0">
+            <div className="w-8 h-8 rounded-full bg-dark-900 bg-opacity-50/20 flex items-center justify-center text-xs font-bold shrink-0">
               {user?.displayName?.charAt(0).toUpperCase() ?? '?'}
             </div>
             <div className="min-w-0">
@@ -76,8 +76,8 @@ export function AppShell() {
               className={({ isActive }) => clsx(
                 'flex items-center gap-3 px-4 py-2.5 text-sm transition-colors',
                 isActive
-                  ? 'bg-white/15 text-white font-medium'
-                  : 'text-blue-100 hover:bg-white/10 hover:text-white'
+                  ? 'bg-dark-900 bg-opacity-50/15 text-white font-medium'
+                  : 'text-blue-100 hover:bg-dark-900 bg-opacity-50/10 hover:text-white'
               )}
             >
               <item.icon size={16} />
@@ -90,7 +90,7 @@ export function AppShell() {
         {/* Logout */}
         <button
           onClick={() => { clearAuth(); navigate('/login'); }}
-          className="flex items-center gap-3 px-4 py-3 text-sm text-blue-200 hover:text-white hover:bg-white/10 border-t border-white/10 transition-colors"
+          className="flex items-center gap-3 px-4 py-3 text-sm text-blue-200 hover:text-white hover:bg-dark-900 bg-opacity-50/10 border-t border-white/10 transition-colors"
         >
           <LogOut size={16} />
           Sign out
@@ -101,7 +101,7 @@ export function AppShell() {
       <main className="flex-1 overflow-y-auto">
         {/* Rehearsal banner */}
         {window.location.search.includes('rehearsal=true') && (
-          <div className="bg-amber-500 text-amber-900 text-center text-sm font-bold py-2 px-4 flex items-center justify-center gap-2">
+          <div className="bg-red-600 text-amber-900 text-center text-sm font-bold py-2 px-4 flex items-center justify-center gap-2">
             <Play size={14} />
             REHEARSAL MODE — No live systems will be affected
           </div>

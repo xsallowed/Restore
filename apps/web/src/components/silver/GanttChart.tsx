@@ -84,11 +84,11 @@ export function GanttChart({ eventId }: { eventId: string }) {
   return (
     <div>
       {/* TTFR header */}
-      <div className="flex items-stretch border-b border-gray-100">
+      <div className="flex items-stretch border-b border-gray-700">
         <div className="flex-1 px-4 py-3 flex items-center gap-6 flex-wrap">
           <div>
             <p className="text-xs text-gray-400 uppercase tracking-wide">TTFR Estimate</p>
-            <p className="text-lg font-bold text-gray-900">
+            <p className="text-lg font-bold text-white">
               {ttfrData?.ttfrMinutes ? `${Math.round(ttfrData.ttfrMinutes / 60 * 10) / 10}h` : '–'}
             </p>
             {ttfrData?.confidenceLow && (
@@ -101,12 +101,12 @@ export function GanttChart({ eventId }: { eventId: string }) {
           <div>
             <p className="text-xs text-gray-400 uppercase tracking-wide">Confidence</p>
             <div className="flex items-center gap-2">
-              <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="w-20 h-2 bg-gray-600 rounded-full overflow-hidden">
                 <div
                   className={clsx('h-full rounded-full transition-all', {
                     'bg-green-500': (ttfrData?.recoveryConfidenceScore ?? 0) >= 0.7,
                     'bg-yellow-500': (ttfrData?.recoveryConfidenceScore ?? 0) >= 0.4 && (ttfrData?.recoveryConfidenceScore ?? 0) < 0.7,
-                    'bg-red-500': (ttfrData?.recoveryConfidenceScore ?? 0) < 0.4,
+                    'bg-red-600': (ttfrData?.recoveryConfidenceScore ?? 0) < 0.4,
                   })}
                   style={{ width: `${Math.round((ttfrData?.recoveryConfidenceScore ?? 0) * 100)}%` }}
                 />
@@ -119,12 +119,12 @@ export function GanttChart({ eventId }: { eventId: string }) {
 
           <div>
             <p className="text-xs text-gray-400 uppercase tracking-wide">Progress</p>
-            <p className="text-lg font-bold text-gray-900">{ttfrData?.completionPercentage ?? 0}%</p>
+            <p className="text-lg font-bold text-white">{ttfrData?.completionPercentage ?? 0}%</p>
           </div>
         </div>
 
         {/* Legend */}
-        <div className="px-4 py-3 flex items-center gap-4 text-xs text-gray-500 border-l border-gray-100">
+        <div className="px-4 py-3 flex items-center gap-4 text-xs text-gray-500 border-l border-gray-700">
           {[
             { color: '#22c55e', label: 'Complete' },
             { color: '#3b82f6', label: 'In Progress' },
@@ -197,12 +197,12 @@ export function GanttChart({ eventId }: { eventId: string }) {
       </div>
 
       {/* Swim lane summary */}
-      <div className="px-4 pb-3 flex gap-2 flex-wrap border-t border-gray-100 pt-2">
+      <div className="px-4 pb-3 flex gap-2 flex-wrap border-t border-gray-700 pt-2">
         {lanes.map(lane => {
           const laneSteps = steps.filter(s => (s.swim_lane || 'General') === lane);
           const laneCompleted = laneSteps.filter(s => s.status === 'COMPLETED').length;
           return (
-            <div key={lane} className="text-xs bg-gray-50 border border-gray-200 rounded px-2 py-1">
+            <div key={lane} className="text-xs bg-dark-800 border border-gray-600 rounded px-2 py-1">
               <span className="font-medium">{lane}</span>
               <span className="text-gray-400 ml-1">{laneCompleted}/{laneSteps.length}</span>
             </div>

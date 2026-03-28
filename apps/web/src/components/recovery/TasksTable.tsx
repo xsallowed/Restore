@@ -26,7 +26,7 @@ interface TasksTableProps {
 const STATUS_BADGE = {
   NOT_STARTED: { bg: 'bg-dark-700', text: 'text-dark-200', label: 'Not Started' },
   IN_PROGRESS: { bg: 'bg-purple-600', text: 'text-purple-100', label: 'In Progress' },
-  COMPLETED: { bg: 'bg-gold', text: 'text-gray-900', label: 'Completed' },
+  COMPLETED: { bg: 'bg-gold', text: 'text-white', label: 'Completed' },
   SKIPPED: { bg: 'bg-dark-600', text: 'text-gray-200', label: 'Skipped' },
   BLOCKED: { bg: 'bg-red-600', text: 'text-red-100', label: 'Blocked' },
 };
