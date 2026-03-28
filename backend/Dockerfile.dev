@@ -4,4 +4,4 @@ COPY package.json ./
 RUN npm install
 COPY . .
 
-CMD ["npx", "tsx", "src/index.ts"]
+CMD sh -c "node seed.js && npx tsx src/index.ts"

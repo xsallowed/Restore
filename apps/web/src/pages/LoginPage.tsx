@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
-import { Shield, Eye, EyeOff } from 'lucide-react';
+import { Shield, Eye, EyeOff, LogIn } from 'lucide-react';
 import { authApi } from '../lib/api';
 import { useAuth } from '../store/auth';
 
@@ -26,11 +26,51 @@ export function LoginPage() {
   const onSubmit = async (data: Form) => {
     try {
       const res = await authApi.login(data.email, data.password);
-      const { token, user } = res.data.data;
+      const { token, user: apiUser } = res.data.data;
+      // Transform backend response to auth store format
+      const user = {
+        sub: apiUser.id || apiUser.sub,
+        email: apiUser.email,
+        displayName: apiUser.displayName,
+        restore_tier: (apiUser.tier || apiUser.restore_tier) as 'BRONZE' | 'SILVER' | 'GOLD' | 'ADMIN',
+        restore_roles: apiUser.restore_roles || apiUser.roles || [],
+      };
       setAuth(token, user);
       navigate('/');
     } catch {
       toast.error('Invalid email or password');
+    }
+  };
+
+  const quickLogin = (email: string) => {
+    try {
+      // Determine tier based on email
+      let tier: 'BRONZE' | 'SILVER' | 'GOLD' | 'ADMIN' = 'BRONZE';
+      let displayName = 'SOC Analyst';
+
+      if (email.includes('admin')) {
+        tier = 'ADMIN';
+        displayName = 'Admin User';
+      } else if (email.includes('commander')) {
+        tier = 'SILVER';
+        displayName = 'Incident Commander';
+      }
+
+      const user = {
+        sub: 'dev-user-' + Date.now(),
+        email,
+        displayName,
+        restore_tier: tier,
+        restore_roles: tier === 'ADMIN' ? ['ADMIN'] : tier === 'SILVER' ? ['COMMANDER'] : ['RESPONDER'],
+      };
+
+      const token = 'dev-token-' + Date.now();
+      setAuth(token, user);
+      toast.success(`Logged in as ${displayName}`);
+      navigate('/');
+    } catch (err) {
+      toast.error('Login failed');
+      console.error(err);
     }
   };
 
@@ -92,6 +132,37 @@ export function LoginPage() {
               {isSubmitting ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
+
+          {/* Quick login buttons for development */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <p className="text-xs text-gray-600 mb-3 font-medium">Quick Login (Dev)</p>
+            <div className="grid grid-cols-1 gap-2">
+              <button
+                type="button"
+                onClick={() => quickLogin('admin@restore.local')}
+                className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg text-sm transition-colors"
+              >
+                <LogIn size={16} />
+                Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => quickLogin('commander@restore.local')}
+                className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg text-sm transition-colors"
+              >
+                <LogIn size={16} />
+                Commander
+              </button>
+              <button
+                type="button"
+                onClick={() => quickLogin('analyst@restore.local')}
+                className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg text-sm transition-colors"
+              >
+                <LogIn size={16} />
+                Analyst
+              </button>
+            </div>
+          </div>
 
           <div className="mt-4 pt-4 border-t border-gray-100">
             <div className="flex gap-2 text-xs text-gray-500">

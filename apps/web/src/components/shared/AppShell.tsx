@@ -23,14 +23,11 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { to: '/gold',       icon: BarChart3,       label: 'Executive',          tiers: ['GOLD','ADMIN'] },
   { to: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard',          tiers: ['SILVER','AUTHOR','ADMIN'] },
   { to: '/events',     icon: AlertTriangle,   label: 'Events',             tiers: ['BRONZE','SILVER','AUTHOR','ADMIN'] },
   { to: '/assets',     icon: Database,        label: 'Asset Registry',     tiers: ['SILVER','AUTHOR','ADMIN'] },
   { to: '/services',   icon: Users,           label: 'Business Services',  tiers: ['SILVER','AUTHOR','ADMIN'] },
-  { to: '/dependencies', icon: Network,          label: 'Dependency Map',     tiers: ['SILVER','AUTHOR','ADMIN'] },
-  { to: '/assets/graph', icon: BarChart2,     label: 'Dependency Graph',   tiers: ['SILVER','AUTHOR','ADMIN'] },
-  { to: '/rehearsals', icon: Play,            label: 'Rehearsals',         tiers: ['SILVER','AUTHOR','ADMIN'] },
+  { to: '/dependencies', icon: Network,       label: 'Dependency Map',     tiers: ['SILVER','AUTHOR','ADMIN'] },
   { to: '/audit',      icon: ClipboardList,   label: 'Audit',              tiers: ['SILVER','GOLD','AUTHOR','ADMIN'] },
   { to: '/connectors', icon: Plug,            label: 'Connectors',         tiers: ['AUTHOR','ADMIN'] },
 ];

@@ -1,8 +1,12 @@
 import axios from 'axios';
+import { mockBusinessServices, mockAssets, mockRecoveryEvents, mockSOE } from './mockData';
 
 const BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
 export const api = axios.create({ baseURL: BASE, withCredentials: true });
+
+// Enable mock mode for development
+const MOCK_MODE = import.meta.env.MODE === 'development';
 
 // Inject JWT from localStorage on every request
 api.interceptors.request.use(cfg => {
@@ -11,14 +15,100 @@ api.interceptors.request.use(cfg => {
   return cfg;
 });
 
-// Auto logout on 401
+// Auto logout on 401 & fallback to mock data on errors
 api.interceptors.response.use(
   r => r,
   err => {
     if (err.response?.status === 401 && !window.location.pathname.startsWith('/login')) {
       localStorage.removeItem('restore_token');
       window.location.href = '/login';
+      return Promise.reject(err);
     }
+
+    // Fall back to mock data if backend is unavailable
+    if (MOCK_MODE && err.config) {
+      const { method, url, data: reqData } = err.config;
+
+      // Mock login
+      if (url?.includes('/auth/login')) {
+        try {
+          const body = JSON.parse(reqData || '{}');
+          const email = body.email;
+          let tier: 'BRONZE' | 'SILVER' | 'GOLD' | 'ADMIN' = 'BRONZE';
+          let roles: string[] = ['RESPONDER'];
+
+          if (email?.includes('admin')) {
+            tier = 'ADMIN';
+            roles = ['ADMIN'];
+          } else if (email?.includes('commander')) {
+            tier = 'SILVER';
+            roles = ['COMMANDER'];
+          }
+
+          const displayName = email?.split('@')[0] || 'User';
+          const userId = 'mock-user-' + Date.now();
+
+          return Promise.resolve({
+            data: {
+              data: {
+                token: 'mock-token-' + Date.now(),
+                user: {
+                  id: userId,
+                  email,
+                  displayName,
+                  tier,
+                  roles,
+                },
+              },
+            },
+            status: 200,
+          });
+        } catch {
+          return Promise.reject(err);
+        }
+      }
+
+      if (method === 'get') {
+        // Return mock data for GET requests
+        if (url?.includes('/business-services') && !url?.includes('/assets')) {
+          return Promise.resolve({
+            data: { data: mockBusinessServices },
+            status: 200,
+          });
+        }
+        if (url?.includes('/assets') && !url?.includes('dependencies')) {
+          return Promise.resolve({
+            data: { data: mockAssets },
+            status: 200,
+          });
+        }
+        if (url?.includes('/events') && !url?.includes('/soe') && !url?.includes('/gantt')) {
+          return Promise.resolve({
+            data: { data: mockRecoveryEvents },
+            status: 200,
+          });
+        }
+        if (url?.includes('/soe')) {
+          return Promise.resolve({
+            data: { data: mockSOE },
+            status: 200,
+          });
+        }
+        if (url?.includes('/audit')) {
+          return Promise.resolve({
+            data: { data: [] },
+            status: 200,
+          });
+        }
+        if (url?.includes('/connectors')) {
+          return Promise.resolve({
+            data: { data: [] },
+            status: 200,
+          });
+        }
+      }
+    }
+
     return Promise.reject(err);
   }
 );
