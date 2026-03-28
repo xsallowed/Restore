@@ -26,7 +26,15 @@ export function LoginPage() {
   const onSubmit = async (data: Form) => {
     try {
       const res = await authApi.login(data.email, data.password);
-      const { token, user } = res.data.data;
+      const { token, user: apiUser } = res.data.data;
+      // Transform backend response to auth store format
+      const user = {
+        sub: apiUser.id || apiUser.sub,
+        email: apiUser.email,
+        displayName: apiUser.displayName,
+        restore_tier: (apiUser.tier || apiUser.restore_tier) as 'BRONZE' | 'SILVER' | 'GOLD' | 'ADMIN',
+        restore_roles: apiUser.restore_roles || apiUser.roles || [],
+      };
       setAuth(token, user);
       navigate('/');
     } catch {

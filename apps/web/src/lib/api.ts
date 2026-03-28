@@ -34,16 +34,30 @@ api.interceptors.response.use(
         try {
           const body = JSON.parse(reqData || '{}');
           const email = body.email;
-          const tier = email?.includes('admin') ? 'ADMIN' : email?.includes('commander') ? 'SILVER' : 'BRONZE';
+          let tier: 'BRONZE' | 'SILVER' | 'GOLD' | 'ADMIN' = 'BRONZE';
+          let roles: string[] = ['RESPONDER'];
+
+          if (email?.includes('admin')) {
+            tier = 'ADMIN';
+            roles = ['ADMIN'];
+          } else if (email?.includes('commander')) {
+            tier = 'SILVER';
+            roles = ['COMMANDER'];
+          }
+
+          const displayName = email?.split('@')[0] || 'User';
+          const userId = 'mock-user-' + Date.now();
+
           return Promise.resolve({
             data: {
               data: {
                 token: 'mock-token-' + Date.now(),
                 user: {
-                  id: 'mock-user-' + Date.now(),
+                  id: userId,
                   email,
-                  displayName: email?.split('@')[0] || 'User',
+                  displayName,
                   tier,
+                  roles,
                 },
               },
             },
