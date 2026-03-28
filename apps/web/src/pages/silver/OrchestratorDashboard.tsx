@@ -71,41 +71,45 @@ export function OrchestratorDashboard() {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="mb-3">
-            <span className={themeClasses.badge.default}>Crisis Response Platform</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-50">Incident Recovery Center</h1>
-          <p className={clsx(themeClasses.text.secondary, 'mt-2')}>Manage and orchestrate cyber incident responses with AI-powered insights</p>
-        </div>
-        <button
-          onClick={() => setShowNewEventDialog(true)}
-          className={clsx(themeClasses.button.primary, 'flex items-center gap-2 px-4 py-2 rounded-lg font-medium')}
-        >
-          <Plus size={18} />
-          Create Incident
-        </button>
-      </div>
-
-      {/* Summary stats */}
-      <div className="grid grid-cols-4 gap-4">
-        {[
-          { label: 'Active Events', value: activeEvents.length, icon: AlertTriangle, color: activeEvents.length > 0 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500' },
-          { label: 'Services Down', value: downCount, icon: TrendingDown, color: downCount > 0 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500' },
-          { label: 'Degraded', value: degradedCount, icon: Activity, color: degradedCount > 0 ? 'text-orange' : 'text-gray-400 dark:text-gray-500' },
-          { label: 'Operational', value: healthyCount, icon: CheckCircle, color: 'text-yellow-500' },
-        ].map(stat => (
-          <div key={stat.label} className={clsx(themeClasses.card, 'p-4')}>
-            <stat.icon size={20} className={stat.color} />
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
-              <p className={clsx(themeClasses.text.tertiary, 'text-xs')}>{stat.label}</p>
+      {/* Header - Show only when no event is selected */}
+      {!activeEventId && (
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="mb-3">
+              <span className={themeClasses.badge.default}>Crisis Response Platform</span>
             </div>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-50">Incident Recovery Center</h1>
+            <p className={clsx(themeClasses.text.secondary, 'mt-2')}>Manage and orchestrate cyber incident responses with AI-powered insights</p>
           </div>
-        ))}
-      </div>
+          <button
+            onClick={() => setShowNewEventDialog(true)}
+            className={clsx(themeClasses.button.primary, 'flex items-center gap-2 px-4 py-2 rounded-lg font-medium')}
+          >
+            <Plus size={18} />
+            Create Event
+          </button>
+        </div>
+      )}
+
+      {/* Summary stats - Show only when no event is selected */}
+      {!activeEventId && (
+        <div className="grid grid-cols-4 gap-4">
+          {[
+            { label: 'Active Events', value: activeEvents.length, icon: AlertTriangle, color: activeEvents.length > 0 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500' },
+            { label: 'Services Down', value: downCount, icon: TrendingDown, color: downCount > 0 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500' },
+            { label: 'Degraded', value: degradedCount, icon: Activity, color: degradedCount > 0 ? 'text-orange' : 'text-gray-400 dark:text-gray-500' },
+            { label: 'Operational', value: healthyCount, icon: CheckCircle, color: 'text-yellow-500' },
+          ].map(stat => (
+            <div key={stat.label} className={clsx(themeClasses.card, 'p-4')}>
+              <stat.icon size={20} className={stat.color} />
+              <div>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                <p className={clsx(themeClasses.text.tertiary, 'text-xs')}>{stat.label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Show Incident Dashboard when event is activated */}
       {activeEventId && activeEvents.find(e => e.id === activeEventId) && soeData && (
