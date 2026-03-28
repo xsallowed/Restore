@@ -34,17 +34,16 @@ export function LoginPage() {
     }
   };
 
-  const quickLogin = (email: string, displayName: string, tier: 'BRONZE' | 'SILVER' | 'GOLD' | 'ADMIN') => {
-    const mockToken = 'mock-dev-token-' + Date.now();
-    setAuth(mockToken, {
-      sub: 'dev-user-' + Date.now(),
-      email,
-      displayName,
-      restore_tier: tier,
-      restore_roles: [tier === 'ADMIN' ? 'ADMIN' : tier === 'SILVER' ? 'COMMANDER' : 'RESPONDER']
-    });
-    toast.success(`Logged in as ${email}`);
-    navigate('/');
+  const quickLogin = async (email: string, password: string) => {
+    try {
+      const res = await authApi.login(email, password);
+      const { token, user } = res.data.data;
+      setAuth(token, user);
+      navigate('/');
+      toast.success(`Logged in as ${email}`);
+    } catch {
+      toast.error(`Login failed for ${email}`);
+    }
   };
 
   return (
@@ -112,7 +111,7 @@ export function LoginPage() {
             <div className="grid grid-cols-1 gap-2">
               <button
                 type="button"
-                onClick={() => quickLogin('admin@restore.local', 'Admin User', 'ADMIN')}
+                onClick={() => quickLogin('admin@restore.local', 'Admin1234!')}
                 className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg text-sm transition-colors"
               >
                 <LogIn size={16} />
@@ -120,7 +119,7 @@ export function LoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => quickLogin('commander@restore.local', 'Incident Commander', 'SILVER')}
+                onClick={() => quickLogin('commander@restore.local', 'Silver1234!')}
                 className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg text-sm transition-colors"
               >
                 <LogIn size={16} />
@@ -128,7 +127,7 @@ export function LoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => quickLogin('analyst@restore.local', 'SOC Analyst', 'BRONZE')}
+                onClick={() => quickLogin('analyst@restore.local', 'Bronze1234!')}
                 className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg text-sm transition-colors"
               >
                 <LogIn size={16} />
