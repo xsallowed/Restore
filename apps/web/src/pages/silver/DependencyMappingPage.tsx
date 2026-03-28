@@ -370,7 +370,7 @@ function RunbookAssociationPanel({ asset, service, runbooks, onClose }: {
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
         <div className="flex items-center gap-2">
-          <BookOpen size={15} className="text-brand-500" />
+          <BookOpen size={15} className="text-purple-500" />
           <div>
             <p className="text-sm font-semibold text-gray-900">Runbook association</p>
             <p className="text-xs text-gray-400">{name} · {runbooks.length} available</p>
@@ -550,7 +550,7 @@ function ServiceDetailPanel({ service, assets, runbooks, allAssets }: { service:
             </div>
           ) : serviceRunbooks.slice(0, 4).map(r => (
             <div key={r.id} className="flex items-center gap-2 bg-white border border-gray-100 rounded-lg px-3 py-2 mb-1.5">
-              <FileText size={12} className="text-brand-400 shrink-0" />
+              <FileText size={12} className="text-purple-400 shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-gray-800 truncate">{r.title}</p>
                 <div className="flex gap-1 mt-0.5">{(r.event_tags || []).slice(0, 2).map(t => <span key={t} className="text-[9px] bg-blue-50 text-blue-700 px-1 py-0.5 rounded">{t}</span>)}</div>
@@ -638,7 +638,7 @@ function AssetDetailPanel({ asset, dependencies, assets, runbooks }: { asset: As
             </div>
           ) : runbooks.slice(0, 3).map(r => (
             <div key={r.id} className="flex items-center gap-2 bg-white border border-gray-100 rounded-lg px-3 py-2 mb-1.5">
-              <FileText size={11} className="text-brand-400 shrink-0" />
+              <FileText size={11} className="text-purple-400 shrink-0" />
               <p className="text-xs text-gray-700 truncate">{r.title}</p>
             </div>
           ))}

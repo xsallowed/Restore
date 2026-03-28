@@ -14,19 +14,19 @@ import { NewEventDialog } from '../../components/recovery/NewEventDialog';
 import { useState } from 'react';
 
 const STATUS_CONFIG: Record<string, { color: string; dot: string; label: string }> = {
-  OPERATIONAL:        { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-accent-gold border-opacity-30',   dot: 'bg-accent-gold', label: 'Operational' },
-  DEGRADED:           { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-accent-orange border-opacity-30', dot: 'bg-accent-orange', label: 'Degraded' },
-  PARTIALLY_IMPACTED: { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-accent-orange border-opacity-30', dot: 'bg-accent-orange', label: 'Partial Impact' },
-  DOWN:               { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-red-500 border-opacity-30',      dot: 'bg-red-500',    label: 'Down' },
-  RECOVERING:         { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-brand-600 border-opacity-30',       dot: 'bg-brand-500',   label: 'Recovering' },
-  RESTORED:           { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-accent-gold border-opacity-30',    dot: 'bg-accent-gold',  label: 'Restored' },
+  OPERATIONAL:        { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-gold border-opacity-40',   dot: 'bg-gold', label: 'Operational' },
+  DEGRADED:           { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-orange border-opacity-40', dot: 'bg-orange', label: 'Degraded' },
+  PARTIALLY_IMPACTED: { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-orange border-opacity-40', dot: 'bg-orange', label: 'Partial Impact' },
+  DOWN:               { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-red-500 border-opacity-40',      dot: 'bg-red-500',    label: 'Down' },
+  RECOVERING:         { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-purple-600 border-opacity-40',       dot: 'bg-purple-600',   label: 'Recovering' },
+  RESTORED:           { color: 'bg-dark-900 bg-opacity-50 text-dark-200 border-gold border-opacity-40',    dot: 'bg-gold',  label: 'Restored' },
 };
 
 const SEVERITY_COLOR: Record<string, string> = {
-  P1: 'bg-red-500 bg-opacity-20 text-red-200',
-  P2: 'bg-accent-orange bg-opacity-20 text-accent-orange',
-  P3: 'bg-accent-gold bg-opacity-20 text-dark-950',
-  P4: 'bg-brand-600 bg-opacity-20 text-brand-200',
+  P1: 'bg-red-600 text-red-100',
+  P2: 'bg-orange text-gray-900',
+  P3: 'bg-gold text-gray-900',
+  P4: 'bg-purple-600 text-purple-100',
 };
 
 export function OrchestratorDashboard() {
@@ -89,10 +89,10 @@ export function OrchestratorDashboard() {
         {[
           { label: 'Active Events', value: activeEvents.length, icon: AlertTriangle, color: activeEvents.length > 0 ? 'text-red-400' : 'text-dark-400' },
           { label: 'Services Down', value: downCount, icon: TrendingDown, color: downCount > 0 ? 'text-red-400' : 'text-dark-400' },
-          { label: 'Degraded', value: degradedCount, icon: Activity, color: degradedCount > 0 ? 'text-accent-orange' : 'text-dark-400' },
-          { label: 'Operational', value: healthyCount, icon: CheckCircle, color: 'text-accent-gold' },
+          { label: 'Degraded', value: degradedCount, icon: Activity, color: degradedCount > 0 ? 'text-orange' : 'text-dark-400' },
+          { label: 'Operational', value: healthyCount, icon: CheckCircle, color: 'text-gold' },
         ].map(stat => (
-          <div key={stat.label} className="bg-dark-900 bg-opacity-50 backdrop-blur rounded-lg border border-brand-600 border-opacity-20 p-4 flex items-center gap-3">
+          <div key={stat.label} className="bg-dark-900 bg-opacity-50 backdrop-blur rounded-lg border border-purple-600 border-opacity-20 p-4 flex items-center gap-3">
             <stat.icon size={20} className={stat.color} />
             <div>
               <p className="text-2xl font-bold text-white">{stat.value}</p>
@@ -157,7 +157,7 @@ export function OrchestratorDashboard() {
 
           <button
             onClick={() => setActiveEventId(null)}
-            className="w-full py-3 bg-dark-900 border border-brand-600 hover:border-accent-orange text-brand-400 hover:text-accent-orange font-semibold rounded-lg transition-all"
+            className="w-full py-3 bg-dark-900 border border-purple-600 hover:border-orange text-purple-400 hover:text-orange font-semibold rounded-lg transition-all"
           >
             Back to Events List
           </button>
@@ -190,8 +190,8 @@ export function OrchestratorDashboard() {
               ))}
             </div>
           ) : (
-            <div className="bg-dark-900 bg-opacity-50 backdrop-blur border-2 border-accent-gold border-opacity-30 rounded-xl p-12 text-center">
-              <CheckCircle size={48} className="text-accent-gold mx-auto mb-4" />
+            <div className="bg-dark-900 bg-opacity-50 backdrop-blur border-2 border-gold border-opacity-30 rounded-xl p-12 text-center">
+              <CheckCircle size={48} className="text-gold mx-auto mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">All Systems Operational</h3>
               <p className="text-dark-200 mb-6">No active incidents. Create one to test the recovery platform.</p>
               <button
@@ -209,7 +209,7 @@ export function OrchestratorDashboard() {
       {/* Business Service Health Panel - Always show */}
       {!activeEventId && (
         <div>
-          <h2 className="text-sm font-semibold text-brand-300 uppercase tracking-wide mb-3">Business Service Health</h2>
+          <h2 className="text-sm font-semibold text-purple-300 uppercase tracking-wide mb-3">Business Service Health</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {services.map(service => {
               const cfg = STATUS_CONFIG[service.status as string] ?? STATUS_CONFIG.OPERATIONAL;
@@ -232,7 +232,7 @@ export function OrchestratorDashboard() {
             })}
 
             {services.length === 0 && (
-              <div className="col-span-3 bg-dark-900 bg-opacity-50 border border-brand-600 border-opacity-20 rounded-lg p-8 text-center text-dark-200 text-sm">
+              <div className="col-span-3 bg-dark-900 bg-opacity-50 border border-purple-600 border-opacity-20 rounded-lg p-8 text-center text-dark-200 text-sm">
                 No business services configured — add assets and services in the Asset Registry.
               </div>
             )}

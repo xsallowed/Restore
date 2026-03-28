@@ -1,4 +1,5 @@
 import { formatDistanceToNow } from 'date-fns';
+import clsx from 'clsx';
 
 interface GanttStep {
   id: string;
@@ -20,8 +21,8 @@ interface GanttChartProps {
 
 const STATUS_COLOR = {
   NOT_STARTED: 'bg-dark-500',
-  IN_PROGRESS: 'bg-brand-500',
-  COMPLETED: 'bg-accent-gold',
+  IN_PROGRESS: 'bg-purple-500',
+  COMPLETED: 'bg-gold',
   SKIPPED: 'bg-dark-600',
   BLOCKED: 'bg-red-500',
 };
@@ -41,7 +42,7 @@ export function GanttChart({ steps, totalMinutes }: GanttChartProps) {
   const completionPercent = Math.round((completedSteps / steps.length) * 100);
 
   return (
-    <div className="bg-dark-900 bg-opacity-50 backdrop-blur border border-brand-600 border-opacity-30 rounded-lg p-8 shadow-glow">
+    <div className="bg-dark-900 bg-opacity-50 backdrop-blur border border-purple-600 border-opacity-30 rounded-lg p-8 shadow-glow">
       <div className="mb-8">
         <div className="flex items-start justify-between mb-5">
           <div>
@@ -71,7 +72,7 @@ export function GanttChart({ steps, totalMinutes }: GanttChartProps) {
                 {Array.from({ length: Math.ceil(totalMinutes / 30) + 1 }).map((_, i) => (
                   <div
                     key={i}
-                    className="border-l border-brand-600 border-opacity-20 pl-2"
+                    className="border-l border-purple-600 border-opacity-20 pl-2"
                     style={{ width: `${30 * pixelsPerMinute}px` }}
                   >
                     {i * 30}m
@@ -99,7 +100,7 @@ export function GanttChart({ steps, totalMinutes }: GanttChartProps) {
                   <div
                     className={`absolute h-full rounded-md flex items-center justify-center text-xs font-medium text-dark-950 transition-all cursor-default shadow-sm group-hover:shadow-glow ${
                       STATUS_COLOR[step.status]
-                    } ${step.is_on_critical_path ? 'ring-2 ring-accent-orange ring-inset' : ''}`}
+                    } ${step.is_on_critical_path ? 'ring-2 ring-orange ring-inset' : ''}`}
                     style={{
                       left: `${leftPercent}%`,
                       width: `${widthPercent}%`,
@@ -115,13 +116,13 @@ export function GanttChart({ steps, totalMinutes }: GanttChartProps) {
           })}
 
           {/* Legend */}
-          <div className="mt-8 pt-6 border-t border-brand-600 border-opacity-20 flex flex-wrap gap-6 text-xs">
+          <div className="mt-8 pt-6 border-t border-purple-600 border-opacity-20 flex flex-wrap gap-6 text-xs">
             {[
-              { color: 'bg-accent-gold', label: 'Completed' },
-              { color: 'bg-brand-500', label: 'In Progress' },
+              { color: 'bg-gold', label: 'Completed' },
+              { color: 'bg-purple-500', label: 'In Progress' },
               { color: 'bg-dark-500', label: 'Not Started' },
               { color: 'bg-red-500', label: 'Blocked' },
-              { color: 'ring-2 ring-accent-orange ring-inset bg-dark-800', label: 'Critical Path' },
+              { color: 'ring-2 ring-orange ring-inset bg-dark-800', label: 'Critical Path' },
             ].map((item, idx) => (
               <div key={idx} className="flex items-center gap-2">
                 <div className={clsx('w-3 h-3 rounded-sm', item.color)} />

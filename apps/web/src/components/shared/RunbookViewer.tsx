@@ -36,12 +36,12 @@ export function RunbookViewer({ runbookId, citation, stepName }: RunbookViewerPr
   }
 
   return (
-    <div className={clsx('rounded-xl border transition-all', expanded ? 'border-brand-200 bg-brand-50/30' : 'border-gray-200 bg-gray-50')}>
+    <div className={clsx('rounded-xl border transition-all', expanded ? 'border-purple-200 bg-purple-50/30' : 'border-gray-200 bg-gray-50')}>
       <button
         onClick={() => setExpanded(e => !e)}
         className="w-full flex items-center gap-2 px-3 py-2.5 text-left"
       >
-        <BookOpen size={14} className="text-brand-500 shrink-0" />
+        <BookOpen size={14} className="text-purple-500 shrink-0" />
         <div className="flex-1 min-w-0">
           <span className="text-xs font-medium text-gray-700">Runbook source</span>
           {citation && <span className="text-xs text-gray-400 ml-2 truncate">· {citation}</span>}
@@ -50,21 +50,21 @@ export function RunbookViewer({ runbookId, citation, stepName }: RunbookViewerPr
       </button>
 
       {expanded && (
-        <div className="px-3 pb-3 border-t border-brand-100">
+        <div className="px-3 pb-3 border-t border-purple-100">
           {isLoading ? (
             <div className="flex items-center gap-2 py-3 text-xs text-gray-400">
-              <div className="w-3 h-3 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+              <div className="w-3 h-3 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
               Loading runbook…
             </div>
           ) : runbook ? (
             <>
               <div className="flex items-center justify-between py-2">
                 <p className="text-xs font-medium text-gray-600">{runbook.title}</p>
-                <a href={runbook.source_ref.startsWith('http') ? runbook.source_ref : '#'} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700">
+                <a href={runbook.source_ref.startsWith('http') ? runbook.source_ref : '#'} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700">
                   <ExternalLink size={11} /> View source
                 </a>
               </div>
-              <div className="bg-white rounded-lg border border-brand-100 px-3 py-2.5 max-h-48 overflow-y-auto">
+              <div className="bg-white rounded-lg border border-purple-100 px-3 py-2.5 max-h-48 overflow-y-auto">
                 <pre className="text-xs text-gray-600 whitespace-pre-wrap font-mono leading-relaxed">
                   {citation ? extractRelevantSection(runbook.content_text, citation) : runbook.content_text?.slice(0, 1500)}
                   {runbook.content_text?.length > 1500 && '\n\n…[view full runbook above]'}
@@ -102,7 +102,7 @@ export function RunbookModal({ runbookId, title, onClose }: { runbookId: string;
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[85vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
           <div className="flex items-center gap-2">
-            <BookOpen size={16} className="text-brand-500" />
+            <BookOpen size={16} className="text-purple-500" />
             <div>
               <p className="font-semibold text-gray-900">{title || runbook?.title || 'Runbook'}</p>
               {runbook && <p className="text-xs text-gray-400 font-mono mt-0.5">{runbook.source_ref}</p>}
@@ -113,7 +113,7 @@ export function RunbookModal({ runbookId, title, onClose }: { runbookId: string;
 
         {!isLoading && (
           <div className="px-5 py-2 border-b border-gray-100 shrink-0">
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search in runbook…" className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-brand-400" />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search in runbook…" className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-purple-400" />
           </div>
         )}
 

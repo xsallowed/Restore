@@ -16,17 +16,17 @@ interface EventCardProps {
 }
 
 const SEVERITY_CONFIG = {
-  P1: { border: 'border-red-500 border-opacity-30', badge: 'bg-red-500 bg-opacity-20 text-red-200', text: 'text-red-400', label: 'Critical', icon: '🔴' },
-  P2: { border: 'border-accent-orange border-opacity-30', badge: 'bg-accent-orange bg-opacity-20 text-accent-orange', text: 'text-accent-orange', label: 'High', icon: '🟠' },
-  P3: { border: 'border-accent-gold border-opacity-30', badge: 'bg-accent-gold bg-opacity-20 text-dark-950', text: 'text-accent-gold', label: 'Medium', icon: '🟡' },
-  P4: { border: 'border-brand-600 border-opacity-30', badge: 'bg-brand-600 bg-opacity-20 text-brand-200', text: 'text-brand-400', label: 'Low', icon: '⚪' },
+  P1: { border: 'border-red-500 border-opacity-40', badge: 'bg-red-600 text-red-100', text: 'text-red-400', label: 'Critical', icon: '🔴' },
+  P2: { border: 'border-orange border-opacity-40', badge: 'bg-orange text-gray-900', text: 'text-orange', label: 'High', icon: '🟠' },
+  P3: { border: 'border-gold border-opacity-40', badge: 'bg-gold text-gray-900', text: 'text-gold', label: 'Medium', icon: '🟡' },
+  P4: { border: 'border-purple-600 border-opacity-40', badge: 'bg-purple-600 text-purple-100', text: 'text-purple-400', label: 'Low', icon: '⚪' },
 };
 
 const STATUS_CONFIG = {
-  OPEN: { dot: 'bg-red-500', label: 'Open', badge: 'bg-red-500 bg-opacity-20 text-red-200' },
-  IN_PROGRESS: { dot: 'bg-brand-500', label: 'Active', badge: 'bg-brand-500 bg-opacity-20 text-brand-200' },
-  RESOLVED: { dot: 'bg-accent-gold', label: 'Resolved', badge: 'bg-accent-gold bg-opacity-20 text-dark-950' },
-  CLOSED: { dot: 'bg-dark-200', label: 'Closed', badge: 'bg-dark-200 bg-opacity-20 text-dark-200' },
+  OPEN: { dot: 'bg-red-500', label: 'Open', badge: 'bg-red-600 text-red-100' },
+  IN_PROGRESS: { dot: 'bg-purple-600', label: 'Active', badge: 'bg-purple-600 text-purple-100' },
+  RESOLVED: { dot: 'bg-gold', label: 'Resolved', badge: 'bg-gold text-gray-900' },
+  CLOSED: { dot: 'bg-dark-500', label: 'Closed', badge: 'bg-dark-600 text-dark-300' },
 };
 
 export function EventCard({
@@ -98,9 +98,9 @@ export function EventCard({
         className={clsx(
           'w-full text-sm font-medium py-2.5 rounded-lg transition-all duration-200',
           'flex items-center justify-center gap-2',
-          'border border-brand-600 hover:border-accent-orange hover:shadow-glow',
-          'text-brand-400 hover:text-accent-orange',
-          'bg-transparent hover:bg-brand-600 hover:bg-opacity-10',
+          'border border-purple-600 hover:border-orange hover:shadow-glow',
+          'text-purple-400 hover:text-orange',
+          'bg-purple-600 bg-opacity-10 hover:bg-opacity-20',
           'group-hover:gap-3'
         )}
       >

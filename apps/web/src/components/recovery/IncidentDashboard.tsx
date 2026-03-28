@@ -25,9 +25,9 @@ interface IncidentDashboardProps {
 
 const SEVERITY_COLOR = {
   P1: 'from-red-600 to-red-700',
-  P2: 'from-accent-orange to-accent-orange',
-  P3: 'from-accent-gold to-accent-gold',
-  P4: 'from-brand-600 to-brand-700',
+  P2: 'from-orange to-orange',
+  P3: 'from-gold to-gold',
+  P4: 'from-purple-600 to-purple-700',
 };
 
 const SEVERITY_LABEL = {
@@ -45,24 +45,24 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="rounded-lg bg-dark-900 bg-opacity-50 backdrop-blur border border-brand-600 border-opacity-30 p-8 shadow-glow">
+      <div className="rounded-lg bg-dark-900 bg-opacity-50 backdrop-blur border border-purple-600 border-opacity-30 p-8 shadow-glow">
         <div className="flex items-start justify-between mb-6">
           <div>
             <div className="flex items-center gap-3 mb-3">
               <div className={clsx(
                 'w-3 h-3 rounded-full',
                 metrics.severity === 'P1' ? 'bg-red-500' :
-                metrics.severity === 'P2' ? 'bg-accent-orange' :
-                metrics.severity === 'P3' ? 'bg-accent-gold' :
-                'bg-brand-500'
+                metrics.severity === 'P2' ? 'bg-orange' :
+                metrics.severity === 'P3' ? 'bg-gold' :
+                'bg-purple-500'
               )} />
-              <span className="text-xs font-semibold text-brand-300 uppercase tracking-wider">Active Incident</span>
+              <span className="text-xs font-semibold text-purple-300 uppercase tracking-wider">Active Incident</span>
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">{metrics.eventTitle}</h1>
             <p className="text-dark-200">{metrics.eventType}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs font-semibold text-brand-300 uppercase tracking-wider mb-2">Severity Level</p>
+            <p className="text-xs font-semibold text-purple-300 uppercase tracking-wider mb-2">Severity Level</p>
             <p className="text-2xl font-bold text-white">{metrics.severity}</p>
             <p className="text-xs text-dark-200 mt-1">{SEVERITY_LABEL[metrics.severity]}</p>
           </div>
@@ -72,7 +72,7 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-dark-200">Overall Progress</span>
-            <span className="text-xs font-semibold text-accent-orange">{Math.round(progressPercent)}%</span>
+            <span className="text-xs font-semibold text-orange">{Math.round(progressPercent)}%</span>
           </div>
           <div className="w-full h-2 bg-dark-800 rounded-full overflow-hidden">
             <div
@@ -90,7 +90,7 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
             { label: 'Tasks Done', value: `${metrics.steps_completed}/${metrics.steps_total}`, icon: '✓' },
             { label: 'Services Down', value: metrics.affected_services, icon: '⚠️' },
           ].map((stat, idx) => (
-            <div key={idx} className="bg-dark-800 bg-opacity-50 rounded-lg p-3 border border-brand-600 border-opacity-20">
+            <div key={idx} className="bg-dark-800 bg-opacity-50 rounded-lg p-3 border border-purple-600 border-opacity-20">
               <p className="text-xs text-dark-200 font-medium mb-1">{stat.label}</p>
               <p className="text-lg font-semibold text-white">{stat.value}</p>
             </div>
@@ -107,8 +107,8 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
             unit: 'min',
             detail: metrics.ml_ttfr_confidence_low ? `Range: ${metrics.ml_ttfr_confidence_low}-${metrics.ml_ttfr_confidence_high} min` : undefined,
             icon: Zap,
-            color: 'border-brand-600 border-opacity-30',
-            textColor: 'text-brand-400',
+            color: 'border-purple-600 border-opacity-30',
+            textColor: 'text-purple-400',
           },
           {
             title: 'RECOVERY CONFIDENCE',
@@ -116,8 +116,8 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
             unit: '%',
             detail: 'ML-powered prediction',
             icon: CheckCircle,
-            color: 'border-accent-gold border-opacity-30',
-            textColor: 'text-accent-gold',
+            color: 'border-gold border-opacity-30',
+            textColor: 'text-gold',
           },
           {
             title: 'TASKS COMPLETED',
@@ -125,8 +125,8 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
             unit: 'steps',
             detail: 'Recovery sequence',
             icon: Activity,
-            color: 'border-accent-orange border-opacity-30',
-            textColor: 'text-accent-orange',
+            color: 'border-orange border-opacity-30',
+            textColor: 'text-orange',
           },
           {
             title: 'ACTIVE TASKS',
@@ -134,8 +134,8 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
             unit: 'running',
             detail: 'in progress',
             icon: AlertCircle,
-            color: 'border-accent-pink border-opacity-30',
-            textColor: 'text-accent-pink',
+            color: 'border-pink border-opacity-30',
+            textColor: 'text-pink',
           },
         ].map((kpi, idx) => (
           <div key={idx} className={clsx('rounded-lg border p-5 transition-all hover:shadow-glow bg-dark-900 bg-opacity-50 backdrop-blur', kpi.color)}>
@@ -154,9 +154,9 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
       {/* Key Factors to Decrease Time */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Optimization Factors */}
-        <div className="bg-dark-900 bg-opacity-50 backdrop-blur border border-accent-orange border-opacity-30 rounded-lg p-6 shadow-sm">
+        <div className="bg-dark-900 bg-opacity-50 backdrop-blur border border-orange border-opacity-30 rounded-lg p-6 shadow-sm">
           <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
-            <TrendingDown size={18} className="text-accent-orange" />
+            <TrendingDown size={18} className="text-orange" />
             Key Factors to Decrease Time
           </h3>
           <div className="space-y-2">
@@ -167,12 +167,12 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
               { label: 'Improve runbook clarity', impact: 'Medium' },
               { label: 'Increase team communication', impact: 'Low' },
             ].map((factor, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 bg-dark-800 bg-opacity-50 rounded-lg hover:border-accent-orange hover:border-opacity-50 border border-transparent transition-colors">
+              <div key={idx} className="flex items-center justify-between p-3 bg-dark-800 bg-opacity-50 rounded-lg hover:border-orange hover:border-opacity-50 border border-transparent transition-colors">
                 <span className="text-sm text-dark-200">{factor.label}</span>
                 <span className={clsx('text-xs font-semibold px-2 py-1 rounded',
                   factor.impact === 'High' ? 'bg-red-500 bg-opacity-20 text-red-200' :
-                  factor.impact === 'Medium' ? 'bg-accent-orange bg-opacity-20 text-accent-orange' :
-                  'bg-brand-600 bg-opacity-20 text-brand-200'
+                  factor.impact === 'Medium' ? 'bg-orange bg-opacity-20 text-orange' :
+                  'bg-purple-600 bg-opacity-20 text-purple-200'
                 )}>
                   {factor.impact}
                 </span>
@@ -199,15 +199,15 @@ export function IncidentDashboard({ metrics }: IncidentDashboardProps) {
                     <p className="text-sm font-medium text-white">{risk.title}</p>
                     <p className={clsx('text-xs mt-1 font-medium',
                       risk.status === 'blocked' ? 'text-red-400' :
-                      risk.status === 'active' ? 'text-accent-orange' :
-                      'text-brand-400'
+                      risk.status === 'active' ? 'text-orange' :
+                      'text-purple-400'
                     )}>
                       {risk.status.charAt(0).toUpperCase() + risk.status.slice(1)}
                     </p>
                   </div>
                   <span className={clsx('text-xs font-semibold px-2 py-1 rounded',
                     risk.severity === 'high' ? 'bg-red-500 bg-opacity-20 text-red-200' :
-                    'bg-accent-orange bg-opacity-20 text-accent-orange'
+                    'bg-orange bg-opacity-20 text-orange'
                   )}>
                     {risk.severity}
                   </span>

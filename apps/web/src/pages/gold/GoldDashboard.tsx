@@ -102,7 +102,7 @@ export function GoldDashboard() {
             label: 'Avg MTTR (90 days)',
             value: mttr > 0 ? `${Math.round(mttr / 60 * 10) / 10}h` : '–',
             icon: Clock,
-            color: 'text-brand-500',
+            color: 'text-purple-500',
             bg: 'bg-blue-50',
           },
         ].map(metric => (

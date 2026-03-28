@@ -52,7 +52,7 @@ export function StepAssignModal({ step, eventId, onClose, onAssigned }: {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <Users size={16} className="text-brand-500" />
+            <Users size={16} className="text-purple-500" />
             <h2 className="font-semibold text-gray-900 text-sm">Assign step</h2>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
