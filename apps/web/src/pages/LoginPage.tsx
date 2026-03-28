@@ -45,7 +45,15 @@ export function LoginPage() {
   const quickLogin = async (email: string, password: string) => {
     try {
       const res = await authApi.login(email, password);
-      const { token, user } = res.data.data;
+      const { token, user: apiUser } = res.data.data;
+      // Transform backend response to auth store format
+      const user = {
+        sub: apiUser.id || apiUser.sub,
+        email: apiUser.email,
+        displayName: apiUser.displayName,
+        restore_tier: (apiUser.tier || apiUser.restore_tier) as 'BRONZE' | 'SILVER' | 'GOLD' | 'ADMIN',
+        restore_roles: apiUser.restore_roles || apiUser.roles || [],
+      };
       setAuth(token, user);
       navigate('/');
       toast.success(`Logged in as ${email}`);
