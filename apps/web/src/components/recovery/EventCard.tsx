@@ -1,5 +1,5 @@
-import { AlertTriangle, Clock, Users, Target } from 'lucide-react';
-import { formatDistanceToNow, format } from 'date-fns';
+import { AlertTriangle, Clock, Users, Target, ArrowRight } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 import clsx from 'clsx';
 
 interface EventCardProps {
@@ -16,17 +16,17 @@ interface EventCardProps {
 }
 
 const SEVERITY_CONFIG = {
-  P1: { bg: 'bg-red-100', border: 'border-red-300', text: 'text-red-800', label: 'Critical' },
-  P2: { bg: 'bg-orange-100', border: 'border-orange-300', text: 'text-orange-800', label: 'High' },
-  P3: { bg: 'bg-yellow-100', border: 'border-yellow-300', text: 'text-yellow-800', label: 'Medium' },
-  P4: { bg: 'bg-gray-100', border: 'border-gray-300', text: 'text-gray-800', label: 'Low' },
+  P1: { bg: 'bg-red-50', border: 'border-red-200', badge: 'bg-red-100 text-red-700', text: 'text-red-600', label: 'Critical', icon: '🔴' },
+  P2: { bg: 'bg-amber-50', border: 'border-amber-200', badge: 'bg-amber-100 text-amber-700', text: 'text-amber-600', label: 'High', icon: '🟠' },
+  P3: { bg: 'bg-yellow-50', border: 'border-yellow-200', badge: 'bg-yellow-100 text-yellow-700', text: 'text-yellow-600', label: 'Medium', icon: '🟡' },
+  P4: { bg: 'bg-slate-50', border: 'border-slate-200', badge: 'bg-slate-100 text-slate-700', text: 'text-slate-600', label: 'Low', icon: '⚪' },
 };
 
 const STATUS_CONFIG = {
-  OPEN: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', dot: 'bg-red-500', label: 'Open' },
-  IN_PROGRESS: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', dot: 'bg-blue-500', label: 'Active' },
-  RESOLVED: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', dot: 'bg-green-500', label: 'Resolved' },
-  CLOSED: { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-700', dot: 'bg-gray-500', label: 'Closed' },
+  OPEN: { dot: 'bg-red-500', label: 'Open', badge: 'bg-red-100 text-red-700' },
+  IN_PROGRESS: { dot: 'bg-blue-500', label: 'Active', badge: 'bg-blue-100 text-blue-700' },
+  RESOLVED: { dot: 'bg-emerald-500', label: 'Resolved', badge: 'bg-emerald-100 text-emerald-700' },
+  CLOSED: { dot: 'bg-slate-400', label: 'Closed', badge: 'bg-slate-100 text-slate-600' },
 };
 
 export function EventCard({
@@ -48,76 +48,73 @@ export function EventCard({
     <div
       onClick={onClick}
       className={clsx(
-        'rounded-2xl border-2 p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105',
-        statusCfg.bg,
-        statusCfg.border
+        'group relative rounded-xl border p-6 cursor-pointer transition-all duration-300',
+        'hover:shadow-lg hover:-translate-y-1',
+        'bg-white',
+        severityCfg.border,
+        'border'
       )}
     >
+      {/* Gradient accent top */}
+      <div className={clsx(
+        'absolute top-0 left-0 right-0 h-1 rounded-t-xl transition-all',
+        severity === 'P1' ? 'bg-gradient-to-r from-red-500 to-red-400' :
+        severity === 'P2' ? 'bg-gradient-to-r from-amber-500 to-amber-400' :
+        severity === 'P3' ? 'bg-gradient-to-r from-yellow-500 to-yellow-400' :
+        'bg-gradient-to-r from-slate-500 to-slate-400'
+      )} />
+
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between mb-4 pt-2">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <div className={clsx('w-3 h-3 rounded-full shrink-0', statusCfg.dot)} />
-            <span className={clsx('text-xs font-bold px-2 py-1 rounded', severityCfg.bg, severityCfg.text)}>
-              {severity} — {severityCfg.label}
+          <div className="flex items-center gap-2 mb-3">
+            <span className={clsx('text-xs font-semibold px-2.5 py-1.5 rounded-md', severityCfg.badge)}>
+              {severityCfg.icon} {severity}
+            </span>
+            <span className={clsx('text-xs font-semibold px-2.5 py-1.5 rounded-md', statusCfg.badge)}>
+              {statusCfg.label}
             </span>
           </div>
-          <h3 className="text-lg font-bold text-gray-900 mb-1">{title}</h3>
-          <p className="text-sm text-gray-600">{event_type}</p>
+          <h3 className="text-base font-semibold text-slate-900 mb-1.5">{title}</h3>
+          <p className="text-sm text-slate-500">{event_type}</p>
         </div>
-        <AlertTriangle size={24} className={clsx('shrink-0 ml-2', statusCfg.text)} />
       </div>
 
-      {/* Status Badge */}
-      <div className="mb-4">
-        <span className={clsx('inline-block text-xs font-semibold px-3 py-1.5 rounded-full', statusCfg.bg, statusCfg.text)}>
-          {statusCfg.label}
-        </span>
-      </div>
-
-      {/* Details Grid */}
-      <div className="space-y-3 mb-4">
-        <div className="flex items-center gap-2 text-sm">
-          <Clock size={16} className="text-gray-600 shrink-0" />
-          <span className="text-gray-700">
-            <span className="font-medium">Opened:</span> {timeSinceOpen}
-          </span>
+      {/* Details */}
+      <div className="space-y-2.5 mb-5">
+        <div className="flex items-center gap-2.5 text-sm">
+          <Clock size={14} className="text-slate-400 shrink-0" />
+          <span className="text-slate-600">{timeSinceOpen}</span>
         </div>
 
         {commander_name && (
-          <div className="flex items-center gap-2 text-sm">
-            <Users size={16} className="text-gray-600 shrink-0" />
-            <span className="text-gray-700">
-              <span className="font-medium">Commander:</span> {commander_name}
-            </span>
+          <div className="flex items-center gap-2.5 text-sm">
+            <Users size={14} className="text-slate-400 shrink-0" />
+            <span className="text-slate-600">{commander_name}</span>
           </div>
         )}
 
         {affected_service_ids && affected_service_ids.length > 0 && (
-          <div className="flex items-center gap-2 text-sm">
-            <Target size={16} className="text-gray-600 shrink-0" />
-            <span className="text-gray-700">
-              <span className="font-medium">{affected_service_ids.length}</span> services affected
-            </span>
+          <div className="flex items-center gap-2.5 text-sm">
+            <Target size={14} className="text-slate-400 shrink-0" />
+            <span className="text-slate-600">{affected_service_ids.length} services affected</span>
           </div>
         )}
       </div>
 
-      {/* Footer */}
-      <div className="pt-4 border-t border-gray-200 border-opacity-40">
-        <button
-          className={clsx(
-            'w-full text-sm font-semibold py-2 rounded-lg transition-colors',
-            status === 'IN_PROGRESS'
-              ? 'bg-blue-500 hover:bg-blue-600 text-white'
-              : status === 'OPEN'
-                ? 'bg-red-500 hover:bg-red-600 text-white'
-                : 'bg-gray-400 hover:bg-gray-500 text-white'
-          )}
-        >
-          {status === 'OPEN' ? 'Activate' : status === 'IN_PROGRESS' ? 'View' : 'Review'} →
-        </button>
-      </div>
+      {/* Action Button */}
+      <button
+        className={clsx(
+          'w-full text-sm font-medium py-2.5 rounded-lg transition-all duration-200',
+          'flex items-center justify-center gap-2',
+          'bg-slate-50 hover:bg-brand-50',
+          'text-brand-600 hover:text-brand-700',
+          'group-hover:gap-3'
+        )}
+      >
+        {status === 'OPEN' ? 'Open Details' : status === 'IN_PROGRESS' ? 'Continue' : 'Review'}
+        <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+      </button>
     </div>
   );
 }
