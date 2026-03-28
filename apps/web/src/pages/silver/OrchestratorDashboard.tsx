@@ -15,12 +15,12 @@ import { useState } from 'react';
 import { Buttons, Typography, Cards, Badges } from '../../lib/styleConstants';
 
 const STATUS_CONFIG: Record<string, { color: string; dot: string; label: string }> = {
-  OPERATIONAL:        { color: 'bg-dark-900 bg-opacity-50 text-gray-300 border-gold border-opacity-40',   dot: 'bg-gold', label: 'Operational' },
-  DEGRADED:           { color: 'bg-dark-900 bg-opacity-50 text-gray-300 border-orange border-opacity-40', dot: 'bg-orange', label: 'Degraded' },
-  PARTIALLY_IMPACTED: { color: 'bg-dark-900 bg-opacity-50 text-gray-300 border-orange border-opacity-40', dot: 'bg-orange', label: 'Partial Impact' },
-  DOWN:               { color: 'bg-dark-900 bg-opacity-50 text-gray-300 border-red-500 border-opacity-40',      dot: 'bg-red-600',    label: 'Down' },
-  RECOVERING:         { color: 'bg-dark-900 bg-opacity-50 text-gray-300 border-purple-600 border-opacity-40',       dot: 'bg-purple-600',   label: 'Recovering' },
-  RESTORED:           { color: 'bg-dark-900 bg-opacity-50 text-gray-300 border-gold border-opacity-40',    dot: 'bg-gold',  label: 'Restored' },
+  OPERATIONAL:        { color: 'bg-gray-800 bg-opacity-30 text-gray-300 border border-gold border-opacity-30',   dot: 'bg-gold', label: 'Operational' },
+  DEGRADED:           { color: 'bg-gray-800 bg-opacity-30 text-gray-300 border border-orange border-opacity-30', dot: 'bg-orange', label: 'Degraded' },
+  PARTIALLY_IMPACTED: { color: 'bg-gray-800 bg-opacity-30 text-gray-300 border border-orange border-opacity-30', dot: 'bg-orange', label: 'Partial Impact' },
+  DOWN:               { color: 'bg-gray-800 bg-opacity-30 text-gray-300 border border-red-500 border-opacity-30',      dot: 'bg-red-600',    label: 'Down' },
+  RECOVERING:         { color: 'bg-gray-800 bg-opacity-30 text-gray-300 border border-purple-600 border-opacity-30',       dot: 'bg-purple-600',   label: 'Recovering' },
+  RESTORED:           { color: 'bg-gray-800 bg-opacity-30 text-gray-300 border border-gold border-opacity-30',    dot: 'bg-gold',  label: 'Restored' },
 };
 
 const SEVERITY_COLOR: Record<string, string> = {
@@ -91,9 +91,9 @@ export function OrchestratorDashboard() {
       {/* Summary stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Active Events', value: activeEvents.length, icon: AlertTriangle, color: activeEvents.length > 0 ? 'text-red-400' : 'text-gray-400' },
-          { label: 'Services Down', value: downCount, icon: TrendingDown, color: downCount > 0 ? 'text-red-400' : 'text-gray-400' },
-          { label: 'Degraded', value: degradedCount, icon: Activity, color: degradedCount > 0 ? 'text-orange' : 'text-gray-400' },
+          { label: 'Active Events', value: activeEvents.length, icon: AlertTriangle, color: activeEvents.length > 0 ? 'text-red-500' : 'text-gray-500' },
+          { label: 'Services Down', value: downCount, icon: TrendingDown, color: downCount > 0 ? 'text-red-500' : 'text-gray-500' },
+          { label: 'Degraded', value: degradedCount, icon: Activity, color: degradedCount > 0 ? 'text-orange' : 'text-gray-500' },
           { label: 'Operational', value: healthyCount, icon: CheckCircle, color: 'text-gold' },
         ].map(stat => (
           <div key={stat.label} className={Cards.base + ' p-4'}>

@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { Shield, Eye, EyeOff, LogIn } from 'lucide-react';
 import { authApi } from '../lib/api';
 import { useAuth } from '../store/auth';
-import { Buttons, Badges } from '../lib/styleConstants';
+import { Buttons, Badges, Inputs, Typography } from '../lib/styleConstants';
 
 const schema = z.object({
   email:    z.string().email('Valid email required'),
@@ -74,11 +74,11 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background gradient orbs */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Subtle gradient orbs for visual interest */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
       </div>
 
       <div className="w-full max-w-md relative z-10">
@@ -91,42 +91,42 @@ export function LoginPage() {
           <p className={Badges.purpleOutline + ' justify-center mx-auto'}>
             AI-Powered Crisis Management
           </p>
-          <p className="text-gray-300 text-sm mt-4">Build organisational resilience through intelligent response coordination and recovery strategies</p>
+          <p className="text-gray-400 text-sm mt-4">Build organisational resilience through intelligent response coordination and recovery strategies</p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-dark-900 bg-opacity-40 backdrop-blur-xl border border-purple-600 border-opacity-30 rounded-xl shadow-2xl p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-6">Sign in to your account</h2>
+        <div className="bg-gray-800 bg-opacity-30 backdrop-blur-xl border border-gray-700 border-opacity-50 rounded-xl shadow-2xl p-8 mb-6">
+          <h2 className={Typography.subsectionHeading + ' mb-6'}>Sign in to your account</h2>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-100 mb-2">Email address</label>
+              <label className={Inputs.label}>Email address</label>
               <input
                 {...register('email')}
                 type="email"
                 autoComplete="email"
                 placeholder="analyst@restore.local"
-                className="w-full bg-dark-800 border border-dark-700 hover:border-purple-600 hover:border-opacity-50 focus:border-purple-600 text-white rounded-lg px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-purple-500 focus:ring-opacity-30"
+                className={Inputs.standard}
               />
               {errors.email && <p className="text-red-400 text-xs mt-1.5">{errors.email.message}</p>}
             </div>
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-100 mb-2">Password</label>
+              <label className={Inputs.label}>Password</label>
               <div className="relative">
                 <input
                   {...register('password')}
                   type={showPw ? 'text' : 'password'}
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className="w-full bg-dark-800 border border-dark-700 hover:border-purple-600 hover:border-opacity-50 focus:border-purple-600 text-white rounded-lg px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-1 focus:ring-purple-500 focus:ring-opacity-30 pr-10"
+                  className={Inputs.standard + ' pr-10'}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPw(p => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:text-gray-200 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
                   tabIndex={-1}
                 >
                   {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -146,13 +146,13 @@ export function LoginPage() {
           </form>
 
           {/* Quick Login Section */}
-          <div className="mt-8 pt-8 border-t border-dark-700">
-            <p className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-4">Quick Login (Development)</p>
+          <div className="mt-8 pt-8 border-t border-gray-700">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Quick Login (Development)</p>
             <div className="space-y-2">
               <button
                 type="button"
                 onClick={() => quickLogin('admin@restore.local')}
-                className="w-full flex items-center justify-center gap-2 bg-dark-800 hover:bg-dark-700 border border-dark-600 text-white py-2.5 rounded-lg text-sm font-medium transition-all"
+                className="w-full flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white py-2.5 rounded-lg text-sm font-medium transition-all"
               >
                 <LogIn size={16} />
                 Admin
@@ -160,7 +160,7 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={() => quickLogin('commander@restore.local')}
-                className="w-full flex items-center justify-center gap-2 bg-dark-800 hover:bg-dark-700 border border-dark-600 text-white py-2.5 rounded-lg text-sm font-medium transition-all"
+                className="w-full flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white py-2.5 rounded-lg text-sm font-medium transition-all"
               >
                 <LogIn size={16} />
                 Commander
@@ -168,7 +168,7 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={() => quickLogin('analyst@restore.local')}
-                className="w-full flex items-center justify-center gap-2 bg-dark-800 hover:bg-dark-700 border border-dark-600 text-white py-2.5 rounded-lg text-sm font-medium transition-all"
+                className="w-full flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white py-2.5 rounded-lg text-sm font-medium transition-all"
               >
                 <LogIn size={16} />
                 Analyst
@@ -177,18 +177,18 @@ export function LoginPage() {
           </div>
 
           {/* Tier Legend */}
-          <div className="mt-6 pt-6 border-t border-dark-700">
-            <p className="text-xs text-white mb-3 font-medium">Account tiers</p>
+          <div className="mt-6 pt-6 border-t border-gray-700">
+            <p className="text-xs text-gray-500 mb-3 font-medium">Account tiers</p>
             <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-red-600/20 border border-amber-500/50 text-gold rounded-full text-xs font-semibold">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-500/20 border border-amber-500/40 text-amber-300 rounded-full text-xs font-semibold">
                 <span className="w-1.5 h-1.5 bg-amber-400 rounded-full"></span>
                 Bronze
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-red-600/20 border border-blue-500/50 text-purple-600 rounded-full text-xs font-semibold">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-500/20 border border-blue-500/40 text-blue-300 rounded-full text-xs font-semibold">
                 <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
                 Silver
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-yellow-500/20 border border-yellow-500/50 text-yellow-300 rounded-full text-xs font-semibold">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-yellow-500/20 border border-yellow-500/40 text-yellow-300 rounded-full text-xs font-semibold">
                 <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></span>
                 Gold
               </span>
@@ -197,7 +197,7 @@ export function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-white text-xs">
+        <p className="text-center text-gray-600 text-xs">
           RESTORE-SDD-001 v1.1 Lean MVP
         </p>
       </div>
