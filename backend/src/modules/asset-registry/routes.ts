@@ -1771,3 +1771,934 @@ assetRegistryRouter.delete(
     }
   }
 );
+
+// ─── User Identities CRUD Operations ──────────────────────────────────────────
+
+/**
+ * POST /api/v1/users
+ * Create a new User Identity record
+ */
+assetRegistryRouter.post(
+  '/users',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const schema = z.object({
+        display_name: z.string().min(1),
+        username: z.string().min(1),
+        email: z.string().email(),
+        user_type: z.string(),
+        department: z.string().optional(),
+        manager_email: z.string().optional(),
+        account_status: z.string(),
+        has_mfa: z.boolean().optional(),
+        has_privileged_access: z.boolean().optional(),
+        last_login: z.string().optional(),
+        expiry_date: z.string().optional(),
+        is_dormant: z.boolean().optional(),
+        is_orphaned: z.boolean().optional(),
+        identity_provider: z.string().optional(),
+        notes: z.string().optional(),
+      });
+
+      const payload = schema.parse(req.body);
+      const assetId = `USER-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+      // Build the User Identity record
+      const userIdentity: UserIdentity = {
+        asset_id: assetId,
+        display_name: payload.display_name,
+        username: payload.username,
+        email: payload.email,
+        user_type: payload.user_type as any,
+        department: payload.department,
+        manager_email: payload.manager_email,
+        created_by: req.user!.id,
+        account_status: payload.account_status as any,
+        has_mfa: payload.has_mfa || false,
+        has_privileged_access: payload.has_privileged_access || false,
+        last_login: payload.last_login,
+        expiry_date: payload.expiry_date,
+        is_dormant: payload.is_dormant || false,
+        is_orphaned: payload.is_orphaned || false,
+        identity_provider: payload.identity_provider,
+        status: 'Active',
+        risk_level: 'Low' as any,
+        confidence_score: 50,
+        tags: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      // Calculate risk level
+      const riskResult = RiskCalculator.calculateUserRisk(userIdentity);
+      userIdentity.risk_level = riskResult.risk_level;
+
+      // Insert into database
+      await sql`
+        INSERT INTO user_identities (
+          asset_id, display_name, username, email, user_type,
+          department, manager_email, created_by, account_status,
+          has_mfa, has_privileged_access, last_login, expiry_date,
+          is_dormant, is_orphaned, identity_provider, status,
+          risk_level, confidence_score, tags, notes, created_at, updated_at
+        ) VALUES (
+          ${userIdentity.asset_id}, ${userIdentity.display_name},
+          ${userIdentity.username}, ${userIdentity.email},
+          ${userIdentity.user_type}, ${userIdentity.department},
+          ${userIdentity.manager_email}, ${userIdentity.created_by},
+          ${userIdentity.account_status}, ${userIdentity.has_mfa},
+          ${userIdentity.has_privileged_access}, ${userIdentity.last_login},
+          ${userIdentity.expiry_date}, ${userIdentity.is_dormant},
+          ${userIdentity.is_orphaned}, ${userIdentity.identity_provider},
+          ${userIdentity.status}, ${userIdentity.risk_level},
+          ${userIdentity.confidence_score}, ${userIdentity.tags || sql.array([])},
+          ${payload.notes || null}, NOW(), NOW()
+        )
+      `;
+
+      await writeAuditEntry({
+        action: 'CREATE',
+        entity_type: 'USER_IDENTITY',
+        entity_id: assetId,
+        changes: { created: true, username: payload.username },
+        user_id: req.user!.id,
+      });
+
+      res.status(201).json({
+        success: true,
+        data: userIdentity,
+      });
+    } catch (err) {
+      logger.error('POST /users error', { err: String(err) });
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: 'Validation error', details: err.errors });
+      }
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * GET /api/v1/users
+ * List all User Identities with filtering and pagination
+ */
+assetRegistryRouter.get(
+  '/users',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const user_type = req.query.user_type as string | undefined;
+      const risk_level = req.query.risk_level as string | undefined;
+      const search = req.query.search as string | undefined;
+
+      const offset = (page - 1) * limit;
+
+      // Build where clause
+      let whereConditions: string[] = [];
+      const params: unknown[] = [];
+
+      if (user_type) {
+        whereConditions.push(`user_type = $${params.length + 1}`);
+        params.push(user_type);
+      }
+
+      if (risk_level) {
+        whereConditions.push(`risk_level = $${params.length + 1}`);
+        params.push(risk_level);
+      }
+
+      if (search) {
+        whereConditions.push(`(display_name ILIKE $${params.length + 1} OR username ILIKE $${params.length + 1} OR email ILIKE $${params.length + 1})`);
+        params.push(`%${search}%`);
+      }
+
+      const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+
+      // Count total
+      const countResult = await sql<{ count: number }[]>`
+        SELECT COUNT(*) as count FROM user_identities ${sql.unsafe(whereClause)}
+      `;
+      const total = parseInt(String(countResult[0]?.count || 0));
+      const total_pages = Math.ceil(total / limit);
+
+      // Fetch User Identities
+      const users = await sql<UserIdentity[]>`
+        SELECT * FROM user_identities
+        ${sql.unsafe(whereClause)}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+
+      res.json({
+        success: true,
+        data: users,
+        total,
+        page,
+        limit,
+        total_pages,
+      });
+    } catch (err) {
+      logger.error('GET /users error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * GET /api/v1/users/:id
+ * Get a specific User Identity
+ */
+assetRegistryRouter.get(
+  '/users/:id',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const users = await sql<UserIdentity[]>`
+        SELECT * FROM user_identities WHERE asset_id = ${id}
+      `;
+
+      if (!users.length) {
+        return res.status(404).json({ success: false, error: 'User Identity not found' });
+      }
+
+      res.json({
+        success: true,
+        data: users[0],
+      });
+    } catch (err) {
+      logger.error('GET /users/:id error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * PUT /api/v1/users/:id
+ * Update a User Identity
+ */
+assetRegistryRouter.put(
+  '/users/:id',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+
+      // Fetch current user for risk recalculation
+      const users = await sql<UserIdentity[]>`
+        SELECT * FROM user_identities WHERE asset_id = ${id}
+      `;
+
+      if (!users.length) {
+        return res.status(404).json({ success: false, error: 'User Identity not found' });
+      }
+
+      const current = users[0];
+
+      // Merge updates
+      const updated: UserIdentity = { ...current, ...updates, updated_at: new Date().toISOString() };
+
+      // Recalculate risk
+      const riskResult = RiskCalculator.calculateUserRisk(updated);
+      updated.risk_level = riskResult.risk_level;
+
+      // Update in database
+      await sql`
+        UPDATE user_identities SET
+          display_name = ${updated.display_name},
+          username = ${updated.username},
+          email = ${updated.email},
+          user_type = ${updated.user_type},
+          department = ${updated.department},
+          manager_email = ${updated.manager_email},
+          account_status = ${updated.account_status},
+          has_mfa = ${updated.has_mfa},
+          has_privileged_access = ${updated.has_privileged_access},
+          last_login = ${updated.last_login},
+          expiry_date = ${updated.expiry_date},
+          is_dormant = ${updated.is_dormant},
+          is_orphaned = ${updated.is_orphaned},
+          identity_provider = ${updated.identity_provider},
+          status = ${updated.status},
+          risk_level = ${updated.risk_level},
+          confidence_score = ${updated.confidence_score},
+          notes = ${updates.notes || null},
+          updated_at = NOW()
+        WHERE asset_id = ${id}
+      `;
+
+      await writeAuditEntry({
+        action: 'UPDATE',
+        entity_type: 'USER_IDENTITY',
+        entity_id: id,
+        changes: updates,
+        user_id: req.user!.id,
+      });
+
+      res.json({
+        success: true,
+        data: updated,
+      });
+    } catch (err) {
+      logger.error('PUT /users/:id error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * DELETE /api/v1/users/:id
+ * Delete a User Identity
+ */
+assetRegistryRouter.delete(
+  '/users/:id',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const result = await sql`
+        DELETE FROM user_identities WHERE asset_id = ${id} RETURNING asset_id
+      `;
+
+      if (!result.length) {
+        return res.status(404).json({ success: false, error: 'User Identity not found' });
+      }
+
+      await writeAuditEntry({
+        action: 'DELETE',
+        entity_type: 'USER_IDENTITY',
+        entity_id: id,
+        changes: { deleted: true },
+        user_id: req.user!.id,
+      });
+
+      res.json({ success: true });
+    } catch (err) {
+      logger.error('DELETE /users/:id error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+// ─── External Connections CRUD Operations ─────────────────────────────────────
+
+/**
+ * POST /api/v1/connections
+ * Create a new External Connection record
+ */
+assetRegistryRouter.post(
+  '/connections',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const schema = z.object({
+        connection_name: z.string().min(1),
+        connection_type: z.string(),
+        source_system: z.string().optional(),
+        destination_system: z.string().optional(),
+        protocol: z.string(),
+        encryption: z.string(),
+        owner_team: z.string().optional(),
+        owner_email: z.string().optional(),
+        is_active: z.boolean().optional(),
+        access_controls: z.string().optional(),
+        last_monitored: z.string().optional(),
+        notes: z.string().optional(),
+      });
+
+      const payload = schema.parse(req.body);
+      const assetId = `CONN-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+      // Build the External Connection record
+      const connection: ExternalConnection = {
+        asset_id: assetId,
+        connection_name: payload.connection_name,
+        connection_type: payload.connection_type as any,
+        source_system: payload.source_system,
+        destination_system: payload.destination_system,
+        protocol: payload.protocol as any,
+        encryption: payload.encryption as any,
+        owner_team: payload.owner_team,
+        owner_email: payload.owner_email,
+        created_by: req.user!.id,
+        is_active: payload.is_active ?? true,
+        access_controls: payload.access_controls,
+        last_monitored: payload.last_monitored,
+        exposed: false,
+        suspicious_activity: false,
+        status: 'Active',
+        risk_level: 'Low' as any,
+        confidence_score: 50,
+        tags: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      // Calculate risk level
+      const riskResult = RiskCalculator.calculateConnectionRisk(connection);
+      connection.risk_level = riskResult.risk_level;
+
+      // Insert into database
+      await sql`
+        INSERT INTO external_connections (
+          asset_id, connection_name, connection_type, source_system,
+          destination_system, protocol, encryption, owner_team,
+          owner_email, created_by, is_active, access_controls,
+          last_monitored, exposed, suspicious_activity, status,
+          risk_level, confidence_score, tags, notes, created_at, updated_at
+        ) VALUES (
+          ${connection.asset_id}, ${connection.connection_name},
+          ${connection.connection_type}, ${connection.source_system},
+          ${connection.destination_system}, ${connection.protocol},
+          ${connection.encryption}, ${connection.owner_team},
+          ${connection.owner_email}, ${connection.created_by},
+          ${connection.is_active}, ${connection.access_controls},
+          ${connection.last_monitored}, ${connection.exposed},
+          ${connection.suspicious_activity}, ${connection.status},
+          ${connection.risk_level}, ${connection.confidence_score},
+          ${connection.tags || sql.array([])}, ${payload.notes || null},
+          NOW(), NOW()
+        )
+      `;
+
+      await writeAuditEntry({
+        action: 'CREATE',
+        entity_type: 'EXTERNAL_CONNECTION',
+        entity_id: assetId,
+        changes: { created: true, connection_type: payload.connection_type },
+        user_id: req.user!.id,
+      });
+
+      res.status(201).json({
+        success: true,
+        data: connection,
+      });
+    } catch (err) {
+      logger.error('POST /connections error', { err: String(err) });
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: 'Validation error', details: err.errors });
+      }
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * GET /api/v1/connections
+ * List all External Connections with filtering and pagination
+ */
+assetRegistryRouter.get(
+  '/connections',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const connection_type = req.query.connection_type as string | undefined;
+      const risk_level = req.query.risk_level as string | undefined;
+      const search = req.query.search as string | undefined;
+
+      const offset = (page - 1) * limit;
+
+      // Build where clause
+      let whereConditions: string[] = [];
+      const params: unknown[] = [];
+
+      if (connection_type) {
+        whereConditions.push(`connection_type = $${params.length + 1}`);
+        params.push(connection_type);
+      }
+
+      if (risk_level) {
+        whereConditions.push(`risk_level = $${params.length + 1}`);
+        params.push(risk_level);
+      }
+
+      if (search) {
+        whereConditions.push(`(connection_name ILIKE $${params.length + 1} OR source_system ILIKE $${params.length + 1} OR destination_system ILIKE $${params.length + 1})`);
+        params.push(`%${search}%`);
+      }
+
+      const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+
+      // Count total
+      const countResult = await sql<{ count: number }[]>`
+        SELECT COUNT(*) as count FROM external_connections ${sql.unsafe(whereClause)}
+      `;
+      const total = parseInt(String(countResult[0]?.count || 0));
+      const total_pages = Math.ceil(total / limit);
+
+      // Fetch External Connections
+      const connections = await sql<ExternalConnection[]>`
+        SELECT * FROM external_connections
+        ${sql.unsafe(whereClause)}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+
+      res.json({
+        success: true,
+        data: connections,
+        total,
+        page,
+        limit,
+        total_pages,
+      });
+    } catch (err) {
+      logger.error('GET /connections error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * GET /api/v1/connections/:id
+ * Get a specific External Connection
+ */
+assetRegistryRouter.get(
+  '/connections/:id',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const connections = await sql<ExternalConnection[]>`
+        SELECT * FROM external_connections WHERE asset_id = ${id}
+      `;
+
+      if (!connections.length) {
+        return res.status(404).json({ success: false, error: 'External Connection not found' });
+      }
+
+      res.json({
+        success: true,
+        data: connections[0],
+      });
+    } catch (err) {
+      logger.error('GET /connections/:id error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * PUT /api/v1/connections/:id
+ * Update an External Connection
+ */
+assetRegistryRouter.put(
+  '/connections/:id',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+
+      // Fetch current connection for risk recalculation
+      const connections = await sql<ExternalConnection[]>`
+        SELECT * FROM external_connections WHERE asset_id = ${id}
+      `;
+
+      if (!connections.length) {
+        return res.status(404).json({ success: false, error: 'External Connection not found' });
+      }
+
+      const current = connections[0];
+
+      // Merge updates
+      const updated: ExternalConnection = { ...current, ...updates, updated_at: new Date().toISOString() };
+
+      // Recalculate risk
+      const riskResult = RiskCalculator.calculateConnectionRisk(updated);
+      updated.risk_level = riskResult.risk_level;
+
+      // Update in database
+      await sql`
+        UPDATE external_connections SET
+          connection_name = ${updated.connection_name},
+          connection_type = ${updated.connection_type},
+          source_system = ${updated.source_system},
+          destination_system = ${updated.destination_system},
+          protocol = ${updated.protocol},
+          encryption = ${updated.encryption},
+          owner_team = ${updated.owner_team},
+          owner_email = ${updated.owner_email},
+          is_active = ${updated.is_active},
+          access_controls = ${updated.access_controls},
+          last_monitored = ${updated.last_monitored},
+          exposed = ${updated.exposed},
+          suspicious_activity = ${updated.suspicious_activity},
+          status = ${updated.status},
+          risk_level = ${updated.risk_level},
+          confidence_score = ${updated.confidence_score},
+          notes = ${updates.notes || null},
+          updated_at = NOW()
+        WHERE asset_id = ${id}
+      `;
+
+      await writeAuditEntry({
+        action: 'UPDATE',
+        entity_type: 'EXTERNAL_CONNECTION',
+        entity_id: id,
+        changes: updates,
+        user_id: req.user!.id,
+      });
+
+      res.json({
+        success: true,
+        data: updated,
+      });
+    } catch (err) {
+      logger.error('PUT /connections/:id error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * DELETE /api/v1/connections/:id
+ * Delete an External Connection
+ */
+assetRegistryRouter.delete(
+  '/connections/:id',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const result = await sql`
+        DELETE FROM external_connections WHERE asset_id = ${id} RETURNING asset_id
+      `;
+
+      if (!result.length) {
+        return res.status(404).json({ success: false, error: 'External Connection not found' });
+      }
+
+      await writeAuditEntry({
+        action: 'DELETE',
+        entity_type: 'EXTERNAL_CONNECTION',
+        entity_id: id,
+        changes: { deleted: true },
+        user_id: req.user!.id,
+      });
+
+      res.json({ success: true });
+    } catch (err) {
+      logger.error('DELETE /connections/:id error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+// ─── Alert Engine Operations ──────────────────────────────────────────────────
+
+/**
+ * POST /api/v1/alerts/rules
+ * Create a new alert rule
+ */
+assetRegistryRouter.post(
+  '/alerts/rules',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const schema = z.object({
+        trigger_type: z.string(),
+        asset_type: z.string(),
+        condition: z.string(),
+        threshold: z.number().optional(),
+        recipient_email: z.string().email(),
+        is_enabled: z.boolean().optional(),
+        notification_frequency: z.string(),
+      });
+
+      const payload = schema.parse(req.body);
+      const ruleId = `ALERT-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+      await sql`
+        INSERT INTO asset_alerts (
+          rule_id, trigger_type, asset_type, condition, threshold,
+          recipient_email, is_enabled, notification_frequency,
+          created_by, created_at, updated_at
+        ) VALUES (
+          ${ruleId}, ${payload.trigger_type}, ${payload.asset_type},
+          ${payload.condition}, ${payload.threshold || null},
+          ${payload.recipient_email}, ${payload.is_enabled ?? true},
+          ${payload.notification_frequency}, ${req.user!.id},
+          NOW(), NOW()
+        )
+      `;
+
+      await writeAuditEntry({
+        action: 'CREATE',
+        entity_type: 'ALERT_RULE',
+        entity_id: ruleId,
+        changes: { created: true, trigger_type: payload.trigger_type },
+        user_id: req.user!.id,
+      });
+
+      res.status(201).json({ success: true, rule_id: ruleId });
+    } catch (err) {
+      logger.error('POST /alerts/rules error', { err: String(err) });
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: 'Validation error', details: err.errors });
+      }
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * GET /api/v1/alerts/rules
+ * List all alert rules
+ */
+assetRegistryRouter.get(
+  '/alerts/rules',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const offset = (page - 1) * limit;
+
+      // Count total
+      const countResult = await sql<{ count: number }[]>`
+        SELECT COUNT(*) as count FROM asset_alerts
+      `;
+      const total = parseInt(String(countResult[0]?.count || 0));
+      const total_pages = Math.ceil(total / limit);
+
+      // Fetch rules
+      const rules = await sql<AssetAlert[]>`
+        SELECT * FROM asset_alerts
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+
+      res.json({
+        success: true,
+        data: rules,
+        total,
+        page,
+        limit,
+        total_pages,
+      });
+    } catch (err) {
+      logger.error('GET /alerts/rules error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * GET /api/v1/alerts/rules/:id
+ * Get a specific alert rule
+ */
+assetRegistryRouter.get(
+  '/alerts/rules/:id',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const rules = await sql<AssetAlert[]>`
+        SELECT * FROM asset_alerts WHERE rule_id = ${id}
+      `;
+
+      if (!rules.length) {
+        return res.status(404).json({ success: false, error: 'Alert rule not found' });
+      }
+
+      res.json({ success: true, data: rules[0] });
+    } catch (err) {
+      logger.error('GET /alerts/rules/:id error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * PUT /api/v1/alerts/rules/:id
+ * Update an alert rule
+ */
+assetRegistryRouter.put(
+  '/alerts/rules/:id',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+
+      await sql`
+        UPDATE asset_alerts SET
+          trigger_type = ${updates.trigger_type || null},
+          asset_type = ${updates.asset_type || null},
+          condition = ${updates.condition || null},
+          threshold = ${updates.threshold || null},
+          recipient_email = ${updates.recipient_email || null},
+          is_enabled = ${updates.is_enabled !== undefined ? updates.is_enabled : null},
+          notification_frequency = ${updates.notification_frequency || null},
+          updated_at = NOW()
+        WHERE rule_id = ${id}
+      `;
+
+      await writeAuditEntry({
+        action: 'UPDATE',
+        entity_type: 'ALERT_RULE',
+        entity_id: id,
+        changes: updates,
+        user_id: req.user!.id,
+      });
+
+      res.json({ success: true });
+    } catch (err) {
+      logger.error('PUT /alerts/rules/:id error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * DELETE /api/v1/alerts/rules/:id
+ * Delete an alert rule
+ */
+assetRegistryRouter.delete(
+  '/alerts/rules/:id',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const result = await sql`
+        DELETE FROM asset_alerts WHERE rule_id = ${id} RETURNING rule_id
+      `;
+
+      if (!result.length) {
+        return res.status(404).json({ success: false, error: 'Alert rule not found' });
+      }
+
+      await writeAuditEntry({
+        action: 'DELETE',
+        entity_type: 'ALERT_RULE',
+        entity_id: id,
+        changes: { deleted: true },
+        user_id: req.user!.id,
+      });
+
+      res.json({ success: true });
+    } catch (err) {
+      logger.error('DELETE /alerts/rules/:id error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * GET /api/v1/alerts/events
+ * List all alert events with optional filtering
+ */
+assetRegistryRouter.get(
+  '/alerts/events',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const unresolved = (req.query.unresolved as string)?.toLowerCase() === 'true';
+      const offset = (page - 1) * limit;
+
+      // Build where clause
+      let whereClause = '';
+      if (unresolved) {
+        whereClause = 'WHERE is_resolved = false';
+      }
+
+      // Count total
+      const countResult = await sql<{ count: number }[]>`
+        SELECT COUNT(*) as count FROM exposed_secrets ${sql.unsafe(whereClause)}
+      `;
+      const total = parseInt(String(countResult[0]?.count || 0));
+      const total_pages = Math.ceil(total / limit);
+
+      // Fetch events
+      const events = await sql<any[]>`
+        SELECT * FROM exposed_secrets
+        ${sql.unsafe(whereClause)}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+
+      res.json({
+        success: true,
+        data: events,
+        total,
+        page,
+        limit,
+        total_pages,
+      });
+    } catch (err) {
+      logger.error('GET /alerts/events error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * POST /api/v1/alerts/events/:id/resolve
+ * Mark an alert event as resolved
+ */
+assetRegistryRouter.post(
+  '/alerts/events/:id/resolve',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const result = await sql`
+        UPDATE exposed_secrets SET
+          is_resolved = true,
+          resolved_at = NOW()
+        WHERE event_id = ${id}
+        RETURNING event_id
+      `;
+
+      if (!result.length) {
+        return res.status(404).json({ success: false, error: 'Alert event not found' });
+      }
+
+      await writeAuditEntry({
+        action: 'UPDATE',
+        entity_type: 'ALERT_EVENT',
+        entity_id: id,
+        changes: { resolved: true },
+        user_id: req.user!.id,
+      });
+
+      res.json({ success: true });
+    } catch (err) {
+      logger.error('POST /alerts/events/:id/resolve error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
