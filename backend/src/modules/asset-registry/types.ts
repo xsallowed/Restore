@@ -397,3 +397,216 @@ export interface PaginatedResponse<T> {
   limit: number;
   total_pages: number;
 }
+
+// ─── SCAN TYPES ─────────────────────────────────────────────────────────────
+
+// Scan Type Enum
+export enum ScanType {
+  ICMP = 'ICMP',
+  TCP = 'TCP',
+  FULL_DISCOVERY = 'FULL_DISCOVERY',
+  NMAP = 'NMAP',
+  SNMP = 'SNMP',
+  HTTP = 'HTTP',
+}
+
+// Scan Target Type Enum
+export enum ScanTargetType {
+  SINGLE_IP = 'SINGLE_IP',
+  IP_RANGE = 'IP_RANGE',
+  CIDR = 'CIDR',
+  ASSET_GROUP = 'ASSET_GROUP',
+  ALL_ACTIVE = 'ALL_ACTIVE',
+}
+
+// Scan Timing Enum
+export enum ScanTiming {
+  SLOW = 'Slow',
+  NORMAL = 'Normal',
+  FAST = 'Fast',
+}
+
+// Scan Status Enum
+export enum ScanStatus {
+  QUEUED = 'Queued',
+  RUNNING = 'Running',
+  COMPLETE = 'Complete',
+  FAILED = 'Failed',
+  CANCELLED = 'Cancelled',
+}
+
+// Scan Result Status Enum
+export enum ScanResultStatus {
+  ONLINE = 'Online',
+  OFFLINE = 'Offline',
+  FILTERED = 'Filtered',
+}
+
+// Port Configuration Interface
+export interface PortConfig {
+  preset?: 'top20' | 'top100' | 'all' | 'custom';
+  custom_ports?: string; // "22,80,443,3389,8080-8090"
+  port_list?: number[]; // Expanded list
+}
+
+// Credentials for authenticated scans
+export interface ScanCredentials {
+  type: 'ssh' | 'wmi';
+  username: string;
+  password?: string;
+  private_key?: string;
+  domain?: string;
+}
+
+// Target Specification
+export interface TargetSpec {
+  type: ScanTargetType;
+  value: string; // IP, range, CIDR, or group_id
+  asset_group_id?: string; // When type is ASSET_GROUP
+  ips?: string[]; // Expanded list of IPs to scan
+}
+
+// Post-Scan Actions
+export interface PostScanActions {
+  create_new_assets: boolean;
+  update_existing_assets: boolean;
+  flag_unresponsive: boolean;
+  send_alert_new_hosts: boolean;
+  add_to_discovery_inbox: boolean;
+}
+
+// Scan Configuration (Create Request)
+export interface CreateScanRequest {
+  name: string;
+  description?: string;
+  scan_type: ScanType;
+  target_type: ScanTargetType;
+  target_spec: TargetSpec;
+  port_config?: PortConfig;
+  timing: ScanTiming;
+  credentials?: ScanCredentials;
+  schedule_type: 'once' | 'scheduled' | 'recurring';
+  scheduled_datetime?: string; // ISO 8601
+  schedule_cron?: string; // For recurring scans
+  post_scan_actions: PostScanActions;
+}
+
+// Scan Interface
+export interface Scan {
+  id: number;
+  scan_id: string;
+  name: string;
+  description?: string;
+  scan_type: ScanType;
+  target_type: ScanTargetType;
+  target_spec: TargetSpec;
+  port_config?: PortConfig;
+  timing: ScanTiming;
+  schedule_type: 'once' | 'scheduled' | 'recurring';
+  scheduled_datetime?: string;
+  schedule_cron?: string;
+  post_scan_actions: PostScanActions;
+  status: ScanStatus;
+  started_at?: string;
+  completed_at?: string;
+  total_hosts: number;
+  hosts_up: number;
+  hosts_down: number;
+  new_discovered: number;
+  error_message?: string;
+  created_by: string;
+  updated_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Port Information
+export interface PortInfo {
+  port: number;
+  service: string;
+  banner?: string;
+  product?: string;
+  version?: string;
+}
+
+// OS Fingerprint
+export interface OSFingerprint {
+  name: string;
+  accuracy: number; // 0-100 percentage
+  vendor?: string;
+}
+
+// SSL Certificate Info
+export interface SSLCertInfo {
+  subject: string;
+  issuer: string;
+  expiry: string; // ISO 8601
+  validity: 'valid' | 'expired' | 'unknown';
+}
+
+// SNMP Interface Info
+export interface SNMPInterface {
+  index: number;
+  description: string;
+  mac_address?: string;
+  status: 'up' | 'down';
+}
+
+// Scan Result Interface
+export interface ScanResult {
+  id: number;
+  result_id: string;
+  scan_id: string;
+  target_ip: string;
+  hostname?: string;
+  mac_address?: string;
+  status: ScanResultStatus;
+  latency_ms?: number;
+  packet_loss_pct?: number;
+  ttl?: number;
+  ttl_hint?: string; // Linux, Windows, NetworkDevice
+  open_ports?: PortInfo[];
+  closed_ports?: number[];
+  filtered_ports?: number[];
+  os_fingerprint?: OSFingerprint;
+  services?: PortInfo[];
+  confidence_score: number;
+  ssl_cert_info?: SSLCertInfo;
+  http_status_code?: number;
+  http_response_time_ms?: number;
+  page_title?: string;
+  server_header?: string;
+  snmp_sysname?: string;
+  snmp_sysdescr?: string;
+  snmp_interfaces?: SNMPInterface[];
+  matched_asset_id?: string;
+  is_new_discovery: boolean;
+  dismissed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Scan Progress Log Entry
+export interface ScanProgressLog {
+  id: number;
+  log_id: string;
+  scan_id: string;
+  timestamp: string;
+  message: string;
+  status?: 'Info' | 'Warning' | 'Error';
+  hosts_completed?: number;
+  hosts_total?: number;
+  current_host?: string;
+}
+
+// Asset Group Interface
+export interface AssetGroup {
+  id: number;
+  group_id: string;
+  name: string;
+  description?: string;
+  asset_ids: string[];
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}

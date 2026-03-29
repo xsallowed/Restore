@@ -461,21 +461,7 @@ export function AssetRegistryPage() {
             onManualAdd={() => setShowAddModal(true)}
             onCSVImport={() => setShowCSVImport(true)}
             onAPIConnector={() => navigate('/assets/connectors')}
-            onActiveNmap={() => {
-              toast.promise(
-                new Promise((resolve) => {
-                  setTimeout(() => {
-                    navigate('/assets/discovery');
-                    resolve(true);
-                  }, 500);
-                }),
-                {
-                  loading: 'Starting Nmap scan...',
-                  success: 'Scan queued! Check Discovery Inbox for results.',
-                  error: 'Failed to start scan',
-                }
-              );
-            }}
+            onActiveNmap={() => navigate('/assets/scan')}
             onPCAPDiscovery={() => {
               toast.success('PCAP discovery started. Check Discovery Inbox.');
               navigate('/assets/discovery');

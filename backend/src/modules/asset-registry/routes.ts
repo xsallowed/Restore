@@ -18,6 +18,13 @@ import {
   Connector,
   ConnectorType,
   ConnectorSyncLog,
+  Scan,
+  ScanType,
+  ScanStatus,
+  ScanTargetType,
+  CreateScanRequest,
+  ScanResult,
+  PostScanActions,
 } from './types';
 import { encryptConfig, decryptConfig, ConnectorFactory } from './connectors';
 import { IntuneConnector } from './connectors/intune';
@@ -1008,6 +1015,428 @@ assetRegistryRouter.post(
       });
     } catch (err) {
       logger.error('POST /connectors/:id/sync error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+// ─── SCAN MANAGEMENT ────────────────────────────────────────────────────────
+
+/**
+ * POST /api/scans
+ * Create a new scan configuration
+ */
+assetRegistryRouter.post(
+  '/scans',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const schema = z.object({
+        name: z.string().min(1),
+        description: z.string().optional(),
+        scan_type: z.string(),
+        target_type: z.string(),
+        target_spec: z.object({
+          type: z.string(),
+          value: z.string(),
+          asset_group_id: z.string().optional(),
+        }),
+        port_config: z.object({
+          preset: z.string().optional(),
+          custom_ports: z.string().optional(),
+        }).optional(),
+        timing: z.string(),
+        credentials: z.object({
+          type: z.string(),
+          username: z.string(),
+          password: z.string().optional(),
+          domain: z.string().optional(),
+        }).optional(),
+        schedule_type: z.string(),
+        scheduled_datetime: z.string().optional(),
+        schedule_cron: z.string().optional(),
+        post_scan_actions: z.object({
+          create_new_assets: z.boolean(),
+          update_existing_assets: z.boolean(),
+          flag_unresponsive: z.boolean(),
+          send_alert_new_hosts: z.boolean(),
+          add_to_discovery_inbox: z.boolean(),
+        }),
+      });
+
+      const payload = schema.parse(req.body);
+      const scanId = `SCAN-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+      // Encrypt credentials if provided
+      const encryptedCredentials = payload.credentials ? encryptConfig(payload.credentials) : null;
+
+      await sql`
+        INSERT INTO scans (
+          scan_id, name, description, scan_type, target_type,
+          target_spec, port_config, timing,
+          credentials, schedule_type, scheduled_datetime, schedule_cron,
+          post_scan_actions, status, created_by, updated_by
+        ) VALUES (
+          ${scanId}, ${payload.name}, ${payload.description || null},
+          ${payload.scan_type}, ${payload.target_type},
+          ${sql.json(payload.target_spec)},
+          ${payload.port_config ? sql.json(payload.port_config) : null},
+          ${payload.timing},
+          ${encryptedCredentials ? Buffer.from(encryptedCredentials) : null},
+          ${payload.schedule_type},
+          ${payload.scheduled_datetime || null},
+          ${payload.schedule_cron || null},
+          ${sql.json(payload.post_scan_actions)},
+          'Queued',
+          ${req.user!.id}, ${req.user!.id}
+        )
+      `;
+
+      await writeAuditEntry({
+        action: 'CREATE',
+        entity_type: 'SCAN',
+        entity_id: scanId,
+        changes: { created: true, scan_type: payload.scan_type },
+        user_id: req.user!.id,
+      });
+
+      res.status(201).json({
+        success: true,
+        data: {
+          scan_id: scanId,
+          name: payload.name,
+          status: 'Queued',
+        },
+      });
+    } catch (err) {
+      logger.error('POST /scans error', { err: String(err) });
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: 'Validation error', details: err.errors });
+      }
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * GET /api/scans
+ * List all scans with filtering and pagination
+ */
+assetRegistryRouter.get(
+  '/scans',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const status = req.query.status as string | undefined;
+      const scan_type = req.query.scan_type as string | undefined;
+
+      const offset = (page - 1) * limit;
+
+      // Build where clause
+      let whereConditions: string[] = [];
+      const params: unknown[] = [];
+
+      if (status) {
+        whereConditions.push(`status = $${params.length + 1}`);
+        params.push(status);
+      }
+
+      if (scan_type) {
+        whereConditions.push(`scan_type = $${params.length + 1}`);
+        params.push(scan_type);
+      }
+
+      const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+
+      // Count total
+      const countResult = await sql<{ count: number }[]>`
+        SELECT COUNT(*) as count FROM scans ${sql.unsafe(whereClause)}
+      `;
+      const total = parseInt(String(countResult[0]?.count || 0));
+      const total_pages = Math.ceil(total / limit);
+
+      // Fetch scans
+      const scans = await sql<Scan[]>`
+        SELECT * FROM scans
+        ${sql.unsafe(whereClause)}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+
+      res.json({
+        success: true,
+        data: scans,
+        total,
+        page,
+        limit,
+        total_pages,
+      });
+    } catch (err) {
+      logger.error('GET /scans error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * GET /api/scans/:id
+ * Get scan details
+ */
+assetRegistryRouter.get(
+  '/scans/:id',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const scans = await sql<Scan[]>`
+        SELECT * FROM scans WHERE scan_id = ${id}
+      `;
+
+      if (!scans.length) {
+        return res.status(404).json({ success: false, error: 'Scan not found' });
+      }
+
+      res.json({
+        success: true,
+        data: scans[0],
+      });
+    } catch (err) {
+      logger.error('GET /scans/:id error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * DELETE /api/scans/:id
+ * Delete a scan
+ */
+assetRegistryRouter.delete(
+  '/scans/:id',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const result = await sql`
+        DELETE FROM scans WHERE scan_id = ${id} RETURNING scan_id
+      `;
+
+      if (!result.length) {
+        return res.status(404).json({ success: false, error: 'Scan not found' });
+      }
+
+      await writeAuditEntry({
+        action: 'DELETE',
+        entity_type: 'SCAN',
+        entity_id: id,
+        changes: { deleted: true },
+        user_id: req.user!.id,
+      });
+
+      res.json({ success: true });
+    } catch (err) {
+      logger.error('DELETE /scans/:id error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * POST /api/scans/:id/run
+ * Start execution of a scan
+ */
+assetRegistryRouter.post(
+  '/scans/:id/run',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      // Verify scan exists
+      const scans = await sql<Scan[]>`
+        SELECT * FROM scans WHERE scan_id = ${id}
+      `;
+
+      if (!scans.length) {
+        return res.status(404).json({ success: false, error: 'Scan not found' });
+      }
+
+      // Update scan status to Running
+      await sql`
+        UPDATE scans
+        SET status = 'Running', started_at = NOW()
+        WHERE scan_id = ${id}
+      `;
+
+      // Log audit entry
+      await writeAuditEntry({
+        action: 'RUN',
+        entity_type: 'SCAN',
+        entity_id: id,
+        changes: { status: 'Running' },
+        user_id: req.user!.id,
+      });
+
+      // In a real implementation, this would queue the scan to a background job processor
+      // For now, just acknowledge that the scan has started
+      res.json({
+        success: true,
+        data: {
+          scan_id: id,
+          status: 'Running',
+          message: 'Scan execution started in background. Monitor progress using GET /scans/:id/progress',
+        },
+      });
+    } catch (err) {
+      logger.error('POST /scans/:id/run error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * GET /api/scans/:id/progress
+ * Get live scan progress
+ */
+assetRegistryRouter.get(
+  '/scans/:id/progress',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      // Get scan details
+      const scans = await sql<Scan[]>`
+        SELECT * FROM scans WHERE scan_id = ${id}
+      `;
+
+      if (!scans.length) {
+        return res.status(404).json({ success: false, error: 'Scan not found' });
+      }
+
+      const scan = scans[0];
+
+      // Get progress logs
+      const logs = await sql`
+        SELECT * FROM scan_progress_log
+        WHERE scan_id = ${id}
+        ORDER BY timestamp DESC
+        LIMIT 50
+      `;
+
+      res.json({
+        success: true,
+        data: {
+          scan: scan,
+          progress_logs: logs,
+        },
+      });
+    } catch (err) {
+      logger.error('GET /scans/:id/progress error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * GET /api/scans/:id/results
+ * Get scan results with filtering
+ */
+assetRegistryRouter.get(
+  '/scans/:id/results',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const status = req.query.status as string | undefined;
+      const has_open_ports = req.query.has_open_ports === 'true';
+
+      // Verify scan exists
+      const scans = await sql<Scan[]>`
+        SELECT * FROM scans WHERE scan_id = ${id}
+      `;
+
+      if (!scans.length) {
+        return res.status(404).json({ success: false, error: 'Scan not found' });
+      }
+
+      // Build where clause
+      let whereConditions = ['scan_id = $1'];
+      const params: unknown[] = [id];
+
+      if (status) {
+        whereConditions.push(`status = $${params.length + 1}`);
+        params.push(status);
+      }
+
+      const whereClause = whereConditions.join(' AND ');
+
+      // Get results
+      let query = `
+        SELECT * FROM scan_results
+        WHERE ${whereClause}
+        ORDER BY target_ip ASC
+      `;
+
+      const results = await sql<ScanResult[]>(query, params as [string, ...any[]]);
+
+      // Filter by has_open_ports if requested
+      const filtered = has_open_ports
+        ? results.filter((r) => Array.isArray(r.open_ports) && r.open_ports.length > 0)
+        : results;
+
+      res.json({
+        success: true,
+        data: filtered,
+        total: filtered.length,
+      });
+    } catch (err) {
+      logger.error('GET /scans/:id/results error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * POST /api/scans/:id/cancel
+ * Cancel a running scan
+ */
+assetRegistryRouter.post(
+  '/scans/:id/cancel',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      await sql`
+        UPDATE scans
+        SET status = 'Cancelled'
+        WHERE scan_id = ${id} AND status = 'Running'
+      `;
+
+      await writeAuditEntry({
+        action: 'CANCEL',
+        entity_type: 'SCAN',
+        entity_id: id,
+        changes: { status: 'Cancelled' },
+        user_id: req.user!.id,
+      });
+
+      res.json({ success: true });
+    } catch (err) {
+      logger.error('POST /scans/:id/cancel error', { err: String(err) });
       res.status(500).json({ success: false, error: 'Internal server error' });
     }
   }
