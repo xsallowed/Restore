@@ -13,6 +13,9 @@ import { NewEventPage } from './pages/silver/NewEventPage';
 import { RehearsalPage } from './pages/silver/RehearsalPage';
 import { BlastRadiusView } from './pages/silver/BlastRadiusView';
 import { AssetRegistryPage } from './pages/silver/AssetRegistryPage';
+import { AssetDetailPage } from './pages/silver/AssetDetailPage';
+import { AssetDashboardPage } from './pages/silver/AssetDashboardPage';
+import { DiscoveryInboxPage } from './pages/silver/DiscoveryInboxPage';
 import { BusinessServicesPage } from './pages/silver/BusinessServicesPage';
 import { DependencyMappingPage } from './pages/silver/DependencyMappingPage';
 import { EventListPage, AuditPage } from './pages/shared/EventListPage';
@@ -61,6 +64,9 @@ export default function App() {
             <Route path="/events/new"        element={<NewEventPage />} />
             <Route path="/events/:id"        element={<EventPage />} />
             <Route path="/assets"            element={<AssetRegistryPage />} />
+            <Route path="/assets/:id"        element={<AssetDetailPage />} />
+            <Route path="/assets/discovery"  element={<DiscoveryInboxPage />} />
+            <Route path="/assets/dashboard"  element={<AssetDashboardPage />} />
             <Route path="/assets/graph"      element={<BlastRadiusView />} />
             <Route path="/services"          element={<BusinessServicesPage />} />
             <Route path="/rehearsals"        element={<RehearsalPage />} />
