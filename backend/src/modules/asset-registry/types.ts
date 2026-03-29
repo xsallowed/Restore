@@ -610,3 +610,334 @@ export interface AssetGroup {
   created_at: string;
   updated_at: string;
 }
+
+// ─── EXTENDED ASSET TYPES ───────────────────────────────────────────────────
+
+// Secret Type Enum
+export enum SecretType {
+  API_KEY = 'API Key',
+  OAUTH_SECRET = 'OAuth Client Secret',
+  SERVICE_ACCOUNT = 'Service Account Key',
+  PAT = 'PAT',
+  WEBHOOK_SECRET = 'Webhook Secret',
+  SIGNING_KEY = 'Signing Key',
+  SSH_KEY = 'SSH Private Key',
+  CERTIFICATE = 'Certificate',
+  OTHER = 'Other',
+}
+
+// Platform Enum
+export enum Platform {
+  AWS = 'AWS',
+  AZURE = 'Azure',
+  GCP = 'GCP',
+  GITHUB = 'GitHub',
+  STRIPE = 'Stripe',
+  TWILIO = 'Twilio',
+  SENDGRID = 'SendGrid',
+  CUSTOM = 'Custom / Internal',
+  OTHER = 'Other',
+}
+
+// User Type Enum
+export enum UserType {
+  EMPLOYEE = 'Employee',
+  CONTRACTOR = 'Contractor',
+  SERVICE_ACCOUNT = 'Service Account',
+  SHARED_ACCOUNT = 'Shared Account',
+  BOT = 'Bot / Automation',
+  EXTERNAL = 'External User',
+}
+
+// Identity Provider Enum
+export enum IdentityProvider {
+  AD = 'Active Directory',
+  AZURE_AD = 'Azure AD',
+  OKTA = 'Okta',
+  GOOGLE = 'Google Workspace',
+  JUMPCLOUD = 'JumpCloud',
+  LOCAL = 'Local',
+  OTHER = 'Other',
+}
+
+// Connection Type Enum
+export enum ConnectionType {
+  VPN_SITE_TO_SITE = 'VPN (Site-to-Site)',
+  VPN_REMOTE = 'VPN (Remote Access)',
+  MPLS = 'MPLS / Leased Line',
+  SD_WAN = 'SD-WAN',
+  DIRECT_CONNECT = 'Direct Connect / ExpressRoute',
+  PEERING = 'Peering (BGP)',
+  PROXY = 'Proxy / Reverse Proxy',
+  API_GATEWAY = 'API Gateway Outbound',
+  THIRD_PARTY = 'Third-Party Integration',
+  ISP_UPLINK = 'ISP Uplink',
+  OTHER = 'Other',
+}
+
+// Risk Level Enum
+export enum RiskLevel {
+  CRITICAL = 'Critical',
+  HIGH = 'High',
+  MEDIUM = 'Medium',
+  LOW = 'Low',
+}
+
+// Relationship Type Enum
+export enum RelationshipType {
+  USED_BY = 'used_by',
+  OWNED_BY = 'owned_by',
+  HAS_ACCESS_TO = 'has_access_to',
+  ASSIGNED_DEVICE = 'assigned_device',
+  TERMINATES_AT = 'terminates_at',
+  OWNS = 'owns',
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+
+// API Key Interface
+export interface ApiKey {
+  id?: number;
+  asset_id: string;
+  key_name: string;
+  key_identifier?: string; // first 6 + last 4 chars only
+  secret_type: SecretType;
+  platform: Platform;
+
+  // Ownership
+  owner_team?: string;
+  owner_email?: string;
+  created_by: string;
+  approved_by?: string;
+
+  // Lifecycle
+  created_date?: string;
+  expiry_date?: string;
+  last_rotated_date?: string;
+  rotation_interval?: number; // days
+  next_rotation_due?: string;
+  auto_rotate: boolean;
+  status: 'Active' | 'Expired' | 'Revoked' | 'Rotation Overdue' | 'Unknown';
+
+  // Usage & Scope
+  associated_service?: string;
+  permission_scope?: string;
+  environment: 'Production' | 'Staging' | 'Dev' | 'Test';
+  where_stored?: 'Vault' | 'AWS Secrets Manager' | 'Azure Key Vault' | '.env file' | 'Code Repository' | 'Hardcoded' | 'Unknown';
+  exposed_in_code: boolean;
+
+  // Risk
+  risk_level: RiskLevel;
+  last_used_date?: string;
+  usage_frequency?: 'Daily' | 'Weekly' | 'Rarely' | 'Never' | 'Unknown';
+  risk_reasons?: string[]; // array of reasons that drove the risk level
+
+  // Audit
+  confidence_score: number;
+  tags: string[];
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// User Identity Interface
+export interface UserIdentity {
+  id?: number;
+  asset_id: string;
+  display_name: string;
+  username: string;
+  email: string;
+  employee_id?: string;
+  user_type: UserType;
+  department?: string;
+  manager_email?: string;
+  location?: string;
+
+  // Account Details
+  identity_provider: IdentityProvider;
+  account_status: 'Active' | 'Disabled' | 'Locked' | 'Suspended' | 'Pending' | 'Deleted';
+  mfa_enabled: boolean;
+  mfa_method?: 'Authenticator App' | 'SMS' | 'Hardware Token' | 'None';
+  password_last_set?: string;
+  password_expires?: string;
+  last_login_date?: string;
+  last_login_ip?: string;
+  failed_login_count: number;
+  account_created?: string;
+  account_expires?: string;
+
+  // Entitlements
+  group_memberships: string[];
+  roles_assigned: string[];
+  privileged_access: boolean;
+  privileged_systems: string[];
+  licenses_assigned: string[];
+
+  // Associated Assets
+  assigned_devices: string[];
+  owned_api_keys: string[];
+
+  // Lifecycle
+  onboarding_date?: string;
+  offboarding_date?: string;
+  access_review_due?: string;
+  last_access_review?: string;
+
+  // Risk
+  risk_level: RiskLevel;
+  dormant: boolean;
+  orphaned: boolean;
+  risk_reasons?: string[];
+
+  // Audit
+  confidence_score: number;
+  tags: string[];
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// External Connection Interface
+export interface ExternalConnection {
+  id?: number;
+  asset_id: string;
+  connection_name: string;
+  connection_type: ConnectionType;
+
+  // Endpoints
+  local_endpoint?: string;
+  remote_endpoint?: string;
+  remote_asn?: number;
+  remote_owner?: string;
+  remote_country?: string;
+
+  // Technical Details
+  protocol?: string;
+  encryption?: 'AES-256' | 'AES-128' | 'None' | 'Unknown';
+  authentication?: 'Pre-shared Key' | 'Certificate' | 'MFA' | 'None';
+  bandwidth_mbps?: number;
+  port_number?: number;
+  firewall_rule_id?: string;
+  traffic_direction?: 'Inbound' | 'Outbound' | 'Bidirectional';
+
+  // Ownership & Purpose
+  business_purpose?: string;
+  owner_team?: string;
+  approved_by?: string;
+  approved_date?: string;
+  contract_ref?: string;
+  provider?: string;
+
+  // Lifecycle
+  established_date?: string;
+  review_date?: string;
+  expiry_date?: string;
+  status: 'Active' | 'Inactive' | 'Degraded' | 'Unauthorised' | 'Under Review';
+
+  // Monitoring
+  last_seen?: string;
+  avg_latency_ms?: number;
+  uptime_pct?: number;
+  bytes_in_30d?: number;
+  bytes_out_30d?: number;
+  alert_on_drop: boolean;
+
+  // Risk
+  risk_level: RiskLevel;
+  encryption_in_transit?: boolean;
+  split_tunnelling: boolean;
+  risk_reasons?: string[];
+
+  // Audit
+  confidence_score: number;
+  tags: string[];
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Asset Relationship Interface
+export interface AssetRelationship {
+  id?: number;
+  relationship_id: string;
+  source_asset_id: string;
+  relationship_type: RelationshipType;
+  target_asset_id: string;
+  metadata?: Record<string, any>;
+  created_at: string;
+  created_by: string;
+}
+
+// Asset Alert Interface
+export interface AssetAlert {
+  id?: number;
+  alert_id: string;
+  asset_id: string;
+  asset_type: string;
+  alert_type: string;
+  severity: 'Critical' | 'High' | 'Medium' | 'Low';
+  status: 'Active' | 'Acknowledged' | 'Resolved';
+  owner_email?: string;
+  recommended_action?: string;
+  alert_details?: Record<string, any>;
+  created_at: string;
+  acknowledged_at?: string;
+  resolved_at?: string;
+}
+
+// Exposed Secret Record
+export interface ExposedSecret {
+  id?: number;
+  secret_id: string;
+  related_asset_id?: string;
+  repository_name: string;
+  file_path: string;
+  line_number?: number;
+  commit_hash?: string;
+  detected_pattern_type: string;
+  detected_at: string;
+  status: 'Unreviewed' | 'Acknowledged' | 'Remediated' | 'False Positive';
+  remediation_notes?: string;
+  remediated_at?: string;
+}
+
+// Create Request Types
+export interface CreateApiKeyRequest {
+  key_name: string;
+  secret_type: SecretType;
+  platform: Platform;
+  owner_team?: string;
+  owner_email?: string;
+  permission_scope?: string;
+  environment: 'Production' | 'Staging' | 'Dev' | 'Test';
+  where_stored?: string;
+  rotation_interval?: number;
+  auto_rotate?: boolean;
+  associated_service?: string;
+  notes?: string;
+}
+
+export interface CreateUserIdentityRequest {
+  display_name: string;
+  username: string;
+  email: string;
+  user_type: UserType;
+  identity_provider: IdentityProvider;
+  department?: string;
+  manager_email?: string;
+  employee_id?: string;
+  notes?: string;
+}
+
+export interface CreateExternalConnectionRequest {
+  connection_name: string;
+  connection_type: ConnectionType;
+  local_endpoint?: string;
+  remote_endpoint?: string;
+  remote_owner?: string;
+  business_purpose?: string;
+  owner_team?: string;
+  protocol?: string;
+  encryption?: string;
+  notes?: string;
+}

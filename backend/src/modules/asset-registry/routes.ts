@@ -25,7 +25,17 @@ import {
   CreateScanRequest,
   ScanResult,
   PostScanActions,
+  ApiKey,
+  UserIdentity,
+  ExternalConnection,
+  AssetRelationship,
+  AssetAlert,
+  CreateApiKeyRequest,
+  CreateUserIdentityRequest,
+  CreateExternalConnectionRequest,
+  RiskLevel,
 } from './types';
+import { RiskCalculator } from './risk-calculator';
 import { encryptConfig, decryptConfig, ConnectorFactory } from './connectors';
 import { IntuneConnector } from './connectors/intune';
 
@@ -1437,6 +1447,326 @@ assetRegistryRouter.post(
       res.json({ success: true });
     } catch (err) {
       logger.error('POST /scans/:id/cancel error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+// ─── API KEYS & SECRETS MANAGEMENT ──────────────────────────────────────────
+
+/**
+ * POST /api/v1/api-keys
+ * Create a new API Key / Secret record
+ */
+assetRegistryRouter.post(
+  '/api-keys',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const schema = z.object({
+        key_name: z.string().min(1),
+        secret_type: z.string(),
+        platform: z.string(),
+        owner_team: z.string().optional(),
+        owner_email: z.string().optional(),
+        permission_scope: z.string().optional(),
+        environment: z.string(),
+        where_stored: z.string().optional(),
+        rotation_interval: z.number().optional(),
+        auto_rotate: z.boolean().optional(),
+        expiry_date: z.string().optional(),
+        associated_service: z.string().optional(),
+        notes: z.string().optional(),
+      });
+
+      const payload = schema.parse(req.body);
+      const assetId = `API-KEY-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+      // Build the API Key record
+      const apiKey: ApiKey = {
+        asset_id: assetId,
+        key_name: payload.key_name,
+        secret_type: payload.secret_type as any,
+        platform: payload.platform as any,
+        owner_team: payload.owner_team,
+        owner_email: payload.owner_email,
+        created_by: req.user!.id,
+        environment: payload.environment as any,
+        where_stored: payload.where_stored,
+        exposed_in_code: false,
+        permission_scope: payload.permission_scope,
+        rotation_interval: payload.rotation_interval,
+        auto_rotate: payload.auto_rotate || false,
+        expiry_date: payload.expiry_date,
+        associated_service: payload.associated_service,
+        status: 'Active',
+        risk_level: 'Low' as any,
+        confidence_score: 50,
+        tags: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      // Calculate risk level
+      const riskResult = RiskCalculator.calculateApiKeyRisk(apiKey);
+      apiKey.risk_level = riskResult.risk_level;
+
+      // Insert into database
+      await sql`
+        INSERT INTO api_keys (
+          asset_id, key_name, secret_type, platform,
+          owner_team, owner_email, created_by,
+          environment, where_stored, exposed_in_code,
+          permission_scope, rotation_interval, auto_rotate,
+          expiry_date, associated_service, status, risk_level,
+          confidence_score, tags, notes, created_at, updated_at
+        ) VALUES (
+          ${apiKey.asset_id}, ${apiKey.key_name}, ${apiKey.secret_type},
+          ${apiKey.platform}, ${apiKey.owner_team}, ${apiKey.owner_email},
+          ${apiKey.created_by}, ${apiKey.environment}, ${apiKey.where_stored},
+          ${apiKey.exposed_in_code}, ${apiKey.permission_scope},
+          ${apiKey.rotation_interval}, ${apiKey.auto_rotate},
+          ${apiKey.expiry_date}, ${apiKey.associated_service},
+          ${apiKey.status}, ${apiKey.risk_level},
+          ${apiKey.confidence_score}, ${apiKey.tags || sql.array([])},
+          ${payload.notes || null}, NOW(), NOW()
+        )
+      `;
+
+      await writeAuditEntry({
+        action: 'CREATE',
+        entity_type: 'API_KEY',
+        entity_id: assetId,
+        changes: { created: true, platform: payload.platform },
+        user_id: req.user!.id,
+      });
+
+      res.status(201).json({
+        success: true,
+        data: apiKey,
+      });
+    } catch (err) {
+      logger.error('POST /api-keys error', { err: String(err) });
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: 'Validation error', details: err.errors });
+      }
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * GET /api/v1/api-keys
+ * List all API Keys with filtering and pagination
+ */
+assetRegistryRouter.get(
+  '/api-keys',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const platform = req.query.platform as string | undefined;
+      const risk_level = req.query.risk_level as string | undefined;
+      const environment = req.query.environment as string | undefined;
+      const search = req.query.search as string | undefined;
+
+      const offset = (page - 1) * limit;
+
+      // Build where clause
+      let whereConditions: string[] = [];
+      const params: unknown[] = [];
+
+      if (platform) {
+        whereConditions.push(`platform = $${params.length + 1}`);
+        params.push(platform);
+      }
+
+      if (risk_level) {
+        whereConditions.push(`risk_level = $${params.length + 1}`);
+        params.push(risk_level);
+      }
+
+      if (environment) {
+        whereConditions.push(`environment = $${params.length + 1}`);
+        params.push(environment);
+      }
+
+      if (search) {
+        whereConditions.push(`key_name ILIKE $${params.length + 1}`);
+        params.push(`%${search}%`);
+      }
+
+      const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+
+      // Count total
+      const countResult = await sql<{ count: number }[]>`
+        SELECT COUNT(*) as count FROM api_keys ${sql.unsafe(whereClause)}
+      `;
+      const total = parseInt(String(countResult[0]?.count || 0));
+      const total_pages = Math.ceil(total / limit);
+
+      // Fetch API Keys
+      const apiKeys = await sql<ApiKey[]>`
+        SELECT * FROM api_keys
+        ${sql.unsafe(whereClause)}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+
+      res.json({
+        success: true,
+        data: apiKeys,
+        total,
+        page,
+        limit,
+        total_pages,
+      });
+    } catch (err) {
+      logger.error('GET /api-keys error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * GET /api/v1/api-keys/:id
+ * Get a specific API Key
+ */
+assetRegistryRouter.get(
+  '/api-keys/:id',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const keys = await sql<ApiKey[]>`
+        SELECT * FROM api_keys WHERE asset_id = ${id}
+      `;
+
+      if (!keys.length) {
+        return res.status(404).json({ success: false, error: 'API Key not found' });
+      }
+
+      res.json({
+        success: true,
+        data: keys[0],
+      });
+    } catch (err) {
+      logger.error('GET /api-keys/:id error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * PUT /api/v1/api-keys/:id
+ * Update an API Key
+ */
+assetRegistryRouter.put(
+  '/api-keys/:id',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+
+      // Fetch current key for risk recalculation
+      const keys = await sql<ApiKey[]>`
+        SELECT * FROM api_keys WHERE asset_id = ${id}
+      `;
+
+      if (!keys.length) {
+        return res.status(404).json({ success: false, error: 'API Key not found' });
+      }
+
+      const current = keys[0];
+
+      // Merge updates
+      const updated: ApiKey = { ...current, ...updates, updated_at: new Date().toISOString() };
+
+      // Recalculate risk
+      const riskResult = RiskCalculator.calculateApiKeyRisk(updated);
+      updated.risk_level = riskResult.risk_level;
+
+      // Update in database
+      await sql`
+        UPDATE api_keys SET
+          key_name = ${updated.key_name},
+          secret_type = ${updated.secret_type},
+          platform = ${updated.platform},
+          owner_team = ${updated.owner_team},
+          owner_email = ${updated.owner_email},
+          environment = ${updated.environment},
+          where_stored = ${updated.where_stored},
+          exposure_in_code = ${updated.exposed_in_code},
+          permission_scope = ${updated.permission_scope},
+          rotation_interval = ${updated.rotation_interval},
+          auto_rotate = ${updated.auto_rotate},
+          expiry_date = ${updated.expiry_date},
+          associated_service = ${updated.associated_service},
+          status = ${updated.status},
+          risk_level = ${updated.risk_level},
+          confidence_score = ${updated.confidence_score},
+          notes = ${updates.notes || null},
+          updated_at = NOW()
+        WHERE asset_id = ${id}
+      `;
+
+      await writeAuditEntry({
+        action: 'UPDATE',
+        entity_type: 'API_KEY',
+        entity_id: id,
+        changes: updates,
+        user_id: req.user!.id,
+      });
+
+      res.json({
+        success: true,
+        data: updated,
+      });
+    } catch (err) {
+      logger.error('PUT /api-keys/:id error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * DELETE /api/v1/api-keys/:id
+ * Delete an API Key
+ */
+assetRegistryRouter.delete(
+  '/api-keys/:id',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const result = await sql`
+        DELETE FROM api_keys WHERE asset_id = ${id} RETURNING asset_id
+      `;
+
+      if (!result.length) {
+        return res.status(404).json({ success: false, error: 'API Key not found' });
+      }
+
+      await writeAuditEntry({
+        action: 'DELETE',
+        entity_type: 'API_KEY',
+        entity_id: id,
+        changes: { deleted: true },
+        user_id: req.user!.id,
+      });
+
+      res.json({ success: true });
+    } catch (err) {
+      logger.error('DELETE /api-keys/:id error', { err: String(err) });
       res.status(500).json({ success: false, error: 'Internal server error' });
     }
   }
