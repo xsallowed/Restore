@@ -17,6 +17,7 @@ import { AssetDetailPage } from './pages/silver/AssetDetailPage';
 import { AssetDashboardPage } from './pages/silver/AssetDashboardPage';
 import { AssetConnectorsPage } from './pages/silver/AssetConnectorsPage';
 import { ActiveScanPage } from './pages/silver/ActiveScanPage';
+import { ApiKeysPage } from './pages/silver/ApiKeysPage';
 import { DiscoveryInboxPage } from './pages/silver/DiscoveryInboxPage';
 import { BusinessServicesPage } from './pages/silver/BusinessServicesPage';
 import { DependencyMappingPage } from './pages/silver/DependencyMappingPage';
@@ -70,6 +71,7 @@ export default function App() {
             <Route path="/assets/discovery"  element={<DiscoveryInboxPage />} />
             <Route path="/assets/dashboard"  element={<AssetDashboardPage />} />
             <Route path="/assets/connectors" element={<AssetConnectorsPage />} />
+            <Route path="/assets/api-keys"   element={<ApiKeysPage />} />
             <Route path="/assets/scan"       element={<ActiveScanPage />} />
             <Route path="/assets/graph"      element={<BlastRadiusView />} />
             <Route path="/services"          element={<BusinessServicesPage />} />
