@@ -15,6 +15,7 @@ import { BlastRadiusView } from './pages/silver/BlastRadiusView';
 import { AssetRegistryPage } from './pages/silver/AssetRegistryPage';
 import { AssetDetailPage } from './pages/silver/AssetDetailPage';
 import { AssetDashboardPage } from './pages/silver/AssetDashboardPage';
+import { AssetConnectorsPage } from './pages/silver/AssetConnectorsPage';
 import { DiscoveryInboxPage } from './pages/silver/DiscoveryInboxPage';
 import { BusinessServicesPage } from './pages/silver/BusinessServicesPage';
 import { DependencyMappingPage } from './pages/silver/DependencyMappingPage';
@@ -67,6 +68,7 @@ export default function App() {
             <Route path="/assets/:id"        element={<AssetDetailPage />} />
             <Route path="/assets/discovery"  element={<DiscoveryInboxPage />} />
             <Route path="/assets/dashboard"  element={<AssetDashboardPage />} />
+            <Route path="/assets/connectors" element={<AssetConnectorsPage />} />
             <Route path="/assets/graph"      element={<BlastRadiusView />} />
             <Route path="/services"          element={<BusinessServicesPage />} />
             <Route path="/rehearsals"        element={<RehearsalPage />} />

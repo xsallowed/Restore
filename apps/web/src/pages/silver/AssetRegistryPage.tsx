@@ -460,7 +460,7 @@ export function AssetRegistryPage() {
           <AddAssetsDropdown
             onManualAdd={() => setShowAddModal(true)}
             onCSVImport={() => setShowCSVImport(true)}
-            onAPIConnector={() => navigate('/connectors')}
+            onAPIConnector={() => navigate('/assets/connectors')}
             onActiveNmap={() => {
               toast.promise(
                 new Promise((resolve) => {
