@@ -7,8 +7,12 @@ import { setupSSE } from '../lib/sse';
 import { generateSOE } from '../modules/runbook/soeGenerator';
 import { issueToken } from '../middleware/auth';
 import { logger } from '../lib/logger';
+import { assetRegistryRouter } from '../modules/asset-registry/routes';
 
 export const router = Router();
+
+// ─── Mount Asset Registry Routes ────────────────────────────────────────────
+router.use('/', assetRegistryRouter);
 
 // ─── Auth ──────────────────────────────────────────────────────────────────
 router.post('/auth/login', async (req: Request, res: Response) => {
