@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Check, X, Shield, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Check, X, Shield, AlertCircle, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import { api } from '../../lib/api';
@@ -162,6 +163,7 @@ function DiscoveryCard({
 }
 
 export function DiscoveryInboxPage() {
+  const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<'Pending' | 'All'>('Pending');
   const [sourceFilter, setSourceFilter] = useState<string>('');
   const queryClient = useQueryClient();
@@ -203,6 +205,12 @@ export function DiscoveryInboxPage() {
   return (
     <div className={clsx('min-h-screen p-6', themeClasses.bg.primary)}>
       <div className="max-w-6xl mx-auto space-y-6">
+        {/* Back Button */}
+        <button onClick={() => navigate('/assets')} className={clsx('flex items-center gap-2 mb-4', themeClasses.text.primary, 'hover:opacity-70 transition')}>
+          <ArrowLeft size={20} />
+          Back to Assets
+        </button>
+
         {/* Header */}
         <div className={themeClasses.text.primary}>
           <h1 className="text-3xl font-bold mb-1">Discovery Inbox</h1>

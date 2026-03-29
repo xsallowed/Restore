@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { TrendingUp, AlertCircle, CheckCircle, XCircle, Package } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { TrendingUp, AlertCircle, CheckCircle, XCircle, Package, ArrowLeft } from 'lucide-react';
 import clsx from 'clsx';
 import { api } from '../../lib/api';
 import { themeClasses } from '../../lib/themeClasses';
@@ -89,6 +90,7 @@ function DistributionChart({
 }
 
 export function AssetDashboardPage() {
+  const navigate = useNavigate();
   const { data: metrics, isLoading } = useQuery<DashboardMetrics>({
     queryKey: ['asset-metrics'],
     queryFn: async () => {
@@ -136,6 +138,12 @@ export function AssetDashboardPage() {
   return (
     <div className={clsx('min-h-screen p-6', themeClasses.bg.primary)}>
       <div className="max-w-7xl mx-auto space-y-6">
+        {/* Back Button */}
+        <button onClick={() => navigate('/assets')} className={clsx('flex items-center gap-2', themeClasses.text.primary, 'hover:opacity-70 transition')}>
+          <ArrowLeft size={20} />
+          Back to Assets
+        </button>
+
         {/* Header */}
         <div className={themeClasses.text.primary}>
           <h1 className="text-3xl font-bold mb-1">Asset Dashboard</h1>
