@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Download, Upload, Filter, Eye, Edit2, Trash2, ChevronRight } from 'lucide-react';
+import { Plus, Search, Download, Upload, Filter, Eye, Edit2, Trash2, ChevronRight, ChevronDown, FileUp, Zap, Network, Radio, Database } from 'lucide-react';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import { api } from '../../lib/api';
@@ -243,6 +243,93 @@ function AddAssetModal({ onClose, onAdded }: { onClose: () => void; onAdded: () 
   );
 }
 
+function AddAssetsDropdown({
+  onManualAdd,
+  onCSVImport,
+  onAPIConnector,
+  onActiveNmap,
+  onPCAPDiscovery,
+  onDNSDiscovery,
+}: {
+  onManualAdd: () => void;
+  onCSVImport: () => void;
+  onAPIConnector: () => void;
+  onActiveNmap: () => void;
+  onPCAPDiscovery: () => void;
+  onDNSDiscovery: () => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const menuItems = [
+    { label: 'Manual Entry', icon: Plus, onClick: onManualAdd, description: 'Add a single asset manually' },
+    { label: 'Import CSV', icon: FileUp, onClick: onCSVImport, description: 'Bulk import from CSV file' },
+    { label: 'API Connector', icon: Database, onClick: onAPIConnector, description: 'Sync from API connectors (Intune, ServiceNow)' },
+    { label: 'Active Scan (Nmap)', icon: Zap, onClick: onActiveNmap, description: 'Discover via network scanning' },
+    { label: 'PCAP Discovery', icon: Network, onClick: onPCAPDiscovery, description: 'Discover from packet capture' },
+    { label: 'DNS Discovery', icon: Radio, onClick: onDNSDiscovery, description: 'Discover from DNS logs' },
+  ];
+
+  return (
+    <div ref={dropdownRef} className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={clsx('flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white', themeClasses.button.primary)}
+      >
+        <Plus size={20} />
+        Add Assets
+        <ChevronDown size={16} className={clsx('transition-transform', isOpen && 'rotate-180')} />
+      </button>
+
+      {isOpen && (
+        <div
+          className={clsx(
+            'absolute right-0 mt-2 w-64 rounded-lg shadow-xl z-50 border',
+            themeClasses.bg.card,
+            themeClasses.border.primary
+          )}
+        >
+          <div className={clsx('p-2')}>
+            {menuItems.map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    item.onClick();
+                    setIsOpen(false);
+                  }}
+                  className={clsx(
+                    'w-full text-left px-3 py-3 rounded flex items-start gap-3 hover:bg-opacity-80 transition-colors',
+                    themeClasses.bg.secondary
+                  )}
+                >
+                  <Icon size={18} className={clsx('mt-0.5 flex-shrink-0', themeClasses.text.secondary)} />
+                  <div className="flex-1 min-w-0">
+                    <p className={clsx('text-sm font-medium', themeClasses.text.primary)}>{item.label}</p>
+                    <p className={clsx('text-xs', themeClasses.text.secondary)}>{item.description}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function AssetRegistryPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
@@ -292,22 +379,14 @@ export function AssetRegistryPage() {
             <h1 className="text-3xl font-bold mb-1">Asset Registry</h1>
             <p className={clsx('text-sm', themeClasses.text.secondary)}>Discover, manage, and monitor your IT assets</p>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setShowCSVImport(true)}
-              className={clsx('flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium', themeClasses.button.secondary)}
-            >
-              <Upload size={20} />
-              Import CSV
-            </button>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className={clsx('flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white', themeClasses.button.primary)}
-            >
-              <Plus size={20} />
-              Add Asset
-            </button>
-          </div>
+          <AddAssetsDropdown
+            onManualAdd={() => setShowAddModal(true)}
+            onCSVImport={() => setShowCSVImport(true)}
+            onAPIConnector={() => toast.info('API Connector sync coming soon. Configure connectors in Settings.')}
+            onActiveNmap={() => toast.info('Active Nmap scanning coming soon. Use Discovery page.')}
+            onPCAPDiscovery={() => toast.info('PCAP discovery coming soon. Check Discovery Inbox.')}
+            onDNSDiscovery={() => toast.info('DNS discovery coming soon. Check Discovery Inbox.')}
+          />
         </div>
 
         {/* Filters & Search */}
