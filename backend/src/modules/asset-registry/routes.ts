@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
+import axios from 'axios';
 import { sql, writeAuditEntry } from '../../lib/db';
 import { requireAuth, requireMinTier } from '../../middleware/auth';
 import { logger } from '../../lib/logger';
@@ -736,6 +737,277 @@ assetRegistryRouter.post(
       if (err instanceof z.ZodError) {
         return res.status(400).json({ success: false, error: 'Validation error', details: err.errors });
       }
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+// ─── Connector Management ─────────────────────────────────────────────────────
+
+/**
+ * POST /api/connectors/test
+ * Test connector configuration without saving
+ */
+assetRegistryRouter.post(
+  '/connectors/test',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const schema = z.object({
+        name: z.string().min(1),
+        type: z.string(),
+        base_url: z.string().url(),
+        auth_type: z.string(),
+        endpoint: z.string(),
+        pagination_type: z.string(),
+        response_root_key: z.string().optional(),
+        auth_config: z.record(z.any()).optional(),
+      });
+
+      const formData = schema.parse(req.body);
+
+      // Simulate testing by making a sample request to the API
+      try {
+        // Build headers based on auth type
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+
+        if (formData.auth_type === 'api_key' && formData.auth_config?.api_key) {
+          const headerName = formData.auth_config.header_name || 'X-API-Key';
+          headers[headerName] = formData.auth_config.api_key;
+        } else if (formData.auth_type === 'bearer' && formData.auth_config?.token) {
+          headers['Authorization'] = `Bearer ${formData.auth_config.token}`;
+        } else if (formData.auth_type === 'basic' && formData.auth_config?.username && formData.auth_config?.password) {
+          const credentials = Buffer.from(`${formData.auth_config.username}:${formData.auth_config.password}`).toString('base64');
+          headers['Authorization'] = `Basic ${credentials}`;
+        }
+
+        // Make test request
+        const response = await axios.get(
+          `${formData.base_url}${formData.endpoint}?limit=1`,
+          { headers, timeout: 10000 }
+        );
+
+        // Extract data from response
+        let data = response.data;
+        if (formData.response_root_key) {
+          data = data[formData.response_root_key];
+        }
+
+        const recordsArray = Array.isArray(data) ? data : [data];
+        const recordsCount = recordsArray.length;
+
+        res.json({
+          success: true,
+          data: {
+            auth_status: 'Valid',
+            records_fetched: recordsCount,
+            pagination_type: formData.pagination_type,
+            estimated_total: recordsCount > 0 ? recordsCount : '?',
+            sample_data: recordsArray.slice(0, 3),
+          },
+        });
+      } catch (err: any) {
+        res.json({
+          success: true,
+          data: {
+            error: `Failed to connect: ${err.message || 'Unknown error'}`,
+          },
+        });
+      }
+    } catch (err) {
+      logger.error('POST /connectors/test error', { err: String(err) });
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: 'Validation error', details: err.errors });
+      }
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * POST /api/connectors
+ * Create a new connector
+ */
+assetRegistryRouter.post(
+  '/connectors',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const schema = z.object({
+        name: z.string().min(1),
+        type: z.string(),
+        base_url: z.string().url(),
+        auth_type: z.string(),
+        endpoint: z.string(),
+        pagination_type: z.string(),
+        response_root_key: z.string().optional(),
+        schedule: z.string(),
+        is_enabled: z.boolean(),
+        auth_config: z.record(z.any()).optional(),
+      });
+
+      const formData = schema.parse(req.body);
+      const connectorId = `CONN-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+      // Encrypt sensitive auth data
+      const encryptedAuthConfig = formData.auth_config ? encryptConfig(formData.auth_config) : null;
+
+      await sql`
+        INSERT INTO connectors (
+          connector_id, name, type, base_url, auth_type, endpoint,
+          pagination_type, response_root_key, schedule, is_enabled,
+          auth_config, created_by, updated_by
+        ) VALUES (
+          ${connectorId}, ${formData.name}, ${formData.type}, ${formData.base_url},
+          ${formData.auth_type}, ${formData.endpoint}, ${formData.pagination_type},
+          ${formData.response_root_key || null}, ${formData.schedule}, ${formData.is_enabled},
+          ${encryptedAuthConfig ? sql.json(encryptedAuthConfig) : null},
+          ${req.user!.id}, ${req.user!.id}
+        )
+      `;
+
+      await writeAuditEntry({
+        action: 'CREATE',
+        entity_type: 'CONNECTOR',
+        entity_id: connectorId,
+        changes: { created: true },
+        user_id: req.user!.id,
+      });
+
+      res.status(201).json({
+        success: true,
+        data: {
+          connector_id: connectorId,
+          name: formData.name,
+        },
+      });
+    } catch (err) {
+      logger.error('POST /connectors error', { err: String(err) });
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: 'Validation error', details: err.errors });
+      }
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * GET /api/connectors
+ * List all connectors
+ */
+assetRegistryRouter.get(
+  '/connectors',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const connectors = await sql<Connector[]>`
+        SELECT * FROM connectors ORDER BY created_at DESC
+      `;
+
+      res.json({
+        success: true,
+        data: connectors.map((c) => ({
+          ...c,
+          auth_config: undefined, // Don't send encrypted config to frontend
+        })),
+      });
+    } catch (err) {
+      logger.error('GET /connectors error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * DELETE /api/connectors/:id
+ * Delete a connector
+ */
+assetRegistryRouter.delete(
+  '/connectors/:id',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const result = await sql`
+        DELETE FROM connectors WHERE connector_id = ${id} RETURNING connector_id
+      `;
+
+      if (!result.length) {
+        return res.status(404).json({ success: false, error: 'Connector not found' });
+      }
+
+      await writeAuditEntry({
+        action: 'DELETE',
+        entity_type: 'CONNECTOR',
+        entity_id: id,
+        changes: { deleted: true },
+        user_id: req.user!.id,
+      });
+
+      res.json({ success: true });
+    } catch (err) {
+      logger.error('DELETE /connectors/:id error', { err: String(err) });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
+/**
+ * POST /api/connectors/:id/sync
+ * Trigger a manual sync for a connector
+ */
+assetRegistryRouter.post(
+  '/connectors/:id/sync',
+  requireAuth,
+  requireMinTier('SILVER'),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      // Verify connector exists
+      const connectors = await sql<Connector[]>`
+        SELECT * FROM connectors WHERE connector_id = ${id}
+      `;
+
+      if (!connectors.length) {
+        return res.status(404).json({ success: false, error: 'Connector not found' });
+      }
+
+      const connector = connectors[0];
+
+      // Log sync initiation
+      const syncLogId = `SYNC-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+      await sql`
+        INSERT INTO connector_sync_log (sync_log_id, connector_id, status, started_at, started_by)
+        VALUES (${syncLogId}, ${id}, 'Running', NOW(), ${req.user!.id})
+      `;
+
+      // In a production system, this would queue an async job
+      // For now, we'll just acknowledge the sync was initiated
+      res.json({
+        success: true,
+        data: {
+          sync_log_id: syncLogId,
+          status: 'Sync initiated - check back soon for results',
+        },
+      });
+
+      await writeAuditEntry({
+        action: 'SYNC',
+        entity_type: 'CONNECTOR',
+        entity_id: id,
+        changes: { sync_initiated: true },
+        user_id: req.user!.id,
+      });
+    } catch (err) {
+      logger.error('POST /connectors/:id/sync error', { err: String(err) });
       res.status(500).json({ success: false, error: 'Internal server error' });
     }
   }
