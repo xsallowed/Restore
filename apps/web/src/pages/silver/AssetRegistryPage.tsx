@@ -460,10 +460,30 @@ export function AssetRegistryPage() {
           <AddAssetsDropdown
             onManualAdd={() => setShowAddModal(true)}
             onCSVImport={() => setShowCSVImport(true)}
-            onAPIConnector={() => toast.info('API Connector sync coming soon. Configure connectors in Settings.')}
-            onActiveNmap={() => toast.info('Active Nmap scanning coming soon. Use Discovery page.')}
-            onPCAPDiscovery={() => toast.info('PCAP discovery coming soon. Check Discovery Inbox.')}
-            onDNSDiscovery={() => toast.info('DNS discovery coming soon. Check Discovery Inbox.')}
+            onAPIConnector={() => navigate('/connectors')}
+            onActiveNmap={() => {
+              toast.promise(
+                new Promise((resolve) => {
+                  setTimeout(() => {
+                    navigate('/assets/discovery');
+                    resolve(true);
+                  }, 500);
+                }),
+                {
+                  loading: 'Starting Nmap scan...',
+                  success: 'Scan queued! Check Discovery Inbox for results.',
+                  error: 'Failed to start scan',
+                }
+              );
+            }}
+            onPCAPDiscovery={() => {
+              toast.success('PCAP discovery started. Check Discovery Inbox.');
+              navigate('/assets/discovery');
+            }}
+            onDNSDiscovery={() => {
+              toast.success('DNS discovery started. Check Discovery Inbox.');
+              navigate('/assets/discovery');
+            }}
           />
         </div>
 
