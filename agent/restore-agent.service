@@ -1,0 +1,26 @@
+[Unit]
+Description=Restore IT Asset Registry - Remote Discovery Agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=restore-agent
+WorkingDirectory=/opt/restore-agent
+ExecStart=/usr/bin/node /opt/restore-agent/dist/agent.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=restore-agent
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Allow raw sockets for ICMP (required for ping sweep)
+# Remove AmbientCapabilities if ICMP is not needed
+AmbientCapabilities=CAP_NET_RAW
+
+[Install]
+WantedBy=multi-user.target

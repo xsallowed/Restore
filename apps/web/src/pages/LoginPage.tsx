@@ -1,206 +1,326 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
-import { Shield, Eye, EyeOff, LogIn } from 'lucide-react';
+import { Shield, Eye, EyeOff, LogIn, Building2, UserPlus } from 'lucide-react';
 import clsx from 'clsx';
-import { authApi } from '../lib/api';
+import { api, authApi } from '../lib/api';
 import { useAuth } from '../store/auth';
 import { themeClasses } from '../lib/themeClasses';
 
-const schema = z.object({
-  email:    z.string().email('Valid email required'),
-  password: z.string().min(1, 'Password required'),
+// ─── Login Form ───────────────────────────────────────────────────────────────
+
+const loginSchema = z.object({
+  email:       z.string().email('Valid email required'),
+  password:    z.string().min(1, 'Password required'),
+  tenant_slug: z.string().optional(),
 });
-type Form = z.infer<typeof schema>;
+type LoginForm = z.infer<typeof loginSchema>;
 
 export function LoginPage() {
   const navigate = useNavigate();
   const { setAuth } = useAuth();
-  const [showPw, setShowPw] = useState(false);
+  const [showPw, setShowPw]         = useState(false);
+  const [showSlug, setShowSlug]     = useState(false);
+  const [view, setView]             = useState<'login' | 'register'>('login');
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<Form>({
-    resolver: zodResolver(schema),
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: Form) => {
+  const onSubmit = async (data: LoginForm) => {
     try {
-      const res = await authApi.login(data.email, data.password);
-      const { token, user: apiUser } = res.data.data;
-      const user = {
-        sub: apiUser.id || apiUser.sub,
+      const res = await api.post('/auth/login', {
+        email: data.email,
+        password: data.password,
+        ...(data.tenant_slug ? { tenant_slug: data.tenant_slug } : {}),
+      });
+      const { token, user: apiUser, tenant } = res.data.data;
+      setAuth(token, {
+        sub: apiUser.id,
         email: apiUser.email,
         displayName: apiUser.displayName,
-        restore_tier: (apiUser.tier || apiUser.restore_tier) as 'BRONZE' | 'SILVER' | 'GOLD' | 'ADMIN',
-        restore_roles: apiUser.restore_roles || apiUser.roles || [],
-      };
-      setAuth(token, user);
+        restore_tier: apiUser.tier,
+        restore_roles: apiUser.roles ?? [],
+        tenant_id: tenant?.id ?? null,
+        tenant_slug: tenant?.slug ?? null,
+        is_tenant_admin: apiUser.is_tenant_admin ?? false,
+      });
       navigate('/');
     } catch {
       toast.error('Invalid email or password');
     }
   };
 
-  const quickLogin = (email: string) => {
+  if (view === 'register') {
+    return <RegisterPage onBack={() => setView('login')} />;
+  }
+
+  return (
+    <div className={clsx('min-h-screen flex items-center justify-center p-4', themeClasses.bg.primary)}>
+      <div className="w-full max-w-md space-y-6">
+        {/* Logo */}
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 mb-4">
+            <Shield size={28} className="text-white" />
+          </div>
+          <h1 className={clsx('text-2xl font-bold', themeClasses.text.primary)}>Restore Platform</h1>
+          <p className={clsx('text-sm mt-1', themeClasses.text.secondary)}>Sign in to your organisation</p>
+        </div>
+
+        {/* Card */}
+        <div className={clsx('rounded-2xl border p-8 space-y-5', themeClasses.bg.card, themeClasses.border.primary)}>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <label className={clsx('block text-sm font-medium mb-1.5', themeClasses.text.primary)}>Email</label>
+              <input {...register('email')} type="email" autoComplete="email" placeholder="you@company.com"
+                className={clsx('w-full px-4 py-2.5 rounded-lg border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary,
+                  errors.email ? 'border-red-400' : '')} />
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+            </div>
+
+            <div>
+              <label className={clsx('block text-sm font-medium mb-1.5', themeClasses.text.primary)}>Password</label>
+              <div className="relative">
+                <input {...register('password')} type={showPw ? 'text' : 'password'} autoComplete="current-password"
+                  className={clsx('w-full px-4 py-2.5 rounded-lg border text-sm pr-10', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
+                <button type="button" onClick={() => setShowPw(!showPw)}
+                  className={clsx('absolute right-3 top-1/2 -translate-y-1/2', themeClasses.text.secondary)}>
+                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+            </div>
+
+            {/* Optional tenant slug (shown on demand) */}
+            <div>
+              <button type="button" onClick={() => setShowSlug(!showSlug)}
+                className={clsx('flex items-center gap-1.5 text-xs', themeClasses.text.secondary, 'hover:opacity-80')}>
+                <Building2 size={13} />
+                {showSlug ? 'Hide' : 'Specify organisation (optional)'}
+              </button>
+              {showSlug && (
+                <div className="mt-2">
+                  <input {...register('tenant_slug')} placeholder="your-org-slug"
+                    className={clsx('w-full px-4 py-2.5 rounded-lg border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
+                  <p className={clsx('text-xs mt-1', themeClasses.text.secondary)}>Only needed if your email exists in multiple organisations</p>
+                </div>
+              )}
+            </div>
+
+            <button type="submit" disabled={isSubmitting}
+              className={clsx('w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-white text-sm', themeClasses.button.primary, 'disabled:opacity-50')}>
+              <LogIn size={16} />
+              {isSubmitting ? 'Signing in...' : 'Sign in'}
+            </button>
+          </form>
+
+          <div className={clsx('border-t pt-4', themeClasses.border.primary)}>
+            <p className={clsx('text-xs text-center', themeClasses.text.secondary)}>
+              New organisation?{' '}
+              <button onClick={() => setView('register')} className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                Create account
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Register Page ────────────────────────────────────────────────────────────
+
+const registerSchema = z.object({
+  org_name:       z.string().min(2, 'Organisation name required'),
+  org_slug:       z.string().min(2).regex(/^[a-z0-9-]+$/, 'Lowercase letters, numbers and hyphens only'),
+  admin_name:     z.string().min(2, 'Your name required'),
+  admin_email:    z.string().email('Valid email required'),
+  admin_password: z.string().min(8, 'At least 8 characters'),
+});
+type RegisterForm = z.infer<typeof registerSchema>;
+
+function RegisterPage({ onBack }: { onBack: () => void }) {
+  const navigate = useNavigate();
+  const { setAuth } = useAuth();
+  const [showPw, setShowPw] = useState(false);
+
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterForm>({
+    resolver: zodResolver(registerSchema),
+  });
+
+  const onSubmit = async (data: RegisterForm) => {
     try {
-      let tier: 'BRONZE' | 'SILVER' | 'GOLD' | 'ADMIN' = 'BRONZE';
-      let displayName = 'SOC Analyst';
-
-      if (email.includes('admin')) {
-        tier = 'ADMIN';
-        displayName = 'Admin User';
-      } else if (email.includes('commander')) {
-        tier = 'SILVER';
-        displayName = 'Incident Commander';
-      }
-
-      const user = {
-        sub: 'dev-user-' + Date.now(),
-        email,
-        displayName,
-        restore_tier: tier,
-        restore_roles: tier === 'ADMIN' ? ['ADMIN'] : tier === 'SILVER' ? ['COMMANDER'] : ['RESPONDER'],
-      };
-
-      const token = 'dev-token-' + Date.now();
-      setAuth(token, user);
-      toast.success(`Logged in as ${displayName}`);
+      const res = await api.post('/tenants/register', data);
+      const { token, user: apiUser, tenant } = res.data.data;
+      setAuth(token, {
+        sub: apiUser.id, email: apiUser.email, displayName: apiUser.displayName,
+        restore_tier: apiUser.tier, restore_roles: [],
+        tenant_id: tenant.id, tenant_slug: tenant.slug, is_tenant_admin: true,
+      });
+      toast.success(`Welcome to Restore, ${tenant.name}!`);
       navigate('/');
-    } catch (err) {
-      toast.error('Login failed');
-      console.error(err);
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Registration failed');
     }
   };
 
   return (
-    <div className={clsx('min-h-screen flex items-center justify-center p-4 relative overflow-hidden', 'bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950')}>
-      {/* Subtle gradient orbs for visual interest */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
-      </div>
-
-      <div className="w-full max-w-md relative z-10">
-        {/* Logo & Branding */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-purple-orange shadow-glow mb-6">
-            <Shield size={32} className="text-white" />
+    <div className={clsx('min-h-screen flex items-center justify-center p-4', themeClasses.bg.primary)}>
+      <div className="w-full max-w-md space-y-6">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 mb-4">
+            <UserPlus size={28} className="text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">Restore</h1>
-          <p className={clsx(themeClasses.badge.default, 'justify-center mx-auto')}>
-            AI-Powered Crisis Management
-          </p>
-          <p className={clsx(themeClasses.text.secondary, 'text-sm mt-4')}>Build organisational resilience through intelligent response coordination and recovery strategies</p>
+          <h1 className={clsx('text-2xl font-bold', themeClasses.text.primary)}>Create Organisation</h1>
+          <p className={clsx('text-sm mt-1', themeClasses.text.secondary)}>Set up your Restore Platform account</p>
         </div>
 
-        {/* Login Card */}
-        <div className={clsx(themeClasses.card, 'border-gray-300 dark:border-gray-700 backdrop-blur-xl rounded-xl shadow-xl dark:shadow-2xl p-8 mb-6')}>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Sign in to your account</h2>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            {/* Email Field */}
-            <div>
-              <label className={clsx(themeClasses.text.secondary, 'block text-sm font-medium mb-1.5')}>Email address</label>
-              <input
-                {...register('email')}
-                type="email"
-                autoComplete="email"
-                placeholder="analyst@restore.local"
-                className={clsx(themeClasses.input, 'w-full rounded-lg px-3 py-2.5 text-sm')}
-              />
-              {errors.email && <p className="text-red-600 dark:text-red-400 text-xs mt-1.5">{errors.email.message}</p>}
+        <div className={clsx('rounded-2xl border p-8 space-y-4', themeClasses.bg.card, themeClasses.border.primary)}>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className={clsx('rounded-lg p-3 text-xs space-y-0.5', themeClasses.bg.secondary, themeClasses.text.secondary)}>
+              <p className="font-medium">Organisation details</p>
             </div>
 
-            {/* Password Field */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Organisation Name</label>
+                <input {...register('org_name')} placeholder="Acme Corporation"
+                  className={clsx('w-full px-3 py-2 rounded-lg border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
+                {errors.org_name && <p className="text-red-500 text-xs mt-0.5">{errors.org_name.message}</p>}
+              </div>
+              <div className="col-span-2">
+                <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Organisation Slug</label>
+                <input {...register('org_slug')} placeholder="acme-corp"
+                  className={clsx('w-full px-3 py-2 rounded-lg border text-sm font-mono', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
+                <p className={clsx('text-xs mt-0.5', themeClasses.text.secondary)}>Unique URL-safe identifier — cannot be changed later</p>
+                {errors.org_slug && <p className="text-red-500 text-xs">{errors.org_slug.message}</p>}
+              </div>
+            </div>
+
+            <div className={clsx('rounded-lg p-3 text-xs space-y-0.5 mt-2', themeClasses.bg.secondary, themeClasses.text.secondary)}>
+              <p className="font-medium">Your admin account</p>
+            </div>
+
             <div>
-              <label className={clsx(themeClasses.text.secondary, 'block text-sm font-medium mb-1.5')}>Password</label>
+              <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Your Name</label>
+              <input {...register('admin_name')} placeholder="Jane Smith"
+                className={clsx('w-full px-3 py-2 rounded-lg border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
+              {errors.admin_name && <p className="text-red-500 text-xs mt-0.5">{errors.admin_name.message}</p>}
+            </div>
+
+            <div>
+              <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Email</label>
+              <input {...register('admin_email')} type="email" placeholder="jane@company.com"
+                className={clsx('w-full px-3 py-2 rounded-lg border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
+              {errors.admin_email && <p className="text-red-500 text-xs mt-0.5">{errors.admin_email.message}</p>}
+            </div>
+
+            <div>
+              <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Password</label>
               <div className="relative">
-                <input
-                  {...register('password')}
-                  type={showPw ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  placeholder="••••••••"
-                  className={clsx(themeClasses.input, 'w-full rounded-lg px-3 py-2.5 text-sm pr-10')}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPw(p => !p)}
-                  className={clsx(themeClasses.text.tertiary, 'absolute right-3 top-1/2 -translate-y-1/2 hover:text-gray-700 dark:hover:text-gray-300 transition-colors')}
-                  tabIndex={-1}
-                >
-                  {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                <input {...register('admin_password')} type={showPw ? 'text' : 'password'}
+                  className={clsx('w-full px-3 py-2 rounded-lg border text-sm pr-10', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
+                <button type="button" onClick={() => setShowPw(!showPw)}
+                  className={clsx('absolute right-3 top-1/2 -translate-y-1/2', themeClasses.text.secondary)}>
+                  {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
-              {errors.password && <p className="text-red-600 dark:text-red-400 text-xs mt-1.5">{errors.password.message}</p>}
+              {errors.admin_password && <p className="text-red-500 text-xs mt-0.5">{errors.admin_password.message}</p>}
             </div>
 
-            {/* Sign In Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={clsx(themeClasses.button.primary, 'w-full disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2.5 rounded-lg font-medium')}
-            >
-              {isSubmitting ? 'Signing in…' : 'Sign In'}
+            <button type="submit" disabled={isSubmitting}
+              className={clsx('w-full py-2.5 rounded-lg font-medium text-white text-sm', themeClasses.button.primary, 'disabled:opacity-50')}>
+              {isSubmitting ? 'Creating account...' : 'Create Organisation'}
             </button>
           </form>
 
-          {/* Quick Login Section */}
-          <div className={clsx('mt-8 pt-8 border-t border-gray-300 dark:border-gray-700')}>
-            <p className={clsx(themeClasses.text.tertiary, 'text-xs font-semibold uppercase tracking-wider mb-4')}>Quick Login (Development)</p>
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => quickLogin('admin@restore.local')}
-                className={clsx(themeClasses.button.secondary, 'w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium')}
-              >
-                <LogIn size={16} />
-                Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => quickLogin('commander@restore.local')}
-                className={clsx(themeClasses.button.secondary, 'w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium')}
-              >
-                <LogIn size={16} />
-                Commander
-              </button>
-              <button
-                type="button"
-                onClick={() => quickLogin('analyst@restore.local')}
-                className={clsx(themeClasses.button.secondary, 'w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium')}
-              >
-                <LogIn size={16} />
-                Analyst
-              </button>
-            </div>
-          </div>
-
-          {/* Tier Legend */}
-          <div className={clsx('mt-6 pt-6 border-t border-gray-300 dark:border-gray-700')}>
-            <p className={clsx(themeClasses.text.tertiary, 'text-xs mb-3 font-medium')}>Account tiers</p>
-            <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 text-amber-900 dark:text-amber-300 rounded-full text-xs font-semibold">
-                <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
-                Bronze
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-100 dark:bg-blue-500/20 border border-blue-300 dark:border-blue-500/40 text-blue-900 dark:text-blue-300 rounded-full text-xs font-semibold">
-                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
-                Silver
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-yellow-100 dark:bg-yellow-500/20 border border-yellow-300 dark:border-yellow-500/40 text-yellow-900 dark:text-yellow-300 rounded-full text-xs font-semibold">
-                <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>
-                Gold
-              </span>
-            </div>
+          <div className={clsx('border-t pt-3', themeClasses.border.primary)}>
+            <button onClick={onBack} className={clsx('text-xs w-full text-center', themeClasses.text.secondary, 'hover:opacity-80')}>
+              Already have an account? Sign in
+            </button>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
 
-        {/* Footer */}
-        <p className={clsx(themeClasses.text.tertiary, 'text-center text-xs')}>
-          RESTORE-SDD-001 v1.1 Lean MVP
-        </p>
+// ─── Accept Invite Page ───────────────────────────────────────────────────────
+
+const acceptSchema = z.object({
+  display_name: z.string().min(2, 'Your name required'),
+  password:     z.string().min(8, 'At least 8 characters'),
+});
+type AcceptForm = z.infer<typeof acceptSchema>;
+
+export function AcceptInvitePage() {
+  const navigate = useNavigate();
+  const { setAuth } = useAuth();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token') ?? '';
+
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<AcceptForm>({
+    resolver: zodResolver(acceptSchema),
+  });
+
+  const onSubmit = async (data: AcceptForm) => {
+    try {
+      const res = await api.post('/auth/accept-invite', { token, ...data });
+      const { token: jwt, user: apiUser, tenant } = res.data.data;
+      setAuth(jwt, {
+        sub: apiUser.id, email: apiUser.email, displayName: apiUser.displayName,
+        restore_tier: apiUser.tier, restore_roles: [],
+        tenant_id: tenant.id, tenant_slug: tenant.slug, is_tenant_admin: false,
+      });
+      toast.success(`Welcome to ${tenant.name}!`);
+      navigate('/');
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Invalid or expired invitation');
+    }
+  };
+
+  if (!token) {
+    return (
+      <div className={clsx('min-h-screen flex items-center justify-center', themeClasses.bg.primary)}>
+        <p className={clsx('text-red-500')}>Invalid invitation link — token missing.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={clsx('min-h-screen flex items-center justify-center p-4', themeClasses.bg.primary)}>
+      <div className="w-full max-w-md space-y-6">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 mb-4">
+            <Shield size={28} className="text-white" />
+          </div>
+          <h1 className={clsx('text-2xl font-bold', themeClasses.text.primary)}>Accept Invitation</h1>
+          <p className={clsx('text-sm mt-1', themeClasses.text.secondary)}>Set up your account to join your team</p>
+        </div>
+
+        <div className={clsx('rounded-2xl border p-8 space-y-4', themeClasses.bg.card, themeClasses.border.primary)}>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Your Name</label>
+              <input {...register('display_name')} placeholder="Jane Smith"
+                className={clsx('w-full px-3 py-2.5 rounded-lg border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
+              {errors.display_name && <p className="text-red-500 text-xs mt-0.5">{errors.display_name.message}</p>}
+            </div>
+            <div>
+              <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Password</label>
+              <input {...register('password')} type="password"
+                className={clsx('w-full px-3 py-2.5 rounded-lg border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
+              {errors.password && <p className="text-red-500 text-xs mt-0.5">{errors.password.message}</p>}
+            </div>
+            <button type="submit" disabled={isSubmitting}
+              className={clsx('w-full py-2.5 rounded-lg font-medium text-white text-sm', themeClasses.button.primary, 'disabled:opacity-50')}>
+              {isSubmitting ? 'Creating account...' : 'Join Organisation'}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
