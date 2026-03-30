@@ -1,0 +1,12 @@
+{
+  "AGENT_ID": "AGT-your-agent-id-here",
+  "AGENT_API_KEY": "agt_your-api-key-here",
+  "CLOUD_URL": "https://restore.yourcompany.com",
+  "AGENT_SITE": "London Office",
+  "AGENT_NETWORK": "192.168.1.0/24",
+  "HEARTBEAT_INTERVAL_MS": "30000",
+  "POLL_INTERVAL_MS": "10000",
+  "PASSIVE_ENABLED": "false",
+  "LOG_LEVEL": "info",
+  "BUFFER_DB": "./agent-buffer.db"
+}

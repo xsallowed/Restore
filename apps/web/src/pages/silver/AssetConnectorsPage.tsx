@@ -1,649 +1,921 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Plus, Edit2, Trash2, Play, Clock, CheckCircle, AlertCircle, XCircle, Zap } from 'lucide-react';
+import {
+  ArrowLeft, Plus, Play, Edit2, Trash2, CheckCircle, XCircle,
+  AlertCircle, Clock, ChevronDown, ChevronUp, Download, RefreshCw,
+  AlertTriangle, Activity,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import { api } from '../../lib/api';
 import { themeClasses } from '../../lib/themeClasses';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 interface Connector {
   id: string;
+  connector_id: string;
   name: string;
   type: string;
   base_url: string;
   auth_type: string;
   endpoint: string;
   pagination_type: string;
-  response_root_key?: string;
+  response_root_key: string;
   schedule: string;
   is_enabled: boolean;
+  sync_status?: string;
   last_sync?: string;
-  sync_status?: 'Success' | 'Partial' | 'Failed' | 'Running';
   next_sync?: string;
-  created_at: string;
-  updated_at: string;
+  consecutive_failures?: number;
+  field_map?: Record<string, string>;
 }
 
+interface TestStep {
+  step: number;
+  name: string;
+  status: 'passed' | 'failed' | 'warning' | 'skipped' | 'running';
+  summary: string;
+  warnings?: string[];
+  errors?: string[];
+  preview?: any[];
+  rawSample?: string;
+}
+
+interface DryRunResult {
+  total_fetched: number;
+  to_create: number;
+  to_update: number;
+  to_skip: number;
+  mapping_errors: number;
+  preview: Array<{
+    source_identifier: string;
+    match_status: string;
+    action: string;
+    fields_mapped: number;
+    warnings: string[];
+  }>;
+}
+
+interface HealthData {
+  health_status: 'green' | 'amber' | 'red' | 'gray';
+  consecutive_failures: number;
+  is_enabled: boolean;
+  last_failure_at?: string;
+  recent_syncs: Array<{ status: string; records_fetched: number; sync_started_at: string }>;
+}
+
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const REGISTRY_FIELDS = [
+  'asset_name', 'asset_type', 'hostname', 'ip_address', 'mac_address',
+  'os_name', 'os_version', 'serial_number', 'manufacturer', 'model',
+  'owner_email', 'owner_name', 'owner_team', 'location', 'status', 'last_seen', 'tags', 'notes',
+];
+
 const CONNECTOR_TYPES = [
-  { label: 'Microsoft Intune', value: 'intune', preset: true },
-  { label: 'ServiceNow CMDB', value: 'servicenow', preset: true },
-  { label: 'CrowdStrike Falcon', value: 'crowdstrike', preset: true },
-  { label: 'Qualys VMDR', value: 'qualys', preset: true },
-  { label: 'Tenable.io', value: 'tenable', preset: true },
-  { label: 'Jamf Pro', value: 'jamf', preset: true },
-  { label: 'Generic REST API', value: 'generic', preset: false },
+  { value: 'generic', label: 'Generic REST' },
+  { value: 'intune', label: 'Microsoft Intune' },
+  { value: 'servicenow', label: 'ServiceNow CMDB' },
+  { value: 'crowdstrike', label: 'CrowdStrike Falcon' },
+  { value: 'tenable', label: 'Tenable.io' },
+  { value: 'jamf', label: 'Jamf Pro' },
+  { value: 'qualys', label: 'Qualys' },
 ];
 
-const AUTH_TYPES = [
-  { label: 'No Auth', value: 'none' },
-  { label: 'API Key', value: 'api_key' },
-  { label: 'Bearer Token', value: 'bearer' },
-  { label: 'Basic Auth', value: 'basic' },
-  { label: 'OAuth2 Client Credentials', value: 'oauth2' },
-];
-
-const PAGINATION_TYPES = [
-  { label: 'None', value: 'none' },
-  { label: 'Offset/Limit', value: 'offset' },
-  { label: 'Page Number', value: 'page' },
-  { label: 'Cursor / nextLink', value: 'cursor' },
-];
-
-const SYNC_SCHEDULES = [
-  { label: 'Manual only', value: 'manual' },
-  { label: 'Every 15 minutes', value: '15m' },
-  { label: 'Every hour', value: '1h' },
-  { label: 'Every 6 hours', value: '6h' },
-  { label: 'Daily', value: 'daily' },
-];
-
-const ASSET_FIELDS = [
-  'asset_name',
-  'asset_type',
-  'ip_address',
-  'mac_address',
-  'os_name',
-  'os_version',
-  'serial_number',
-  'manufacturer',
-  'model',
-  'owner_email',
-  'owner_name',
-  'location',
-  'status',
-  'last_seen',
-  'hostname',
-  'tags',
-  'notes',
-];
-
-const PRESET_CONFIGS: Record<string, any> = {
+const PRESET_CONFIGS: Record<string, Partial<typeof DEFAULT_FORM>> = {
   intune: {
     base_url: 'https://graph.microsoft.com/v1.0',
-    auth_type: 'oauth2',
-    token_url: 'https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token',
-    scope: 'https://graph.microsoft.com/.default',
+    auth_type: 'OAuth2',
     endpoint: '/deviceManagement/managedDevices',
-    pagination_type: 'cursor',
+    pagination_type: 'Cursor / nextLink',
     response_root_key: 'value',
   },
   servicenow: {
     base_url: 'https://{instance}.service-now.com',
-    auth_type: 'basic',
+    auth_type: 'Basic Auth',
     endpoint: '/api/now/table/cmdb_ci_computer',
-    pagination_type: 'offset',
+    pagination_type: 'Offset-Limit',
     response_root_key: 'result',
   },
   crowdstrike: {
     base_url: 'https://api.crowdstrike.com',
-    auth_type: 'oauth2',
-    token_url: 'https://api.crowdstrike.com/oauth2/token',
+    auth_type: 'OAuth2',
     endpoint: '/devices/queries/devices/v1',
-    pagination_type: 'cursor',
+    pagination_type: 'Cursor / nextLink',
   },
   tenable: {
     base_url: 'https://cloud.tenable.com',
-    auth_type: 'api_key',
+    auth_type: 'API Key',
     endpoint: '/assets',
-    pagination_type: 'cursor',
+    pagination_type: 'Cursor / nextLink',
     response_root_key: 'assets',
   },
   jamf: {
     base_url: 'https://{instance}.jamfcloud.com',
-    auth_type: 'bearer',
+    auth_type: 'Bearer Token',
     endpoint: '/api/v1/computers-preview',
-    pagination_type: 'page',
+    pagination_type: 'Page Number',
     response_root_key: 'results',
   },
 };
 
-function ConnectorForm({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
-  const [step, setStep] = useState<'config' | 'mapping' | 'test'>('config');
-  const [form, setForm] = useState({
-    name: '',
-    type: 'generic',
-    base_url: '',
-    auth_type: 'none',
-    endpoint: '',
-    pagination_type: 'none',
-    response_root_key: '',
-    schedule: 'manual',
-    is_enabled: true,
-    auth_config: {} as Record<string, any>,
+const DEFAULT_FORM = {
+  name: '',
+  type: 'generic',
+  base_url: '',
+  auth_type: 'None',
+  endpoint: '',
+  pagination_type: 'None',
+  response_root_key: '',
+  schedule: 'Manual',
+  is_enabled: true,
+  auth_config: {} as Record<string, string>,
+  field_map: {} as Record<string, string>,
+};
+
+// ─── Step Icon ───────────────────────────────────────────────────────────────
+
+function StepIcon({ status }: { status: TestStep['status'] }) {
+  if (status === 'passed') return <CheckCircle size={18} className="text-green-500" />;
+  if (status === 'failed') return <XCircle size={18} className="text-red-500" />;
+  if (status === 'warning') return <AlertCircle size={18} className="text-yellow-500" />;
+  if (status === 'skipped') return <Clock size={18} className="text-gray-400" />;
+  return <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />;
+}
+
+// ─── Test Results Stepper ─────────────────────────────────────────────────────
+
+function TestResultsStepper({ steps, overall, onDryRun, onSave, onSync, isSaved }: {
+  steps: TestStep[];
+  overall: 'passed' | 'failed' | 'warning';
+  onDryRun: () => void;
+  onSave: () => void;
+  onSync: () => void;
+  isSaved: boolean;
+}) {
+  const [expanded, setExpanded] = useState<number | null>(null);
+
+  const bannerClasses = {
+    passed: 'bg-green-50 dark:bg-green-900/30 border-green-300 dark:border-green-700 text-green-800 dark:text-green-200',
+    warning: 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-700 text-yellow-800 dark:text-yellow-200',
+    failed: 'bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-800 dark:text-red-200',
+  };
+
+  const bannerText = {
+    passed: '✓ All checks passed — connector is ready to sync',
+    warning: '⚠ Checks passed with warnings — review before syncing',
+    failed: '✗ Validation failed — fix errors before syncing',
+  };
+
+  return (
+    <div className="space-y-3">
+      {/* Overall banner */}
+      <div className={clsx('px-4 py-3 rounded-lg border text-sm font-medium', bannerClasses[overall])}>
+        {bannerText[overall]}
+      </div>
+
+      {/* Steps */}
+      <div className={clsx('rounded-lg border overflow-hidden', themeClasses.border.primary)}>
+        {steps.map((step, idx) => (
+          <div key={step.step} className={clsx('border-b last:border-b-0', themeClasses.border.primary)}>
+            <button
+              className={clsx('w-full flex items-center gap-3 px-4 py-3 text-left hover:opacity-80 transition', themeClasses.bg.card)}
+              onClick={() => setExpanded(expanded === idx ? null : idx)}
+            >
+              <StepIcon status={step.status} />
+              <div className="flex-1">
+                <span className={clsx('text-sm font-medium', themeClasses.text.primary)}>
+                  Step {step.step}: {step.name}
+                </span>
+                <span className={clsx('ml-3 text-xs', themeClasses.text.secondary)}>{step.summary}</span>
+              </div>
+              {expanded === idx ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </button>
+
+            {expanded === idx && (
+              <div className={clsx('px-4 pb-4 text-xs space-y-2', themeClasses.bg.secondary)}>
+                {step.warnings?.map((w, i) => (
+                  <p key={i} className="text-yellow-600 dark:text-yellow-400">⚠ {w}</p>
+                ))}
+                {step.errors?.map((e, i) => (
+                  <p key={i} className="text-red-600 dark:text-red-400">✗ {e}</p>
+                ))}
+                {step.rawSample && (
+                  <pre className={clsx('mt-2 p-2 rounded text-xs overflow-x-auto max-h-40', themeClasses.bg.primary, themeClasses.text.secondary)}>
+                    {step.rawSample}
+                  </pre>
+                )}
+                {step.preview && step.preview.length > 0 && (
+                  <div className="mt-2 overflow-x-auto">
+                    <table className="text-xs w-full">
+                      <thead>
+                        <tr className={themeClasses.text.secondary}>
+                          {Object.keys(step.preview[0]).map((k) => (
+                            <th key={k} className="text-left px-2 py-1 font-medium">{k}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {step.preview.slice(0, 3).map((row, i) => (
+                          <tr key={i} className={themeClasses.text.primary}>
+                            {Object.values(row).map((v: any, j) => (
+                              <td key={j} className="px-2 py-1 truncate max-w-xs">{String(v ?? '')}</td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-2 flex-wrap">
+        {!isSaved && (
+          <button onClick={onSave} className={clsx('px-4 py-2 rounded text-sm font-medium text-white', themeClasses.button.primary)}>
+            Save Connector
+          </button>
+        )}
+        {overall !== 'failed' && (
+          <>
+            <button onClick={onDryRun} className={clsx('px-4 py-2 rounded text-sm font-medium', 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-800')}>
+              Run Dry Run
+            </button>
+            {isSaved && (
+              <button onClick={onSync} className={clsx('px-4 py-2 rounded text-sm font-medium', 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800')}>
+                Sync Now
+              </button>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Dry Run Modal ────────────────────────────────────────────────────────────
+
+function DryRunModal({ result, onClose, onConfirmSync }: {
+  result: DryRunResult;
+  onClose: () => void;
+  onConfirmSync: () => void;
+}) {
+  const exportCSV = () => {
+    const rows = result.preview.map((r) =>
+      [r.source_identifier, r.match_status, r.action, r.fields_mapped, r.warnings.join('; ')].join(',')
+    );
+    const csv = ['Source Identifier,Match Status,Action,Fields Mapped,Warnings', ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'dry-run-preview.csv'; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className={clsx('rounded-xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col', themeClasses.bg.card)}>
+        <div className={clsx('px-6 py-4 border-b flex justify-between items-center', themeClasses.border.primary)}>
+          <h2 className={clsx('text-lg font-semibold', themeClasses.text.primary)}>Dry Run Results</h2>
+          <button onClick={onClose} className={clsx('text-xl', themeClasses.text.secondary)}>✕</button>
+        </div>
+
+        <div className="overflow-y-auto flex-1 px-6 py-4 space-y-4">
+          {/* Summary cards */}
+          <div className="grid grid-cols-4 gap-3">
+            {[
+              { label: 'Total Fetched', value: result.total_fetched, color: '' },
+              { label: 'To Create', value: result.to_create, color: 'text-green-600 dark:text-green-400' },
+              { label: 'To Update', value: result.to_update, color: 'text-blue-600 dark:text-blue-400' },
+              { label: 'To Skip', value: result.to_skip, color: 'text-gray-500' },
+            ].map((c) => (
+              <div key={c.label} className={clsx('rounded-lg p-3 text-center', themeClasses.bg.secondary)}>
+                <p className={clsx('text-2xl font-bold', c.color || themeClasses.text.primary)}>{c.value}</p>
+                <p className={clsx('text-xs mt-1', themeClasses.text.secondary)}>{c.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Preview table */}
+          <div>
+            <p className={clsx('text-sm font-medium mb-2', themeClasses.text.primary)}>Preview (first 20 rows)</p>
+            <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+              <table className="w-full text-xs">
+                <thead className={clsx('bg-gray-50 dark:bg-gray-800')}>
+                  <tr>
+                    {['Source Identifier', 'Status', 'Action', 'Fields', 'Warnings'].map((h) => (
+                      <th key={h} className={clsx('px-3 py-2 text-left font-medium', themeClasses.text.secondary)}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.preview.map((row, i) => (
+                    <tr key={i} className={clsx('border-t border-gray-100 dark:border-gray-800', themeClasses.text.primary)}>
+                      <td className="px-3 py-2 font-mono">{row.source_identifier}</td>
+                      <td className="px-3 py-2">
+                        <span className={clsx('px-2 py-0.5 rounded-full text-xs',
+                          row.match_status === 'Matched' ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200'
+                            : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200')}>
+                          {row.match_status}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2">{row.action}</td>
+                      <td className="px-3 py-2">{row.fields_mapped}</td>
+                      <td className="px-3 py-2 text-yellow-600 dark:text-yellow-400">{row.warnings.join(', ') || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div className={clsx('px-6 py-4 border-t flex gap-3 justify-between', themeClasses.border.primary)}>
+          <button onClick={exportCSV} className={clsx('flex items-center gap-2 px-4 py-2 rounded text-sm', themeClasses.button.secondary)}>
+            <Download size={14} /> Export CSV
+          </button>
+          <div className="flex gap-2">
+            <button onClick={onClose} className={clsx('px-4 py-2 rounded text-sm', themeClasses.button.secondary)}>Cancel</button>
+            <button
+              onClick={() => {
+                const msg = `This will create ${result.to_create}, update ${result.to_update}, skip ${result.to_skip} records. Proceed?`;
+                if (window.confirm(msg)) { onConfirmSync(); onClose(); }
+              }}
+              className={clsx('px-4 py-2 rounded text-sm font-medium text-white', themeClasses.button.primary)}
+            >
+              Proceed with Live Sync
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Health Sparkline ─────────────────────────────────────────────────────────
+
+function HealthSparkline({ syncs }: { syncs: Array<{ status: string; records_fetched: number }> }) {
+  if (!syncs.length) return <span className="text-xs text-gray-400">No history</span>;
+  return (
+    <div className="flex items-end gap-0.5 h-6">
+      {syncs.map((s, i) => (
+        <div
+          key={i}
+          title={`${s.status} — ${s.records_fetched} records`}
+          className={clsx(
+            'w-2 rounded-sm',
+            s.status === 'Success' ? 'bg-green-400' : s.status === 'Partial' ? 'bg-yellow-400' : 'bg-red-400'
+          )}
+          style={{ height: `${Math.max(4, Math.min(24, (s.records_fetched / 100) * 24))}px` }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── Connector Card ───────────────────────────────────────────────────────────
+
+function ConnectorCard({ connector, onEdit, onDelete, onSync }: {
+  connector: Connector;
+  onEdit: (c: Connector) => void;
+  onDelete: (id: string) => void;
+  onSync: (id: string) => void;
+}) {
+  const { data: healthData } = useQuery<{ data: HealthData }>({
+    queryKey: ['connector-health', connector.connector_id],
+    queryFn: () => api.get(`/api/v1/connectors/${connector.connector_id}/health`).then((r) => r.data),
+    refetchInterval: 60_000,
   });
+  const health = healthData?.data;
 
-  const [queryParams, setQueryParams] = useState<Array<{ key: string; value: string }>>([]);
-  const [customHeaders, setCustomHeaders] = useState<Array<{ key: string; value: string }>>([]);
-  const [testResults, setTestResults] = useState<any>(null);
+  const healthDot = {
+    green: 'bg-green-400',
+    amber: 'bg-yellow-400',
+    red: 'bg-red-400',
+    gray: 'bg-gray-400',
+  }[health?.health_status ?? 'gray'];
 
-  const handleConnectorTypeChange = (type: string) => {
-    setForm({ ...form, type });
-    const preset = PRESET_CONFIGS[type];
-    if (preset) {
-      setForm((f) => ({ ...f, ...preset }));
-    }
+  return (
+    <div className={clsx('rounded-xl border p-4 space-y-3', themeClasses.bg.card, themeClasses.border.primary)}>
+      <div className="flex justify-between items-start">
+        <div className="flex items-center gap-2">
+          <span className={clsx('w-2.5 h-2.5 rounded-full', healthDot)} title={`Health: ${health?.health_status ?? 'unknown'}`} />
+          <div>
+            <h3 className={clsx('font-semibold text-sm', themeClasses.text.primary)}>{connector.name}</h3>
+            <p className={clsx('text-xs uppercase tracking-wide', themeClasses.text.secondary)}>{connector.type}</p>
+          </div>
+        </div>
+        <span className={clsx('px-2 py-0.5 rounded-full text-xs font-medium',
+          connector.is_enabled ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200'
+            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300')}>
+          {connector.is_enabled ? 'Active' : 'Inactive'}
+        </span>
+      </div>
+
+      {/* Auto-disable warning */}
+      {(health?.consecutive_failures ?? 0) >= 3 && (
+        <div className="flex items-center gap-1.5 text-xs text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 px-2 py-1 rounded">
+          <AlertTriangle size={12} />
+          {(health?.consecutive_failures ?? 0) >= 5
+            ? 'Auto-disabled after 5 consecutive failures'
+            : `Warning: ${health?.consecutive_failures} consecutive failures (auto-disables at 5)`}
+        </div>
+      )}
+
+      {/* Sparkline */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className={clsx('text-xs mb-1', themeClasses.text.secondary)}>Last 10 syncs</p>
+          <HealthSparkline syncs={health?.recent_syncs ?? []} />
+        </div>
+        <div className="text-right">
+          <p className={clsx('text-xs', themeClasses.text.secondary)}>Last sync</p>
+          <p className={clsx('text-xs font-medium', themeClasses.text.primary)}>
+            {connector.last_sync ? new Date(connector.last_sync).toLocaleDateString() : 'Never'}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex gap-2">
+        <button onClick={() => onSync(connector.connector_id)} className={clsx('flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded text-xs font-medium text-white', themeClasses.button.primary)}>
+          <Play size={12} /> Sync Now
+        </button>
+        <button onClick={() => onEdit(connector)} className={clsx('px-3 py-2 rounded', themeClasses.button.secondary)}>
+          <Edit2 size={13} />
+        </button>
+        <button onClick={() => { if (window.confirm('Delete this connector?')) onDelete(connector.connector_id); }}
+          className="px-3 py-2 rounded bg-red-100 dark:bg-red-900/40">
+          <Trash2 size={13} className="text-red-600 dark:text-red-400" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Field Mapper ─────────────────────────────────────────────────────────────
+
+function FieldMapper({ fieldMap, onChange, sampleKeys }: {
+  fieldMap: Record<string, string>;
+  onChange: (map: Record<string, string>) => void;
+  sampleKeys: string[];
+}) {
+  const [newSource, setNewSource] = useState('');
+  const [newTarget, setNewTarget] = useState(REGISTRY_FIELDS[0]);
+
+  const addMapping = () => {
+    if (!newSource) return;
+    onChange({ ...fieldMap, [newSource]: newTarget });
+    setNewSource('');
+  };
+
+  const removeMapping = (key: string) => {
+    const updated = { ...fieldMap };
+    delete updated[key];
+    onChange(updated);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <label className={clsx('block text-xs font-medium mb-1', themeClasses.text.secondary)}>Source field (API key, dot-notation OK)</label>
+          <input
+            value={newSource}
+            onChange={(e) => setNewSource(e.target.value)}
+            placeholder="e.g. deviceDetail.operatingSystem"
+            list="source-keys"
+            className={clsx('w-full px-3 py-2 rounded border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
+          />
+          <datalist id="source-keys">
+            {sampleKeys.map((k) => <option key={k} value={k} />)}
+          </datalist>
+        </div>
+        <div className="flex-1">
+          <label className={clsx('block text-xs font-medium mb-1', themeClasses.text.secondary)}>→ Registry field</label>
+          <select
+            value={newTarget}
+            onChange={(e) => setNewTarget(e.target.value)}
+            className={clsx('w-full px-3 py-2 rounded border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
+          >
+            {REGISTRY_FIELDS.map((f) => <option key={f} value={f}>{f}</option>)}
+          </select>
+        </div>
+        <div className="flex items-end">
+          <button onClick={addMapping} className={clsx('px-3 py-2 rounded text-sm font-medium text-white', themeClasses.button.primary)}>Add</button>
+        </div>
+      </div>
+
+      {Object.keys(fieldMap).length > 0 && (
+        <div className="space-y-1">
+          {Object.entries(fieldMap).map(([src, tgt]) => (
+            <div key={src} className={clsx('flex items-center gap-2 px-3 py-2 rounded text-sm', themeClasses.bg.secondary)}>
+              <span className={clsx('font-mono text-xs flex-1', themeClasses.text.primary)}>{src}</span>
+              <span className={clsx('text-xs', themeClasses.text.secondary)}>→</span>
+              <span className={clsx('text-xs flex-1', themeClasses.text.primary)}>{tgt}</span>
+              <button onClick={() => removeMapping(src)} className="text-red-400 hover:text-red-600"><XCircle size={14} /></button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Connector Form ───────────────────────────────────────────────────────────
+
+function ConnectorForm({ editing, onClose, onSaved }: {
+  editing?: Connector;
+  onClose: () => void;
+  onSaved: (id?: string) => void;
+}) {
+  const [step, setStep] = useState<'config' | 'mapping' | 'test'>('config');
+  const [form, setForm] = useState({ ...DEFAULT_FORM, ...(editing ? {
+    name: editing.name, type: editing.type, base_url: editing.base_url,
+    auth_type: editing.auth_type, endpoint: editing.endpoint,
+    pagination_type: editing.pagination_type, response_root_key: editing.response_root_key,
+    field_map: editing.field_map ?? {},
+  } : {}) });
+  const [testSteps, setTestSteps] = useState<TestStep[]>([]);
+  const [testOverall, setTestOverall] = useState<'passed' | 'failed' | 'warning'>('failed');
+  const [savedConnectorId, setSavedConnectorId] = useState<string | undefined>(editing?.connector_id);
+  const [dryRunResult, setDryRunResult] = useState<DryRunResult | null>(null);
+  const [sampleKeys, setSampleKeys] = useState<string[]>([]);
+
+  const handleTypeChange = (type: string) => {
+    const preset = PRESET_CONFIGS[type] ?? {};
+    setForm((f) => ({ ...f, type, ...preset }));
   };
 
   const testMutation = useMutation({
     mutationFn: async () => {
-      const response = await api.post('/api/v1/connectors/test', form);
-      return response.data;
+      if (savedConnectorId) {
+        const r = await api.post(`/api/v1/connectors/${savedConnectorId}/test-full`);
+        return r.data;
+      }
+      // Test without saving first using simple test endpoint
+      const r = await api.post('/api/v1/connectors/test', form);
+      return r.data;
     },
     onSuccess: (data) => {
-      setTestResults(data.data);
+      setTestSteps(data.steps || []);
+      setTestOverall(data.overall || 'failed');
+      // Extract sample keys from step 3/4 data
+      const step3 = data.steps?.find((s: TestStep) => s.step === 3);
+      if (step3?.preview?.length) {
+        setSampleKeys(Object.keys(step3.preview[0]));
+      }
       setStep('test');
-      toast.success('Connection test successful!');
     },
     onError: (err: any) => {
-      setTestResults({ error: err.response?.data?.error || String(err) });
+      toast.error(err.response?.data?.error || 'Test failed');
+      setTestSteps([{ step: 1, name: 'Connection', status: 'failed', summary: err.response?.data?.error || 'Connection failed' }]);
+      setTestOverall('failed');
       setStep('test');
-      toast.error('Connection test failed');
     },
   });
 
   const saveMutation = useMutation({
-    mutationFn: () => api.post('/api/v1/connectors', form),
-    onSuccess: () => {
-      toast.success('Connector created successfully');
-      onSaved();
-      onClose();
+    mutationFn: () => editing
+      ? api.put(`/api/v1/connectors/${editing.connector_id}`, form)
+      : api.post('/api/v1/connectors', form),
+    onSuccess: (r) => {
+      const id = r.data?.data?.connector_id;
+      if (id) setSavedConnectorId(id);
+      toast.success(editing ? 'Connector updated' : 'Connector created');
+      onSaved(id);
     },
-    onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to create connector'),
+    onError: (err: any) => toast.error(err.response?.data?.error || 'Save failed'),
+  });
+
+  const dryRunMutation = useMutation({
+    mutationFn: () => api.post(`/api/v1/connectors/${savedConnectorId}/dry-run`),
+    onSuccess: (r) => setDryRunResult(r.data.data),
+    onError: (err: any) => toast.error(err.response?.data?.error || 'Dry run failed'),
+  });
+
+  const syncMutation = useMutation({
+    mutationFn: () => api.post(`/api/v1/connectors/${savedConnectorId}/sync`),
+    onSuccess: () => toast.success('Sync started!'),
+    onError: (err: any) => toast.error(err.response?.data?.error || 'Sync failed'),
   });
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className={clsx('rounded-lg shadow-xl w-full max-w-2xl max-h-96 overflow-y-auto', themeClasses.bg.card)}>
-        {/* Header with Back Button */}
-        <div className={clsx('px-6 py-4 border-b', themeClasses.border.primary, 'flex justify-between items-center sticky top-0', themeClasses.bg.card)}>
-          <h2 className={clsx('text-lg font-semibold', themeClasses.text.primary)}>Configure API Connector</h2>
-          <button onClick={onClose} className={clsx('text-2xl', themeClasses.text.secondary)}>
-            ✕
-          </button>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className={clsx('rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col', themeClasses.bg.card)}>
+        {/* Header */}
+        <div className={clsx('px-6 py-4 border-b flex justify-between items-center sticky top-0', themeClasses.border.primary, themeClasses.bg.card)}>
+          <div className="flex items-center gap-4">
+            <h2 className={clsx('text-lg font-semibold', themeClasses.text.primary)}>
+              {editing ? 'Edit Connector' : 'New Connector'}
+            </h2>
+            <div className="flex gap-1">
+              {(['config', 'mapping', 'test'] as const).map((s, i) => (
+                <button key={s} onClick={() => setStep(s)} className={clsx(
+                  'px-3 py-1 rounded text-xs font-medium',
+                  step === s ? 'bg-blue-600 text-white' : clsx(themeClasses.button.secondary, themeClasses.text.secondary)
+                )}>
+                  {i + 1}. {s.charAt(0).toUpperCase() + s.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <button onClick={onClose} className={clsx('text-xl', themeClasses.text.secondary)}>✕</button>
         </div>
 
-        <div className={clsx('px-6 py-6 space-y-4')}>
-          {/* Configuration View */}
+        <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
+          {/* ── Config Step ── */}
           {step === 'config' && (
             <>
-              {/* Connector Name */}
-              <div>
-                <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Connector Name *</label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="e.g., Production Intune"
-                  className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Connector Name *</label>
+                  <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    placeholder="e.g. Production Intune"
+                    className={clsx('w-full px-3 py-2 rounded border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
+                </div>
+                <div>
+                  <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Connector Type</label>
+                  <select value={form.type} onChange={(e) => handleTypeChange(e.target.value)}
+                    className={clsx('w-full px-3 py-2 rounded border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}>
+                    {CONNECTOR_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                </div>
               </div>
 
-              {/* Connector Type */}
-              <div>
-                <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Connector Type *</label>
-                <select
-                  value={form.type}
-                  onChange={(e) => handleConnectorTypeChange(e.target.value)}
-                  className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                >
-                  {CONNECTOR_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Base URL */}
               <div>
                 <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Base URL *</label>
-                <input
-                  type="text"
-                  value={form.base_url}
-                  onChange={(e) => setForm({ ...form, base_url: e.target.value })}
-                  placeholder="https://api.example.com/v1"
-                  className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                />
+                <input value={form.base_url} onChange={(e) => setForm({ ...form, base_url: e.target.value })}
+                  placeholder="https://api.example.com"
+                  className={clsx('w-full px-3 py-2 rounded border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
               </div>
 
-              {/* Auth Type */}
-              <div>
-                <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Authentication Type</label>
-                <select
-                  value={form.auth_type}
-                  onChange={(e) => setForm({ ...form, auth_type: e.target.value })}
-                  className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                >
-                  {AUTH_TYPES.map((a) => (
-                    <option key={a.value} value={a.value}>
-                      {a.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Auth Config Fields (shown based on auth type) */}
-              {form.auth_type === 'api_key' && (
-                <>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Header Name</label>
-                      <input
-                        type="text"
-                        value={form.auth_config.header_name || ''}
-                        onChange={(e) => setForm({ ...form, auth_config: { ...form.auth_config, header_name: e.target.value } })}
-                        placeholder="X-API-Key"
-                        className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                      />
-                    </div>
-                    <div>
-                      <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>API Key</label>
-                      <input
-                        type="password"
-                        value={form.auth_config.api_key || ''}
-                        onChange={(e) => setForm({ ...form, auth_config: { ...form.auth_config, api_key: e.target.value } })}
-                        placeholder="••••••••"
-                        className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {form.auth_type === 'bearer' && (
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Bearer Token</label>
-                  <input
-                    type="password"
-                    value={form.auth_config.token || ''}
+                  <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Auth Type</label>
+                  <select value={form.auth_type} onChange={(e) => setForm({ ...form, auth_type: e.target.value })}
+                    className={clsx('w-full px-3 py-2 rounded border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}>
+                    {['None', 'API Key', 'Bearer Token', 'Basic Auth', 'OAuth2 Client Credentials'].map((a) => (
+                      <option key={a} value={a}>{a}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Endpoint Path *</label>
+                  <input value={form.endpoint} onChange={(e) => setForm({ ...form, endpoint: e.target.value })}
+                    placeholder="/devices"
+                    className={clsx('w-full px-3 py-2 rounded border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
+                </div>
+              </div>
+
+              {/* Auth config fields */}
+              {form.auth_type === 'OAuth2 Client Credentials' && (
+                <div className="space-y-3">
+                  {[['token_url', 'Token URL', 'https://login.microsoftonline.com/.../token'],
+                    ['client_id', 'Client ID', ''],
+                    ['client_secret', 'Client Secret', ''],
+                    ['scope', 'Scope (optional)', 'https://graph.microsoft.com/.default']].map(([k, label, ph]) => (
+                    <div key={k}>
+                      <label className={clsx('block text-xs font-medium mb-1', themeClasses.text.secondary)}>{label}</label>
+                      <input type={k === 'client_secret' ? 'password' : 'text'}
+                        value={form.auth_config[k] ?? ''}
+                        onChange={(e) => setForm({ ...form, auth_config: { ...form.auth_config, [k]: e.target.value } })}
+                        placeholder={ph}
+                        className={clsx('w-full px-3 py-2 rounded border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {form.auth_type === 'API Key' && (
+                <div>
+                  <label className={clsx('block text-xs font-medium mb-1', themeClasses.text.secondary)}>API Key</label>
+                  <input type="password" value={form.auth_config.api_key ?? ''}
+                    onChange={(e) => setForm({ ...form, auth_config: { ...form.auth_config, api_key: e.target.value } })}
+                    className={clsx('w-full px-3 py-2 rounded border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
+                </div>
+              )}
+
+              {(form.auth_type === 'Bearer Token') && (
+                <div>
+                  <label className={clsx('block text-xs font-medium mb-1', themeClasses.text.secondary)}>Bearer Token</label>
+                  <input type="password" value={form.auth_config.token ?? ''}
                     onChange={(e) => setForm({ ...form, auth_config: { ...form.auth_config, token: e.target.value } })}
-                    placeholder="••••••••"
-                    className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                  />
+                    className={clsx('w-full px-3 py-2 rounded border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
                 </div>
               )}
 
-              {form.auth_type === 'basic' && (
-                <div className="grid grid-cols-2 gap-4">
+              {form.auth_type === 'Basic Auth' && (
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Username</label>
-                    <input
-                      type="text"
-                      value={form.auth_config.username || ''}
+                    <label className={clsx('block text-xs font-medium mb-1', themeClasses.text.secondary)}>Username</label>
+                    <input value={form.auth_config.username ?? ''}
                       onChange={(e) => setForm({ ...form, auth_config: { ...form.auth_config, username: e.target.value } })}
-                      className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                    />
+                      className={clsx('w-full px-3 py-2 rounded border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
                   </div>
                   <div>
-                    <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Password</label>
-                    <input
-                      type="password"
-                      value={form.auth_config.password || ''}
+                    <label className={clsx('block text-xs font-medium mb-1', themeClasses.text.secondary)}>Password</label>
+                    <input type="password" value={form.auth_config.password ?? ''}
                       onChange={(e) => setForm({ ...form, auth_config: { ...form.auth_config, password: e.target.value } })}
-                      className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                    />
+                      className={clsx('w-full px-3 py-2 rounded border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
                   </div>
                 </div>
               )}
 
-              {form.auth_type === 'oauth2' && (
-                <>
-                  <div>
-                    <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Token URL</label>
-                    <input
-                      type="text"
-                      value={form.auth_config.token_url || ''}
-                      onChange={(e) => setForm({ ...form, auth_config: { ...form.auth_config, token_url: e.target.value } })}
-                      className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Client ID</label>
-                      <input
-                        type="text"
-                        value={form.auth_config.client_id || ''}
-                        onChange={(e) => setForm({ ...form, auth_config: { ...form.auth_config, client_id: e.target.value } })}
-                        className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                      />
-                    </div>
-                    <div>
-                      <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Client Secret</label>
-                      <input
-                        type="password"
-                        value={form.auth_config.client_secret || ''}
-                        onChange={(e) => setForm({ ...form, auth_config: { ...form.auth_config, client_secret: e.target.value } })}
-                        className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Endpoint */}
-              <div>
-                <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Endpoint Path *</label>
-                <input
-                  type="text"
-                  value={form.endpoint}
-                  onChange={(e) => setForm({ ...form, endpoint: e.target.value })}
-                  placeholder="/devices"
-                  className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                />
-              </div>
-
-              {/* Pagination Type */}
-              <div>
-                <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Pagination Type</label>
-                <select
-                  value={form.pagination_type}
-                  onChange={(e) => setForm({ ...form, pagination_type: e.target.value })}
-                  className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                >
-                  {PAGINATION_TYPES.map((p) => (
-                    <option key={p.value} value={p.value}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Response Root Key */}
-              <div>
-                <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Response Root Key (optional)</label>
-                <input
-                  type="text"
-                  value={form.response_root_key}
-                  onChange={(e) => setForm({ ...form, response_root_key: e.target.value })}
-                  placeholder="value (for Intune), result (for ServiceNow)"
-                  className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                />
-              </div>
-
-              {/* Sync Schedule */}
-              <div>
-                <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Sync Schedule</label>
-                <select
-                  value={form.schedule}
-                  onChange={(e) => setForm({ ...form, schedule: e.target.value })}
-                  className={clsx('w-full px-3 py-2 rounded border', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}
-                >
-                  {SYNC_SCHEDULES.map((s) => (
-                    <option key={s.value} value={s.value}>
-                      {s.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Active Toggle */}
-              <div className="flex items-center gap-3">
-                <label className={clsx('text-sm font-medium', themeClasses.text.primary)}>Active</label>
-                <input
-                  type="checkbox"
-                  checked={form.is_enabled}
-                  onChange={(e) => setForm({ ...form, is_enabled: e.target.checked })}
-                  className="w-5 h-5 rounded cursor-pointer"
-                />
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Pagination</label>
+                  <select value={form.pagination_type} onChange={(e) => setForm({ ...form, pagination_type: e.target.value })}
+                    className={clsx('w-full px-3 py-2 rounded border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}>
+                    {['None', 'Offset-Limit', 'Page Number', 'Cursor / nextLink'].map((p) => <option key={p}>{p}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Response Root Key</label>
+                  <input value={form.response_root_key} onChange={(e) => setForm({ ...form, response_root_key: e.target.value })}
+                    placeholder="e.g. value, results"
+                    className={clsx('w-full px-3 py-2 rounded border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)} />
+                </div>
+                <div>
+                  <label className={clsx('block text-sm font-medium mb-1', themeClasses.text.primary)}>Sync Schedule</label>
+                  <select value={form.schedule} onChange={(e) => setForm({ ...form, schedule: e.target.value })}
+                    className={clsx('w-full px-3 py-2 rounded border text-sm', themeClasses.bg.secondary, themeClasses.border.primary, themeClasses.text.primary)}>
+                    {['Manual', 'Every 15 min', 'Hourly', 'Every 6 hours', 'Daily'].map((s) => <option key={s}>{s}</option>)}
+                  </select>
+                </div>
               </div>
             </>
           )}
 
-          {/* Test Results View */}
-          {step === 'test' && testResults && (
-            <div className={clsx('p-4 rounded-lg border', testResults.error ? 'bg-red-50 dark:bg-red-900 border-red-300 dark:border-red-700' : 'bg-green-50 dark:bg-green-900 border-green-300 dark:border-green-700')}>
-              {testResults.error ? (
-                <>
-                  <div className="flex gap-2 mb-2">
-                    <XCircle size={20} className="text-red-600 dark:text-red-400 flex-shrink-0" />
-                    <div>
-                      <h3 className={clsx('font-semibold', 'text-red-900 dark:text-red-100')}>Connection Failed</h3>
-                      <p className={clsx('text-sm mt-1', 'text-red-800 dark:text-red-200')}>{testResults.error}</p>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex gap-2 mb-4">
-                    <CheckCircle size={20} className="text-green-600 dark:text-green-400 flex-shrink-0" />
-                    <div className="flex-1">
-                      <h3 className={clsx('font-semibold', 'text-green-900 dark:text-green-100')}>Connection Successful!</h3>
-                      <p className={clsx('text-sm mt-1', 'text-green-800 dark:text-green-200')}>The connector was able to authenticate and fetch data.</p>
-                    </div>
-                  </div>
+          {/* ── Mapping Step ── */}
+          {step === 'mapping' && (
+            <div className="space-y-3">
+              <p className={clsx('text-sm', themeClasses.text.secondary)}>
+                Map source API fields to registry fields. Use dot-notation for nested keys (e.g. <code className="font-mono text-xs">deviceDetail.os</code>).
+              </p>
+              <FieldMapper fieldMap={form.field_map} onChange={(map) => setForm({ ...form, field_map: map })} sampleKeys={sampleKeys} />
+              <div className={clsx('text-xs px-3 py-2 rounded', themeClasses.bg.secondary, themeClasses.text.secondary)}>
+                Coverage: {Object.keys(form.field_map).length} of {REGISTRY_FIELDS.length} registry fields mapped.
+                {!form.field_map.asset_name && ' ⚠ asset_name is required.'}
+              </div>
+            </div>
+          )}
 
-                  <div className="space-y-2 text-sm">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className={clsx('p-2 rounded', 'bg-white dark:bg-gray-800')}>
-                        <p className={clsx('text-xs', themeClasses.text.secondary)}>Auth Status</p>
-                        <p className={clsx('font-semibold', 'text-green-700 dark:text-green-300')}>{testResults.auth_status || 'Valid'}</p>
-                      </div>
-                      <div className={clsx('p-2 rounded', 'bg-white dark:bg-gray-800')}>
-                        <p className={clsx('text-xs', themeClasses.text.secondary)}>Records Fetched</p>
-                        <p className={clsx('font-semibold', 'text-green-700 dark:text-green-300')}>{testResults.records_fetched || 0}</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className={clsx('p-2 rounded', 'bg-white dark:bg-gray-800')}>
-                        <p className={clsx('text-xs', themeClasses.text.secondary)}>Pagination Type</p>
-                        <p className={clsx('font-semibold', 'text-green-700 dark:text-green-300')}>{testResults.pagination_type || 'Unknown'}</p>
-                      </div>
-                      <div className={clsx('p-2 rounded', 'bg-white dark:bg-gray-800')}>
-                        <p className={clsx('text-xs', themeClasses.text.secondary)}>Estimated Total</p>
-                        <p className={clsx('font-semibold', 'text-green-700 dark:text-green-300')}>{testResults.estimated_total || '?'}</p>
-                      </div>
-                    </div>
-                  </div>
+          {/* ── Test Step ── */}
+          {step === 'test' && testSteps.length > 0 && (
+            <TestResultsStepper
+              steps={testSteps}
+              overall={testOverall}
+              isSaved={!!savedConnectorId}
+              onDryRun={() => dryRunMutation.mutate()}
+              onSave={() => saveMutation.mutate()}
+              onSync={() => syncMutation.mutate()}
+            />
+          )}
 
-                  {testResults.sample_data && (
-                    <details className="mt-4 p-2 rounded bg-white dark:bg-gray-800">
-                      <summary className={clsx('cursor-pointer font-medium text-sm', 'text-green-700 dark:text-green-300')}>View Sample Data</summary>
-                      <pre className={clsx('mt-2 p-2 rounded text-xs overflow-x-auto', 'bg-gray-50 dark:bg-gray-900', themeClasses.text.secondary)}>
-                        {JSON.stringify(testResults.sample_data, null, 2)}
-                      </pre>
-                    </details>
-                  )}
-                </>
-              )}
+          {step === 'test' && testSteps.length === 0 && (
+            <div className={clsx('text-center py-8', themeClasses.text.secondary)}>
+              <Activity size={32} className="mx-auto mb-3 opacity-40" />
+              <p className="text-sm">Click "Run Test" to validate this connector</p>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className={clsx('px-6 py-4 border-t', themeClasses.border.primary, 'flex gap-3 justify-end sticky bottom-0', themeClasses.bg.card)}>
-          {step === 'test' && (
-            <button
-              onClick={() => setStep('config')}
-              className={clsx('px-4 py-2 rounded text-sm font-medium', themeClasses.button.secondary)}
-            >
-              ← Back to Config
-            </button>
-          )}
-
-          <button onClick={onClose} className={clsx('px-4 py-2 rounded text-sm font-medium', themeClasses.button.secondary)}>
-            {step === 'test' ? 'Close' : 'Cancel'}
-          </button>
-
-          {step === 'config' && (
-            <>
-              <button
-                onClick={() => testMutation.mutate()}
-                disabled={!form.name || !form.base_url || !form.endpoint || testMutation.isPending}
-                className={clsx('px-4 py-2 rounded text-sm font-medium', 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200', 'disabled:opacity-50 hover:bg-blue-200 dark:hover:bg-blue-800')}
-              >
-                {testMutation.isPending ? 'Testing...' : '🧪 Test Connection'}
+        <div className={clsx('px-6 py-4 border-t flex gap-3 justify-between sticky bottom-0', themeClasses.border.primary, themeClasses.bg.card)}>
+          <div className="flex gap-2">
+            {step !== 'config' && (
+              <button onClick={() => setStep(step === 'test' ? 'mapping' : 'config')}
+                className={clsx('px-4 py-2 rounded text-sm', themeClasses.button.secondary)}>
+                ← Back
               </button>
-
-              <button
-                onClick={() => saveMutation.mutate()}
-                disabled={!form.name || !form.base_url || !form.endpoint || saveMutation.isPending}
-                className={clsx('px-4 py-2 rounded text-sm font-medium text-white', themeClasses.button.primary, 'disabled:opacity-50')}
-              >
-                {saveMutation.isPending ? 'Creating...' : 'Create Connector'}
+            )}
+          </div>
+          <div className="flex gap-2">
+            <button onClick={onClose} className={clsx('px-4 py-2 rounded text-sm', themeClasses.button.secondary)}>Cancel</button>
+            {step === 'config' && (
+              <>
+                <button onClick={() => setStep('mapping')} className={clsx('px-4 py-2 rounded text-sm', themeClasses.button.secondary)}>
+                  Field Mapping →
+                </button>
+                <button
+                  onClick={() => testMutation.mutate()}
+                  disabled={!form.name || !form.base_url || !form.endpoint || testMutation.isPending}
+                  className={clsx('px-4 py-2 rounded text-sm font-medium', 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 disabled:opacity-50')}>
+                  {testMutation.isPending ? <RefreshCw size={14} className="animate-spin inline mr-1" /> : null}
+                  {testMutation.isPending ? 'Testing...' : 'Test Connection'}
+                </button>
+                <button
+                  onClick={() => saveMutation.mutate()}
+                  disabled={!form.name || !form.base_url || !form.endpoint || saveMutation.isPending}
+                  className={clsx('px-4 py-2 rounded text-sm font-medium text-white', themeClasses.button.primary, 'disabled:opacity-50')}>
+                  {editing ? 'Save Changes' : 'Create Connector'}
+                </button>
+              </>
+            )}
+            {step === 'mapping' && (
+              <button onClick={() => { testMutation.mutate(); }}
+                disabled={testMutation.isPending}
+                className={clsx('px-4 py-2 rounded text-sm font-medium', 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200')}>
+                Test & Validate →
               </button>
-            </>
-          )}
+            )}
+          </div>
         </div>
       </div>
+
+      {dryRunResult && (
+        <DryRunModal
+          result={dryRunResult}
+          onClose={() => setDryRunResult(null)}
+          onConfirmSync={() => { syncMutation.mutate(); setDryRunResult(null); }}
+        />
+      )}
     </div>
   );
 }
 
-function ConnectorCard({ connector, onEdit, onDelete, onSync }: { connector: Connector; onEdit: (c: Connector) => void; onDelete: (id: string) => void; onSync: (id: string) => void }) {
-  const getStatusIcon = (status?: string) => {
-    switch (status) {
-      case 'Success':
-        return <CheckCircle size={16} className="text-green-600 dark:text-green-400" />;
-      case 'Partial':
-        return <AlertCircle size={16} className="text-yellow-600 dark:text-yellow-400" />;
-      case 'Failed':
-        return <XCircle size={16} className="text-red-600 dark:text-red-400" />;
-      default:
-        return <Clock size={16} className={clsx(themeClasses.text.secondary)} />;
-    }
-  };
-
-  return (
-    <div className={clsx('rounded-lg p-4 border', themeClasses.bg.secondary, themeClasses.border.primary)}>
-      <div className="flex justify-between items-start mb-3">
-        <div>
-          <h3 className={clsx('font-semibold', themeClasses.text.primary)}>{connector.name}</h3>
-          <p className={clsx('text-xs', themeClasses.text.secondary)}>{connector.type.toUpperCase()}</p>
-        </div>
-        <span className={clsx('px-3 py-1 rounded-full text-xs font-medium', connector.is_enabled ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200')}>
-          {connector.is_enabled ? 'Active' : 'Inactive'}
-        </span>
-      </div>
-
-      <div className="space-y-2 mb-4">
-        <div className="flex items-center gap-2 text-sm">
-          {getStatusIcon(connector.sync_status)}
-          <span className={clsx(themeClasses.text.secondary)}>Last sync: {connector.last_sync ? new Date(connector.last_sync).toLocaleDateString() : 'Never'}</span>
-        </div>
-        <div className="flex items-center gap-2 text-sm">
-          <Clock size={16} className={clsx(themeClasses.text.secondary)} />
-          <span className={clsx(themeClasses.text.secondary)}>Next sync: {connector.next_sync ? new Date(connector.next_sync).toLocaleDateString() : 'Manual only'}</span>
-        </div>
-      </div>
-
-      <div className="flex gap-2">
-        <button onClick={() => onSync(connector.id)} className={clsx('flex-1 px-3 py-2 rounded text-xs font-medium flex items-center justify-center gap-2', themeClasses.button.primary)}>
-          <Play size={14} />
-          Sync Now
-        </button>
-        <button onClick={() => onEdit(connector)} className={clsx('px-3 py-2 rounded', themeClasses.button.secondary)}>
-          <Edit2 size={14} />
-        </button>
-        <button onClick={() => onDelete(connector.id)} className={clsx('px-3 py-2 rounded', 'bg-red-100 dark:bg-red-900')}>
-          <Trash2 size={14} className="text-red-600 dark:text-red-400" />
-        </button>
-      </div>
-    </div>
-  );
-}
+// ─── Main Page ────────────────────────────────────────────────────────────────
 
 export function AssetConnectorsPage() {
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
+  const [editingConnector, setEditingConnector] = useState<Connector | undefined>();
   const queryClient = useQueryClient();
 
   const { data: connectorsData, isLoading } = useQuery({
     queryKey: ['asset-connectors'],
     queryFn: async () => {
-      try {
-        const response = await api.get('/api/v1/connectors');
-        return response.data.data || [];
-      } catch (err) {
-        return [];
-      }
+      const r = await api.get('/api/v1/connectors');
+      return r.data.data || [];
     },
   });
-
   const connectors: Connector[] = connectorsData || [];
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/api/v1/connectors/${id}`),
-    onSuccess: () => {
-      toast.success('Connector deleted');
-      queryClient.invalidateQueries({ queryKey: ['asset-connectors'] });
-    },
-    onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to delete connector'),
+    onSuccess: () => { toast.success('Connector deleted'); queryClient.invalidateQueries({ queryKey: ['asset-connectors'] }); },
+    onError: (err: any) => toast.error(err.response?.data?.error || 'Delete failed'),
   });
 
   const syncMutation = useMutation({
     mutationFn: (id: string) => api.post(`/api/v1/connectors/${id}/sync`),
-    onSuccess: () => {
-      toast.success('Sync started! Check back soon for results.');
-      queryClient.invalidateQueries({ queryKey: ['asset-connectors'] });
-    },
-    onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to start sync'),
+    onSuccess: () => { toast.success('Sync started!'); queryClient.invalidateQueries({ queryKey: ['asset-connectors'] }); },
+    onError: (err: any) => toast.error(err.response?.data?.error || 'Sync failed'),
   });
 
   return (
     <div className={clsx('min-h-screen p-6', themeClasses.bg.primary)}>
       <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header with Back Button */}
-        <div className={clsx('flex justify-between items-start')}>
+        <button onClick={() => navigate('/assets')} className={clsx('flex items-center gap-2', themeClasses.text.primary, 'hover:opacity-70')}>
+          <ArrowLeft size={20} /> Back to Assets
+        </button>
+
+        <div className="flex justify-between items-start">
           <div>
-            <button onClick={() => navigate('/assets')} className={clsx('flex items-center gap-2 mb-4', themeClasses.text.primary, 'hover:opacity-70')}>
-              <ArrowLeft size={20} />
-              Back to Assets
-            </button>
             <h1 className={clsx('text-3xl font-bold mb-1', themeClasses.text.primary)}>API Connectors</h1>
-            <p className={clsx('text-sm', themeClasses.text.secondary)}>Configure integrations to pull asset data from external systems</p>
+            <p className={clsx('text-sm', themeClasses.text.secondary)}>Configure integrations to pull asset data automatically</p>
           </div>
-          <button
-            onClick={() => setShowForm(true)}
-            className={clsx('flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white', themeClasses.button.primary)}
-          >
-            <Plus size={20} />
-            Add Connector
+          <button onClick={() => { setEditingConnector(undefined); setShowForm(true); }}
+            className={clsx('flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white', themeClasses.button.primary)}>
+            <Plus size={18} /> Add Connector
           </button>
         </div>
 
-        {/* Connectors List */}
         {isLoading ? (
-          <div className={clsx('text-center p-12', themeClasses.text.secondary)}>Loading connectors...</div>
+          <div className={clsx('text-center py-12', themeClasses.text.secondary)}>Loading connectors...</div>
         ) : connectors.length === 0 ? (
-          <div className={clsx('rounded-lg p-12 text-center', themeClasses.bg.card, 'border', themeClasses.border.primary)}>
-            <p className={clsx('text-lg font-medium mb-4', themeClasses.text.primary)}>No connectors yet</p>
-            <p className={clsx('text-sm mb-6', themeClasses.text.secondary)}>Create your first API connector to start importing assets from external systems</p>
+          <div className={clsx('rounded-xl p-12 text-center border', themeClasses.bg.card, themeClasses.border.primary)}>
+            <Activity size={40} className={clsx('mx-auto mb-4 opacity-30', themeClasses.text.secondary)} />
+            <p className={clsx('text-lg font-medium mb-2', themeClasses.text.primary)}>No connectors yet</p>
+            <p className={clsx('text-sm mb-6', themeClasses.text.secondary)}>Create your first API connector to start importing assets automatically</p>
             <button onClick={() => setShowForm(true)} className={clsx('inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white', themeClasses.button.primary)}>
-              <Plus size={20} />
-              Create Connector
+              <Plus size={18} /> Create Connector
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {connectors.map((connector) => (
-              <ConnectorCard key={connector.id} connector={connector} onEdit={() => {}} onDelete={(id) => deleteMutation.mutate(id)} onSync={(id) => syncMutation.mutate(id)} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {connectors.map((c) => (
+              <ConnectorCard key={c.connector_id || c.id} connector={c}
+                onEdit={(conn) => { setEditingConnector(conn); setShowForm(true); }}
+                onDelete={(id) => deleteMutation.mutate(id)}
+                onSync={(id) => syncMutation.mutate(id)} />
             ))}
           </div>
         )}
       </div>
 
-      {showForm && <ConnectorForm onClose={() => setShowForm(false)} onSaved={() => queryClient.invalidateQueries({ queryKey: ['asset-connectors'] })} />}
+      {showForm && (
+        <ConnectorForm
+          editing={editingConnector}
+          onClose={() => { setShowForm(false); setEditingConnector(undefined); }}
+          onSaved={() => queryClient.invalidateQueries({ queryKey: ['asset-connectors'] })}
+        />
+      )}
     </div>
   );
 }
